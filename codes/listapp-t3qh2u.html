@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi List - To-Do & Checklist</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --success-color: #48bb78;
+            --danger-color: #f56565;
+            --warning-color: #ed8936;
+            --dark-color: #2d3748;
+            --light-color: #f7fafc;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--dark-color);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .app-wrapper {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            padding: 30px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px 20px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .tab-btn.active {
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .add-item-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .add-item-form input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .add-item-form input:focus {
+            outline: none;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+        }
+
+        .add-item-form button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .add-item-form button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .list-container {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .list-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .list-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .list-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+
+        .list-item {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .list-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .list-item.completed {
+            opacity: 0.6;
+        }
+
+        .list-item.completed .item-text {
+            text-decoration: line-through;
+        }
+
+        .checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--primary-color);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .checkbox.checked {
+            background: var(--success-color);
+            border-color: var(--success-color);
+        }
+
+        .checkbox.checked i {
+            color: white;
+            font-size: 14px;
+        }
+
+        .item-text {
+            flex: 1;
+            font-size: 1rem;
+            color: var(--dark-color);
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .item-actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            padding: 5px;
+        }
+
+        .edit-btn {
+            color: var(--warning-color);
+        }
+
+        .edit-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .delete-btn {
+            color: var(--danger-color);
+        }
+
+        .delete-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .stat-item {
+            text-align: center;
+            color: white;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .gallery-item {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 150px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .gallery-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            color: white;
+            padding: 10px;
+            font-size: 0.9rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: white;
+            opacity: 0.8;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 640px) {
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .app-wrapper {
+                padding: 20px;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab-btn {
+                width: 100%;
+            }
+
+            .add-item-form {
+                flex-direction: column;
+            }
+
+            .add-item-form button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-tasks"></i> Aplikasi List</h1>
+            <p>Kelola To-Do List dan Checklist Anda dengan mudah</p>
+        </header>
+
+        <div class="app-wrapper">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('todo')">
+                    <i class="fas fa-list-check"></i> To-Do List
+                </button>
+                <button class="tab-btn" onclick="switchTab('checklist')">
+                    <i class="fas fa-clipboard-check"></i> Checklist
+                </button>
+                <button class="tab-btn" onclick="switchTab('gallery')">
+                    <i class="fas fa-images"></i> Galeri
+                </button>
+            </div>
+
+            <!-- To-Do List Tab -->
+            <div id="todo-tab" class="tab-content active">
+                <div class="add-item-form">
+                    <input type="text" id="todo-input" placeholder="Tambahkan tugas baru..." onkeypress="handleEnter(event, 'todo')">
+                    <button onclick="addItem('todo')">
+                        <i class="fas fa-plus"></i> Tambah
+                    </button>
+                </div>
+                <div class="list-container" id="todo-list"></div>
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="todo-total">0</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="todo-completed">0</div>
+                        <div class="stat-label">Selesai</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="todo-pending">0</div>
+                        <div class="stat-label">Tertunda</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Checklist Tab -->
+            <div id="checklist-tab" class="tab-content">
+                <div class="add-item-form">
+                    <input type="text" id="checklist-input" placeholder="Tambahkan item checklist..." onkeypress="handleEnter(event, 'checklist')">
+                    <button onclick="addItem('checklist')">
+                        <i class="fas fa-plus"></i> Tambah
+                    </button>
+                </div>
+                <div class="list-container" id="checklist-list"></div>
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="checklist-total">0</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="checklist-completed">0</div>
+                        <div class="stat-label">Dicentang</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="checklist-pending">0</div>
+                        <div class="stat-label">Belum</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gallery Tab -->
+            <div id="gallery-tab" class="tab-content">
+                <h3 style="color: white; margin-bottom: 20px;">Galeri Inspirasi List</h3>
+                <div class="image-gallery">
+                    <div class="gallery-item" onclick="viewImage('https://marketplace.canva.com/EAGMJMGq2G0/2/0/1131w/canva-black-and-white-simple-minimalist-to-do-list-planner-flyer-fljGJqzNnII.jpg')">
+                        <img src="https://marketplace.canva.com/EAGMJMGq2G0/2/0/1131w/canva-black-and-white-simple-minimalist-to-do-list-planner-flyer-fljGJqzNnII.jpg" alt="List 1">
+                        <div class="gallery-label">Minimalist List</div>
+                    </div>
+                    <div class="gallery-item" onclick="viewImage('https://www.computerhope.com/jargon/l/list.jpg')">
+                        <img src="https://www.computerhope.com/jargon/l/list.jpg" alt="List 2">
+                        <div class="gallery-label">Simple List</div>
+                    </div>
+                    <div class="gallery-item" onclick="viewImage('https://imageio.forbes.com/specials-images/dam/imageserve/1092571024/0x0.jpg?format=jpg&height=900&width=1600&fit=bounds')">
+                        <img src="https://imageio.forbes.com/specials-images/dam/imageserve/1092571024/0x0.jpg?format=jpg&height=900&width=1600&fit=bounds" alt="To-Do 1">
+                        <div class="gallery-label">Productivity</div>
+                    </div>
+                    <div class="gallery-item" onclick="viewImage('https://static.vecteezy.com/system/resources/previews/020/305/295/non_2x/to-do-list-icon-vector.jpg')">
+                        <img src="https://static.vecteezy.com/system/resources/previews/020/305/295/non_2x/to-do-list-icon-vector.jpg" alt="To-Do 2">
+                        <div class="gallery-label">Icon Design</div>
+                    </div>
+                    <div class="gallery-item" onclick="viewImage('https://www.iso-9001-checklist.co.uk/wp-content/uploads/2023/09/iso-45001-checklists-1.svg')">
+                        <img src="https://www.iso-9001-checklist.co.uk/wp-content/uploads/2023/09/iso-45001-checklists-1.svg" alt="Checklist 1">
+                        <div class="gallery-label">Professional</div>
+                    </div>
+                    <div class="gallery-item" onclick="viewImage('https://t2informatik.de/en/wp-content/uploads/sites/2/2019/06/checklist-t2informatik.jpg')">
+                        <img src="https://t2informatik.de/en/wp-content/uploads/sites/2/2019/06/checklist-t2informatik.jpg" alt="Checklist 2">
+                        <div class="gallery-label">Business</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data storage
+        let todoData = JSON.parse(localStorage.getItem('todoData')) || [];
+        let checklistData = JSON.parse(localStorage.getItem('checklistData')) || [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            renderList('todo');
+            renderList('checklist');
+        });
+
+        // Tab switching
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+        }
+
+        // Handle Enter key
+        function handleEnter(event, type) {
+            if (event.key === 'Enter') {
+                addItem(type);
+            }
+        }
+
+        // Add item
+        function addItem(type) {
+            const input = document.getElementById(`${type}-input`);
+            const text = input.value.trim();
+            
+            if (text === '') {
+                showNotification('Silakan masukkan teks terlebih dahulu', 'warning');
+                return;
+            }
+
+            const newItem = {
+                id: Date.now(),
+                text: text,
+                completed: false,
+                createdAt: new Date().toISOString()
+            };
+
+            if (type === 'todo') {
+                todoData.push(newItem);
+                localStorage.setItem('todoData', JSON.stringify(todoData));
+            } else {
+                checklistData.push(newItem);
+                localStorage.setItem('checklistData', JSON.stringify(checklistData));
+            }
+
+            input.value = '';
+            renderList(type);
+            showNotification('Item berhasil ditambahkan', 'success');
+        }
+
+        // Toggle item completion
+        function toggleItem(type, id) {
+            if (type === 'todo') {
+                const item = todoData.find(item => item.id === id);
+                if (item) {
+                    item.completed = !item.completed;
+                    localStorage.setItem('todoData', JSON.stringify(todoData));
+                }
+            } else {
+                const item = checklistData.find(item => item.id === id);
+                if (item) {
+                    item.completed = !item.completed;
+                    localStorage.setItem('checklistData', JSON.stringify(checklistData));
+                }
+            }
+            renderList(type);
+        }
+
+        // Edit item
+        function editItem(type, id) {
+            const data = type === 'todo' ? todoData : checklistData;
+            const item = data.find(item => item.id === id);
+            
+            if (item) {
+                const newText = prompt('Edit item:', item.text);
+                if (newText && newText.trim() !== '') {
+                    item.text = newText.trim();
+                    if (type === 'todo') {
+                        localStorage.setItem('todoData', JSON.stringify(todoData));
+                    } else {
+                        localStorage.setItem('checklistData', JSON.stringify(checklistData));
+                    }
+                    renderList(type);
+                    showNotification('Item berhasil diperbarui', 'success');
+                }
+            }
+        }
+
+        // Delete item
+        function deleteItem(type, id) {
+            if (confirm('Apakah Anda yakin ingin menghapus item ini?')) {
+                if (type === 'todo') {
+                    todoData = todoData.filter(item => item.id !== id);
+                    localStorage.setItem('todoData', JSON.stringify(todoData));
+                } else {
+                    checklistData = checklistData.filter(item => item.id !== id);
+                    localStorage.setItem('checklistData', JSON.stringify(checklistData));
+                }
+                renderList(type);
+                showNotification('Item berhasil dihapus', 'success');
+            }
+        }
+
+        // Render list
+        function renderList(type) {
+            const data = type === 'todo' ? todoData : checklistData;
+            const container = document.getElementById(`${type}-list`);
+            
+            if (data.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>Belum ada item. Tambahkan item baru!</p>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = data.map(item => `
+                    <div class="list-item ${item.completed ? 'completed' : ''}" onclick="toggleItem('${type}', ${item.id})">
+                        <div class="checkbox ${item.completed ? 'checked' : ''}">
+                            ${item.completed ? '<i class="fas fa-check"></i>' : ''}
+                        </div>
+                        <span class="item-text">${item.text}</span>
+                        <div class="item-actions" onclick="event.stopPropagation()">
+                            <button class="edit-btn" onclick="editItem('${type}', ${item.id})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="delete-btn" onclick="deleteItem('${type}', ${item.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Update stats
+            updateStats(type);
+        }
+
+        // Update statistics
+        function updateStats(type) {
+            const data = type === 'todo' ? todoData : checklistData;
+            const total = data.length;
+            const completed = data.filter(item => item.completed).length;
+            const pending = total - completed;
+
+            document.getElementById(`${type}-total`).textContent = total;
+            document.getElementById(`${type}-completed`).textContent = completed;
+            document.getElementById(`${type}-pending`).textContent = pending;
+        }
+
+        // View image in full screen
+        function viewImage(src) {
+            window.open(src, '_blank');
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                background: ${type === 'success' ? 'var(--success-color)' : 'var(--warning-color)'};
+                color: white;
+                border-radius: 10px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = message;
+            
+            // Add animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
