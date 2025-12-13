@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokemon Gacha Game</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .background-animation {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .pokeball {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle at 30% 30%, #ff6b6b, #c92a2a);
+            border-radius: 50%;
+            border: 3px solid #fff;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .pokeball::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 50%;
+            background: #fff;
+            top: 50%;
+            border-radius: 0 0 50% 50%;
+        }
+
+        .pokeball::before {
+            content: '';
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: #fff;
+            border: 3px solid #333;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-20px) rotate(90deg); }
+            50% { transform: translateY(0) rotate(180deg); }
+            75% { transform: translateY(20px) rotate(270deg); }
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stat-item i {
+            font-size: 1.2rem;
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .gacha-machine {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .machine-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 15px;
+            margin-bottom: 1.5rem;
+        }
+
+        .pull-button {
+            width: 100%;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #333;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .pull-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
+        }
+
+        .pull-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .cost-display {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .collection {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .collection h2 {
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .pokemon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        .pokemon-card {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 0.5rem;
+            text-align: center;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .pokemon-card:hover {
+            transform: scale(1.05);
+        }
+
+        .pokemon-card img {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+        }
+
+        .pokemon-card p {
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+
+        .rarity {
+            font-size: 0.7rem;
+            padding: 0.1rem 0.3rem;
+            border-radius: 10px;
+            margin-top: 0.25rem;
+        }
+
+        .rarity.common {
+            background: #6c757d;
+        }
+
+        .rarity.uncommon {
+            background: #28a745;
+        }
+
+        .rarity.rare {
+            background: #007bff;
+        }
+
+        .rarity.epic {
+            background: #6f42c1;
+        }
+
+        .rarity.legendary {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #333;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            max-width: 90%;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .pokemon-result {
+            color: #333;
+        }
+
+        .pokemon-result img {
+            width: 150px;
+            height: 150px;
+            object-fit: contain;
+            animation: bounce 0.5s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .pokemon-result h3 {
+            margin: 1rem 0;
+            font-size: 1.5rem;
+            text-transform: capitalize;
+        }
+
+        .close-modal {
+            margin-top: 1rem;
+            padding: 0.5rem 1.5rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .empty-collection {
+            text-align: center;
+            opacity: 0.7;
+            padding: 2rem;
+        }
+
+        @media (min-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .gacha-machine {
+                max-width: 500px;
+            }
+
+            .machine-image {
+                height: 250px;
+            }
+
+            .pokemon-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-animation">
+        <div class="pokeball" style="top: 10%; left: 10%; animation-delay: 0s;"></div>
+        <div class="pokeball" style="top: 70%; left: 80%; animation-delay: 5s;"></div>
+        <div class="pokeball" style="top: 40%; left: 50%; animation-delay: 10s;"></div>
+        <div class="pokeball" style="top: 80%; left: 20%; animation-delay: 15s;"></div>
+    </div>
+
+    <header>
+        <h1><i class="fas fa-dragon"></i> Pokemon Gacha Game</h1>
+        <div class="stats">
+            <div class="stat-item">
+                <i class="fas fa-coins"></i>
+                <span id="coins">100</span> Coins
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-trophy"></i>
+                <span id="collection-count">0</span> Pokemon
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="gacha-machine">
+            <img src="https://i.ytimg.com/vi/lSvhLiSJcTQ/maxresdefault.jpg" alt="Gacha Machine" class="machine-image">
+            <button class="pull-button" id="pullButton">
+                <i class="fas fa-dice"></i>
+                Pull Gacha!
+            </button>
+            <div class="cost-display">
+                <i class="fas fa-coins"></i> Cost: 10 coins per pull
+            </div>
+        </section>
+
+        <section class="collection">
+            <h2><i class="fas fa-book"></i> My Collection</h2>
+            <div id="pokemonCollection" class="pokemon-grid">
+                <div class="empty-collection">
+                    <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <p>No Pokemon yet. Start pulling!</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="modal" id="resultModal">
+        <div class="modal-content">
+            <div class="pokemon-result">
+                <img id="resultImage" src="" alt="Pokemon">
+                <h3 id="resultName"></h3>
+                <span class="rarity" id="resultRarity"></span>
+            </div>
+            <button class="close-modal" onclick="closeModal()">Got it!</button>
+        </div>
+    </div>
+
+    <script>
+        let coins = 100;
+        let collection = [];
+        const PULL_COST = 10;
+
+        const rarityChances = {
+            common: 50,
+            uncommon: 30,
+            rare: 15,
+            epic: 4,
+            legendary: 1
+        };
+
+        function getRandomRarity() {
+            const random = Math.random() * 100;
+            let accumulated = 0;
+            
+            for (const [rarity, chance] of Object.entries(rarityChances)) {
+                accumulated += chance;
+                if (random <= accumulated) {
+                    return rarity;
+                }
+            }
+            return 'common';
+        }
+
+        async function getRandomPokemon() {
+            const rarity = getRandomRarity();
+            let pokemonId;
+            
+            switch(rarity) {
+                case 'common':
+                    pokemonId = Math.floor(Math.random() * 151) + 1;
+                    break;
+                case 'uncommon':
+                    pokemonId = Math.floor(Math.random() * 100) + 152;
+                    break;
+                case 'rare':
+                    pokemonId = Math.floor(Math.random() * 135) + 252;
+                    break;
+                case 'epic':
+                    pokemonId = Math.floor(Math.random() * 72) + 387;
+                    break;
+                case 'legendary':
+                    const legendaryIds = [144, 145, 146, 150, 151, 243, 244, 245, 249, 250, 251, 377, 378, 379, 380, 381, 382, 383, 384, 386, 480, 481, 482, 483, 484, 485, 486, 487];
+                    pokemonId = legendaryIds[Math.floor(Math.random() * legendaryIds.length)];
+                    break;
+            }
+            
+            try {
+                const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`);
+                const data = await response.json();
+                
+                return {
+                    id: data.id,
+                    name: data.name,
+                    image: data.sprites.other['official-artwork'].front_default || data.sprites.front_default,
+                    rarity: rarity
+                };
+            } catch (error) {
+                console.error('Error fetching Pokemon:', error);
+                return null;
+            }
+        }
+
+        async function pullGacha() {
+            if (coins < PULL_COST) {
+                showNotification('Not enough coins!');
+                return;
+            }
+            
+            const button = document.getElementById('pullButton');
+            button.disabled = true;
+            
+            coins -= PULL_COST;
+            updateStats();
+            
+            const pokemon = await getRandomPokemon();
+            
+            if (pokemon) {
+                collection.push(pokemon);
+                showResult(pokemon);
+                updateCollection();
+            }
+            
+            setTimeout(() => {
+                button.disabled = false;
+            }, 1000);
+        }
+
+        function showResult(pokemon) {
+            document.getElementById('resultImage').src = pokemon.image;
+            document.getElementById('resultName').textContent = pokemon.name;
+            
+            const rarityElement = document.getElementById('resultRarity');
+            rarityElement.textContent = pokemon.rarity.toUpperCase();
+            rarityElement.className = `rarity ${pokemon.rarity}`;
+            
+            document.getElementById('resultModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('resultModal').classList.remove('active');
+        }
+
+        function updateStats() {
+            document.getElementById('coins').textContent = coins;
+            document.getElementById('collection-count').textContent = collection.length;
+        }
+
+        function updateCollection() {
+            const collectionDiv = document.getElementById('pokemonCollection');
+            
+            if (collection.length === 0) {
+                collectionDiv.innerHTML = `
+                    <div class="empty-collection">
+                        <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                        <p>No Pokemon yet. Start pulling!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            collectionDiv.innerHTML = collection.map(pokemon => `
+                <div class="pokemon-card">
+                    <img src="${pokemon.image}" alt="${pokemon.name}">
+                    <p>${pokemon.name}</p>
+                    <span class="rarity ${pokemon.rarity}">${pokemon.rarity.toUpperCase()}</span>
+                </div>
+            `).join('');
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(255, 255, 255, 0.9);
+                color: #333;
+                padding: 1rem 2rem;
+                border-radius: 20px;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+                z-index: 2000;
+                animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        document.getElementById('pullButton').addEventListener('click', pullGacha);
+
+        // Add bonus coins every 30 seconds
+        setInterval(() => {
+            coins += 5;
+            updateStats();
+            showNotification('+5 coins bonus!');
+        }, 30000);
+
+        // Initialize
+        updateStats();
+    </script>
+</body>
+</html>
