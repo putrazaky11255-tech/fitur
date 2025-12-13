@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emoji Mix - Kreasikan Emoji Unikmu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* CSS_START */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('https://www.shutterstock.com/image-vector/yellow-cute-emoji-face-lightbulb-600nw-2419235275.jpg') center/cover;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1rem;
+        }
+
+        .mixer-container {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .emoji-selector {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .emoji-box {
+            background: rgba(255,255,255,0.2);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .emoji-box:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-5px);
+        }
+
+        .emoji-box.selected {
+            background: rgba(255,255,255,0.4);
+            box-shadow: 0 0 20px rgba(255,255,255,0.5);
+        }
+
+        .emoji-display {
+            font-size: 4rem;
+            margin-bottom: 10px;
+        }
+
+        .emoji-label {
+            color: white;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .plus-icon {
+            font-size: 2rem;
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        .emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            gap: 10px;
+            margin-bottom: 30px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+
+        .emoji-grid::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .emoji-grid::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+
+        .emoji-grid::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 10px;
+        }
+
+        .emoji-item {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .emoji-item:hover {
+            background: rgba(255,255,255,0.4);
+            transform: scale(1.1);
+        }
+
+        .mix-button {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(245,87,108,0.4);
+            display: block;
+            margin: 0 auto 30px;
+        }
+
+        .mix-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(245,87,108,0.5);
+        }
+
+        .mix-button:active {
+            transform: translateY(-1px);
+        }
+
+        .result-container {
+            background: rgba(255,255,255,0.2);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            min-height: 200px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .result-container.show {
+            display: block;
+        }
+
+        .result-emoji {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            animation: bounceIn 0.8s ease;
+        }
+
+        .result-name {
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .result-description {
+            color: rgba(255,255,255,0.9);
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        .save-button {
+            background: rgba(255,255,255,0.3);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.5);
+            border-radius: 25px;
+            padding: 10px 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 5px;
+        }
+
+        .save-button:hover {
+            background: rgba(255,255,255,0.4);
+            transform: scale(1.05);
+        }
+
+        .saved-emojis {
+            margin-top: 40px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 20px;
+            padding: 20px;
+        }
+
+        .saved-title {
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .saved-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 15px;
+        }
+
+        .saved-item {
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .saved-item:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+
+        .saved-emoji {
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+        }
+
+        .saved-name {
+            color: white;
+            font-size: 0.9rem;
+            word-break: break-word;
+        }
+
+        .delete-saved {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(255,0,0,0.5);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .saved-item:hover .delete-saved {
+            opacity: 1;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .emoji-selector {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .plus-icon {
+                transform: rotate(90deg);
+            }
+
+            .emoji-display {
+                font-size: 3rem;
+            }
+
+            .result-emoji {
+                font-size: 4rem;
+            }
+
+            .emoji-grid {
+                grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            }
+        }
+        /* CSS_END */
+    </style>
+</head>
+<body>
+    <!-- HTML_START -->
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-magic"></i> Emoji Mix</h1>
+            <p class="subtitle">Kombinasikan dua emoji untuk menciptakan emoji unik!</p>
+        </header>
+
+        <main>
+            <div class="mixer-container">
+                <div class="emoji-selector">
+                    <div class="emoji-box" id="emoji1Box">
+                        <div class="emoji-display" id="emoji1Display">?</div>
+                        <div class="emoji-label">Pilih Emoji 1</div>
+                    </div>
+                    <div class="plus-icon">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="emoji-box" id="emoji2Box">
+                        <div class="emoji-display" id="emoji2Display">?</div>
+                        <div class="emoji-label">Pilih Emoji 2</div>
+                    </div>
+                </div>
+
+                <div class="emoji-grid" id="emojiGrid">
+                    <!-- Emojis will be loaded here -->
+                </div>
+
+                <button class="mix-button" id="mixButton">
+                    <i class="fas fa-blender"></i> Campur Emoji!
+                </button>
+
+                <div class="result-container" id="resultContainer">
+                    <div class="result-emoji" id="resultEmoji"></div>
+                    <div class="result-name" id="resultName"></div>
+                    <div class="result-description" id="resultDescription"></div>
+                    <div>
+                        <button class="save-button" id="saveButton">
+                            <i class="fas fa-save"></i> Simpan
+                        </button>
+                        <button class="save-button" id="shareButton">
+                            <i class="fas fa-share"></i> Bagikan
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="saved-emojis">
+                <h2 class="saved-title"><i class="fas fa-bookmark"></i> Emoji Tersimpan</h2>
+                <div class="saved-grid" id="savedGrid">
+                    <!-- Saved emojis will appear here -->
+                </div>
+            </div>
+        </main>
+    </div>
+    <!-- HTML_END -->
+
+    <script>
+        /* JS_START */
+        class EmojiMixer {
+            constructor() {
+                this.emoji1 = null;
+                this.emoji2 = null;
+                this.selectedBox = null;
+                this.emojis = [];
+                this.savedEmojis = JSON.parse(localStorage.getItem('savedEmojis')) || [];
+                this.init();
+            }
+
+            init() {
+                this.loadEmojis();
+                this.setupEventListeners();
+                this.renderSavedEmojis();
+            }
+
+            async loadEmojis() {
+                try {
+                    // Using a predefined list of popular emojis since we're simulating the API
+                    const popularEmojis = [
+                        '😀', '😃', '😄', '😁', '😅', '😂', '🤣', '😊', '😇', '🙂',
+                        '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛',
+                        '😜', '🤪', '😝', '🤑', '🤗', '🤭', '🤫', '🤔', '🤐', '🤨',
+                        '😐', '😑', '😶', '😏', '😒', '🙄', '😬', '🤥', '😌', '😔',
+                        '😪', '🤤', '😴', '😷', '🤒', '🤕', '🤢', '🤮', '🤧', '🥵',
+                        '🥶', '🥴', '😵', '🤯', '🤠', '🥳', '😎', '🤓', '🧐', '😕',
+                        '😟', '🙁', '☹️', '😮', '😯', '😲', '😳', '🥺', '😦', '😧',
+                        '😨', '😰', '😥', '😢', '😭', '😱', '😖', '😣', '😞', '😓',
+                        '😩', '😫', '🥱', '😤', '😡', '😠', '🤬', '😈', '👿', '💀',
+                        '☠️', '💩', '🤡', '👹', '👺', '👻', '👽', '👾', '🤖', '❤️',
+                        '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❣️',
+                        '💕', '💞', '💓', '💗', '💖', '💘', '💝', '🌟', '⭐', '🌠',
+                        '🌈', '🔥', '💧', '🌊', '⚡', '❄️', '🌙', '☀️', '🌞', '⭐',
+                        '🍎', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓', '🫐', '🍈', '🍒',
+                        '🍑', '🥭', '🍍', '🥥', '🥝', '🍅', '🍆', '🥑', '🥦', '🥬'
+                    ];
+
+                    this.emojis = popularEmojis;
+                    this.renderEmojiGrid();
+                } catch (error) {
+                    console.error('Error loading emojis:', error);
+                }
+            }
+
+            renderEmojiGrid() {
+                const grid = document.getElementById('emojiGrid');
+                grid.innerHTML = '';
+                
+                this.emojis.forEach(emoji => {
+                    const button = document.createElement('button');
+                    button.className = 'emoji-item';
+                    button.textContent = emoji;
+                    button.addEventListener('click', () => this.selectEmoji(emoji));
+                    grid.appendChild(button);
+                });
+            }
+
+            setupEventListeners() {
+                document.getElementById('emoji1Box').addEventListener('click', () => {
+                    this.selectedBox = 1;
+                    this.updateBoxSelection();
+                });
+
+                document.getElementById('emoji2Box').addEventListener('click', () => {
+                    this.selectedBox = 2;
+                    this.updateBoxSelection();
+                });
+
+                document.getElementById('mixButton').addEventListener('click', () => this.mixEmojis());
+                document.getElementById('saveButton').addEventListener('click', () => this.saveEmoji());
+                document.getElementById('shareButton').addEventListener('click', () => this.shareEmoji());
+            }
+
+            updateBoxSelection() {
+                const box1 = document.getElementById('emoji1Box');
+                const box2 = document.getElementById('emoji2Box');
+                
+                box1.classList.toggle('selected', this.selectedBox === 1);
+                box2.classList.toggle('selected', this.selectedBox === 2);
+            }
+
+            selectEmoji(emoji) {
+                if (!this.selectedBox) {
+                    this.selectedBox = 1;
+                }
+
+                if (this.selectedBox === 1) {
+                    this.emoji1 = emoji;
+                    document.getElementById('emoji1Display').textContent = emoji;
+                    document.getElementById('emoji1Box').querySelector('.emoji-label').textContent = 'Emoji 1 Dipilih';
+                    this.selectedBox = 2;
+                } else {
+                    this.emoji2 = emoji;
+                    document.getElementById('emoji2Display').textContent = emoji;
+                    document.getElementById('emoji2Box').querySelector('.emoji-label').textContent = 'Emoji 2 Dipilih';
+                    this.selectedBox = null;
+                }
+
+                this.updateBoxSelection();
+            }
+
+            mixEmojis() {
+                if (!this.emoji1 || !this.emoji2) {
+                    this.showNotification('Pilih dua emoji terlebih dahulu!');
+                    return;
+                }
+
+                const button = document.getElementById('mixButton');
+                button.innerHTML = '<span class="loading"></span> Mencampur...';
+                button.disabled = true;
+
+                setTimeout(() => {
+                    const mixedEmoji = this.generateMixedEmoji();
+                    this.displayResult(mixedEmoji);
+                    button.innerHTML = '<i class="fas fa-blender"></i> Campur Emoji!';
+                    button.disabled = false;
+                }, 1500);
+            }
+
+            generateMixedEmoji() {
+                // Simulate emoji mixing by combining Unicode values
+                const code1 = this.emoji1.codePointAt(0);
+                const code2 = this.emoji2.codePointAt(0);
+                const mixedCode = (code1 + code2) % 0x1F600 + 0x1F300;
+                
+                // Create a mixed emoji visually (using zero-width joiner)
+                const mixedEmoji = this.emoji1 + '\u200D' + this.emoji2;
+                
+                const names = [
+                    'Emoji Misterius', 'Emoji Ajaib', 'Emoji Kombinasi', 'Emoji Hybrid',
+                    'Emoji Spesial', 'Emoji Unik', 'Emoji Langka', 'Emoji Fantastis'
+                ];
+                
+                const descriptions = [
+                    'Kombinasi sempurna dari dua emoji favoritmu!',
+                    'Emoji baru yang lahir dari kreativitasmu.',
+                    'Perpaduan unik yang hanya bisa kamu buat.',
+                    'Emoji eksklusif hasil eksperimenmu.',
+                    'Campuran menakjubkan yang penuh makna.',
+                    'Fusi emoji yang menciptakan emosi baru.',
+                    'Emoji hybrid dengan karakter ganda.',
+                    'Kreasi orisinal dari imajinasimu.'
+                ];
+
+                return {
+                    emoji: mixedEmoji,
+                    name: names[Math.floor(Math.random() * names.length)],
+                    description: descriptions[Math.floor(Math.random() * descriptions.length)],
+                    components: [this.emoji1, this.emoji2]
+                };
+            }
+
+            displayResult(result) {
+                const container = document.getElementById('resultContainer');
+                document.getElementById('resultEmoji').textContent = result.emoji;
+                document.getElementById('resultName').textContent = result.name;
+                document.getElementById('resultDescription').textContent = result.description;
+                
+                container.classList.add('show');
+                container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            saveEmoji() {
+                const resultEmoji = document.getElementById('resultEmoji').textContent;
+                const resultName = document.getElementById('resultName').textContent;
+                
+                const savedEmoji = {
+                    id: Date.now(),
+                    emoji: resultEmoji,
+                    name: resultName,
+                    components: [this.emoji1, this.emoji2]
+                };
+
+                this.savedEmojis.push(savedEmoji);
+                localStorage.setItem('savedEmojis', JSON.stringify(this.savedEmojis));
+                this.renderSavedEmojis();
+                this.showNotification('Emoji berhasil disimpan!');
+            }
+
+            shareEmoji() {
+                const resultEmoji = document.getElementById('resultEmoji').textContent;
+                const resultName = document.getElementById('resultName').textContent;
+                
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'Emoji Mix Kreatif',
+                        text: `Lihat emoji mix ku: ${resultEmoji} - ${resultName}`,
+                    }).catch(err => console.log('Error sharing:', err));
+                } else {
+                    // Fallback - copy to clipboard
+                    const text = `${resultEmoji} - ${resultName}`;
+                    navigator.clipboard.writeText(text).then(() => {
+                        this.showNotification('Emoji disalin ke clipboard!');
+                    });
+                }
+            }
+
+            renderSavedEmojis() {
+                const grid = document.getElementById('savedGrid');
+                
+                if (this.savedEmojis.length === 0) {
+                    grid.innerHTML = '<p style="color: rgba(255,255,255,0.7); text-align: center;">Belum ada emoji tersimpan</p>';
+                    return;
+                }
+
+                grid.innerHTML = '';
+                this.savedEmojis.forEach(saved => {
+                    const item = document.createElement('div');
+                    item.className = 'saved-item';
+                    item.innerHTML = `
+                        <button class="delete-saved" data-id="${saved.id}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <div class="saved-emoji">${saved.emoji}</div>
+                        <div class="saved-name">${saved.name}</div>
+                    `;
+                    
+                    item.querySelector('.delete-saved').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.deleteSavedEmoji(saved.id);
+                    });
+                    
+                    grid.appendChild(item);
+                });
+            }
+
+            deleteSavedEmoji(id) {
+                this.savedEmojis = this.savedEmojis.filter(e => e.id !== id);
+                localStorage.setItem('savedEmojis', JSON.stringify(this.savedEmojis));
+                this.renderSavedEmojis();
+                this.showNotification('Emoji dihapus!');
+            }
+
+            showNotification(message) {
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: rgba(255,255,255,0.95);
+                    color: #333;
+                    padding: 15px 25px;
+                    border-radius: 10px;
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                    z-index: 1000;
+                    animation: slideInRight 0.3s ease;
+                `;
+                notification.textContent = message;
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.style.animation = 'slideOutRight 0.3s ease';
+                    setTimeout(() => notification.remove(), 300);
+                }, 3000);
+            }
+        }
+
+        // Add slide animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            @keyframes slideOutRight {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            new EmojiMixer();
+        });
+        /* JS_END */
+    </script>
+</body>
+</html>
