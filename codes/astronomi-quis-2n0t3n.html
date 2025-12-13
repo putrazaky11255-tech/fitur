@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Astronomi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- Global Styles & Variables --- */
+        :root {
+            --primary-bg: #0f0c29;
+            --secondary-bg: #302b63;
+            --tertiary-bg: #24243e;
+            --text-color: #f0f0f0;
+            --correct-color: #4caf50;
+            --incorrect-color: #f44336;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        /* --- Background Image --- */
+        .background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: url('https://cdn.mos.cms.futurecdn.net/v2/t:0,l:240,cw:1440,ch:1080,q:80,w:1440/UqKrHFjGaYQ3Fi9rACt6S9.jpg') no-repeat center center/cover;
+            filter: brightness(0.6);
+            animation: backgroundZoom 30s infinite alternate;
+        }
+
+        @keyframes backgroundZoom {
+            from { transform: scale(1); }
+            to { transform: scale(1.1); }
+        }
+
+        /* --- Main App Container --- */
+        .app-container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            padding: 30px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* --- Header --- */
+        .header {
+            margin-bottom: 25px;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(to right, #00d2ff, #3a7bd5, #00d2ff);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 3s linear infinite;
+        }
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
+        .header p {
+            margin-top: 10px;
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        /* --- Start Screen --- */
+        #start-screen {
+            display: block;
+        }
+        .start-btn {
+            margin-top: 20px;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-bg);
+            background: linear-gradient(to right, #00d2ff, #3a7bd5);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 210, 255, 0.4);
+        }
+
+        /* --- Quiz Screen --- */
+        #quiz-screen {
+            display: none;
+            width: 100%;
+        }
+        .question-container {
+            margin-bottom: 25px;
+        }
+        .question-counter {
+            font-size: 0.9rem;
+            color: #ccc;
+            margin-bottom: 10px;
+        }
+        .question-text {
+            font-size: 1.4rem;
+            margin-bottom: 25px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .answer-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        .answer-btn {
+            padding: 18px;
+            font-size: 1.1rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+        .answer-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        .answer-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .answer-btn.correct {
+            background: var(--correct-color);
+            border-color: var(--correct-color);
+            animation: pulse 0.5s;
+        }
+        .answer-btn.incorrect {
+            background: var(--incorrect-color);
+            border-color: var(--incorrect-color);
+            animation: shake 0.5s;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        .feedback {
+            margin-top: 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            min-height: 30px;
+        }
+        .feedback.correct { color: var(--correct-color); }
+        .feedback.incorrect { color: var(--incorrect-color); }
+
+        .next-btn {
+            margin-top: 20px;
+            padding: 12px 30px;
+            font-size: 1rem;
+            background: transparent;
+            border: 2px solid var(--text-color);
+            color: var(--text-color);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: none; /* Hidden by default */
+        }
+        .next-btn.show {
+            display: inline-block;
+        }
+        .next-btn:hover {
+            background: var(--text-color);
+            color: var(--primary-bg);
+        }
+
+        /* --- End Screen --- */
+        #end-screen {
+            display: none;
+        }
+        .final-score {
+            font-size: 3rem;
+            margin: 20px 0;
+        }
+        .score-message {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        .restart-btn {
+            padding: 12px 30px;
+            font-size: 1rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-color);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .restart-btn:hover {
+            background: var(--glass-border);
+        }
+
+        /* --- Loading Indicator --- */
+        .loader {
+            border: 5px solid var(--glass-bg);
+            border-top: 5px solid var(--text-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 50px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* --- Responsive Design --- */
+        @media (min-width: 768px) {
+            .header h1 { font-size: 3rem; }
+            .question-text { font-size: 1.6rem; }
+            .answer-grid { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="background-container"></div>
+
+    <main class="app-container">
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen">
+            <div class="header">
+                <h1><i class="fas fa-rocket"></i> Kuis Astronomi</h1>
+                <p>Uji pengetahuan Anda tentang tata surya kita!</p>
+            </div>
+            <button id="start-btn" class="start-btn">Mulai Kuis</button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="screen">
+            <div class="question-container">
+                <p class="question-counter">Pertanyaan <span id="current-question">1</span> dari <span id="total-questions">10</span></p>
+                <h2 class="question-text" id="question-text">Memuat pertanyaan...</h2>
+            </div>
+            <div class="answer-grid" id="answer-grid">
+                <!-- Answers will be inserted here by JS -->
+            </div>
+            <p class="feedback" id="feedback"></p>
+            <button id="next-btn" class="next-btn">Pertanyaan Selanjutnya <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <!-- End Screen -->
+        <div id="end-screen" class="screen">
+            <div class="header">
+                <h1>Kuis Selesai!</h1>
+            </div>
+            <div class="final-score" id="final-score">0/10</div>
+            <p class="score-message" id="score-message">Terima kasih telah bermain.</p>
+            <button id="restart-btn" class="restart-btn">Main Lagi</button>
+        </div>
+        
+        <div class="loader" id="loader" style="display: none;"></div>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM Elements ---
+            const startScreen = document.getElementById('start-screen');
+            const quizScreen = document.getElementById('quiz-screen');
+            const endScreen = document.getElementById('end-screen');
+            const loader = document.getElementById('loader');
+
+            const startBtn = document.getElementById('start-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const restartBtn = document.getElementById('restart-btn');
+
+            const questionText = document.getElementById('question-text');
+            const answerGrid = document.getElementById('answer-grid');
+            const feedback = document.getElementById('feedback');
+            const currentQuestionSpan = document.getElementById('current-question');
+            const totalQuestionsSpan = document.getElementById('total-questions');
+            const finalScore = document.getElementById('final-score');
+            const scoreMessage = document.getElementById('score-message');
+
+            // --- State Management ---
+            let quizData = [];
+            let currentQuestionIndex = 0;
+            let score = 0;
+            const API_URL = 'https://api.le-systeme-solaire.net/rest/bodies/';
+            const QUESTION_COUNT = 10;
+
+            // --- Event Listeners ---
+            startBtn.addEventListener('click', startQuiz);
+            nextBtn.addEventListener('click', showNextQuestion);
+            restartBtn.addEventListener('click', () => {
+                endScreen.style.display = 'none';
+                startScreen.style.display = 'block';
+                resetQuiz();
+            });
+
+            // --- Functions ---
+
+            /**
+             * Fetches celestial bodies data from the API and filters for planets.
+             */
+            async function fetchPlanets() {
+                loader.style.display = 'block';
+                try {
+                    const response = await fetch(API_URL);
+                    if (!response.ok) throw new Error('Gagal mengambil data dari API');
+                    const data = await response.json();
+                    // Filter for bodies that are planets and not a moon
+                    return data.bodies.filter(body => body.isPlanet);
+                } catch (error) {
+                    console.error(error);
+                    alert('Tidak dapat memuat data kuis. Silakan coba lagi nanti.');
+                    return null;
+                } finally {
+                    loader.style.display = 'none';
+                }
+            }
+
+            /**
+             * Generates quiz questions from the fetched planet data.
+             * @param {Array} planets - Array of planet objects from the API.
+             */
+            function generateQuestions(planets) {
+                const questions = [];
+                for (let i = 0; i < QUESTION_COUNT; i++) {
+                    const correctPlanet = planets[Math.floor(Math.random() * planets.length)];
+                    const otherPlanets = planets.filter(p => p.id !== correctPlanet.id);
+                    const wrongAnswers = [];
+                    
+                    // Generate 3 wrong answers
+                    for (let j = 0; j < 3; j++) {
+                        const randomPlanet = otherPlanets[Math.floor(Math.random() * otherPlanets.length)];
+                        if (randomPlanet && !wrongAnswers.includes(randomPlanet.englishName)) {
+                            wrongAnswers.push(randomPlanet.englishName);
+                        }
+                    }
+
+                    const questionType = Math.random() > 0.5 ? 'gravity' : 'moons';
+                    let questionText, correctAnswer;
+
+                    if (questionType === 'gravity') {
+                        questionText = `Planet manakah yang memiliki gravitasi paling tinggi?`;
+                        // Find planet with highest gravity among the choices
+                        const choices = [correctPlanet, ...wrongAnswers.map(n => planets.find(p => p.englishName === n))].filter(Boolean);
+                        choices.sort((a, b) => b.gravity - a.gravity);
+                        correctAnswer = choices[0].englishName;
+                    } else { // 'moons'
+                        questionText = `Planet manakah yang memiliki bulan (moon) terbanyak?`;
+                        // Find planet with most moons among the choices
+                        const choices = [correctPlanet, ...wrongAnswers.map(n => planets.find(p => p.englishName === n))].filter(Boolean);
+                        choices.sort((a, b) => (b.moons?.length || 0) - (a.moons?.length || 0));
+                        correctAnswer = choices[0].englishName;
+                    }
+                    
+                    const allAnswers = [correctAnswer, ...wrongAnswers].sort(() => Math.random() - 0.5);
+
+                    questions.push({
+                        text: questionText,
+                        answers: allAnswers,
+                        correct: correctAnswer
+                    });
+                }
+                return questions;
+            }
+
+            /**
+             * Starts the quiz by fetching data and showing the first question.
+             */
+            async function startQuiz() {
+                startScreen.style.display = 'none';
+                quizScreen.style.display = 'block';
+                loader.style.display = 'block';
+                
+                const planets = await fetchPlanets();
+                if (planets) {
+                    quizData = generateQuestions(planets);
+                    totalQuestionsSpan.textContent = quizData.length;
+                    showQuestion();
+                } else {
+                    // If API fails, show a fallback or error screen
+                    quizScreen.style.display = 'none';
+                    startScreen.style.display = 'block';
+                }
+                loader.style.display = 'none';
+            }
+
+            /**
+             * Displays the current question and its answers.
+             */
+            function showQuestion() {
+                resetState();
+                const currentQuestion = quizData[currentQuestionIndex];
+                questionText.textContent = currentQuestion.text;
+                currentQuestionSpan.textContent = currentQuestionIndex + 1;
+
+                currentQuestion.answers.forEach(answer => {
+                    const button = document.createElement('button');
+                    button.classList.add('answer-btn');
+                    button.textContent = answer;
+                    button.addEventListener('click', () => selectAnswer(answer));
+                    answerGrid.appendChild(button);
+                });
+            }
+
+            /**
+             * Handles the answer selection.
+             * @param {string} selectedAnswer - The answer text selected by the user.
+             */
+            function selectAnswer(selectedAnswer) {
+                const currentQuestion = quizData[currentQuestionIndex];
+                const correct = selectedAnswer === currentQuestion.correct;
+                
+                const buttons = Array.from(answerGrid.children);
+                buttons.forEach(button => {
+                    button.disabled = true;
+                    if (button.textContent === currentQuestion.correct) {
+                        button.classList.add('correct');
+                    } else if (button.textContent === selectedAnswer && !correct) {
+                        button.classList.add('incorrect');
+                    }
+                });
+
+                if (correct) {
+                    score++;
+                    feedback.textContent = 'Benar! 🎉';
+                    feedback.className = 'feedback correct';
+                } else {
+                    feedback.textContent = `Salah. Jawaban yang benar adalah ${currentQuestion.correct}.`;
+                    feedback.className = 'feedback incorrect';
+                }
+                
+                if (currentQuestionIndex < quizData.length - 1) {
+                    nextBtn.classList.add('show');
+                } else {
+                    setTimeout(showEndScreen, 1500); // Delay before showing final score
+                }
+            }
+
+            /**
+             * Shows the next question in the quiz.
+             */
+            function showNextQuestion() {
+                currentQuestionIndex++;
+                showQuestion();
+            }
+
+            /**
+             * Displays the final score and end screen.
+             */
+            function showEndScreen() {
+                quizScreen.style.display = 'none';
+                endScreen.style.display = 'block';
+                finalScore.textContent = `${score}/${quizData.length}`;
+                
+                let message = '';
+                const percentage = (score / quizData.length) * 100;
+                if (percentage === 100) {
+                    message = 'Sempurna! Anda adalah seorang ahli astronomi! 🌟';
+                } else if (percentage >= 70) {
+                    message = 'Luar biasa! Pengetahuan Anda sangat bagus! 🚀';
+                } else if (percentage >= 50) {
+                    message = 'Bagus! Terus tingkatkan pengetahuan Anda! 🌍';
+                } else {
+                    message = 'Jangan menyerah! Jagat raya ini penuh misteri untuk dipecahkan. 🔭';
+                }
+                scoreMessage.textContent = message;
+            }
+
+            /**
+             * Resets the state for the next question or a new quiz.
+             */
+            function resetState() {
+                feedback.textContent = '';
+                feedback.className = 'feedback';
+                nextBtn.classList.remove('show');
+                while (answerGrid.firstChild) {
+                    answerGrid.removeChild(answerGrid.firstChild);
+                }
+            }
+
+            /**
+             * Resets all quiz variables to their initial state.
+             */
+            function resetQuiz() {
+                currentQuestionIndex = 0;
+                score = 0;
+                quizData = [];
+                resetState();
+            }
+        });
+    </script>
+</body>
+</html>
