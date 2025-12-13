@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tahu Bulat Tycoon</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #f0a500;
+            --secondary-color: #d9534f;
+            --success-color: #5cb85c;
+            --bg-color-1: #a8e6cf;
+            --bg-color-2: #dcedc1;
+            --glass-bg: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --text-color: #333;
+            --text-light: #f4f4f4;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-color-1), var(--bg-color-2));
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+            overflow-x: hidden;
+        }
+
+        /* --- Glassmorphism Utility --- */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+
+        /* --- Header --- */
+        .header {
+            width: 100%;
+            max-width: 500px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            color: var(--text-light);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            margin-bottom: 0.5rem;
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .stat-box {
+            flex: 1;
+            min-width: 120px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-box i {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .stat-box p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-box span {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--text-light);
+        }
+
+        /* --- Main Game Area --- */
+        .main-game-area {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* --- Visual Section --- */
+        .visual-section {
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .game-image {
+            width: 100%;
+            max-width: 350px;
+            height: auto;
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .action-button {
+            background: linear-gradient(45deg, var(--primary-color), #ffb347);
+            color: var(--text-light);
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(240, 165, 0, 0.4);
+        }
+
+        .action-button:active {
+            transform: scale(0.95);
+        }
+
+        .action-button:hover {
+            box-shadow: 0 6px 20px rgba(240, 165, 0, 0.6);
+        }
+
+        /* --- Upgrades Section --- */
+        .upgrades-section {
+            padding: 1.5rem;
+        }
+
+        .upgrades-section h2 {
+            color: var(--text-light);
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .upgrade-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .upgrade-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .upgrade-item:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .upgrade-item:active {
+            transform: scale(0.98);
+        }
+
+        .upgrade-item.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .upgrade-item.disabled:hover {
+            background-color: transparent;
+        }
+
+        .upgrade-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .upgrade-info i {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .upgrade-details h3 {
+            font-size: 1rem;
+            color: var(--text-light);
+        }
+
+        .upgrade-details p {
+            font-size: 0.8rem;
+            color: #ddd;
+        }
+
+        .upgrade-cost {
+            font-size: 1rem;
+            font-weight: bold;
+            color: var(--success-color);
+        }
+
+        /* --- Manager Section --- */
+        .manager-section {
+            padding: 1.5rem;
+        }
+
+        .manager-section h2 {
+            color: var(--text-light);
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .manager-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        
+        .manager-item.hired {
+            background-color: rgba(92, 184, 92, 0.2);
+            border: 1px solid var(--success-color);
+        }
+
+        .manager-item.hired:hover {
+            background-color: rgba(92, 184, 92, 0.3);
+        }
+
+        .manager-item:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .manager-item:active {
+            transform: scale(0.98);
+        }
+
+        .manager-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .manager-info i {
+            font-size: 1.5rem;
+            color: var(--secondary-color);
+        }
+
+        .manager-details h3 {
+            font-size: 1rem;
+            color: var(--text-light);
+        }
+
+        .manager-details p {
+            font-size: 0.8rem;
+            color: #ddd;
+        }
+
+        .manager-cost {
+            font-size: 1rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+
+        /* --- Floating Text --- */
+        .floating-text {
+            position: absolute;
+            pointer-events: none;
+            animation: float-up 1.5s ease-out forwards;
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: var(--success-color);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        @keyframes float-up {
+            to {
+                transform: translateY(-80px);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header glass">
+        <h1>Tahu Bulat Tycoon</h1>
+        <div class="stats-container">
+            <div class="stat-box">
+                <i class="fas fa-coins"></i>
+                <p>Uang</p>
+                <span id="money">0</span>
+            </div>
+            <div class="stat-box">
+                <i class="fas fa-chart-line"></i>
+                <p>Tahu/Click</p>
+                <span id="tahu-per-click">1</span>
+            </div>
+            <div class="stat-box">
+                <i class="fas fa-tachometer-alt"></i>
+                <p>Tahu/Detik</p>
+                <span id="tahu-per-second">0</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-game-area">
+        <div class="visual-section glass">
+            <img src="https://i.ytimg.com/vi/u4Mfa53K_es/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLAX2pZgcmfX2p8LGxLsn9QcjwFM1Q" alt="Penjual Tahu Bulat" class="game-image" id="game-image">
+            <button class="action-button" id="click-button">
+                <i class="fas fa-hand-pointer"></i> Jual Tahu!
+            </button>
+        </div>
+
+        <div class="upgrades-section glass">
+            <h2><i class="fas fa-tools"></i> Peningkatan</h2>
+            <div class="upgrade-list" id="upgrade-list">
+                <!-- Upgrades will be generated by JS -->
+            </div>
+        </div>
+
+        <div class="manager-section glass">
+            <h2><i class="fas fa-user-tie"></i> Manajer</h2>
+            <div class="upgrade-list" id="manager-list">
+                <!-- Managers will be generated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Game State ---
+            let gameState = {
+                money: 0,
+                tahuPerClick: 1,
+                tahuPerSecond: 0,
+                currentStage: 0,
+                upgrades: [
+                    { id: 'gerobak', name: 'Gerobak Lebih Bagus', baseCost: 50, multiplier: 1.5, owned: 0, effect: 1, icon: 'fa-shopping-cart' },
+                    { id: 'bumbu', name: 'Bumbu Rahasia', baseCost: 200, multiplier: 1.6, owned: 0, effect: 5, icon: 'fa-pepper-hot' },
+                    { id: 'spanduk', name: 'Spanduk Menarik', baseCost: 1000, multiplier: 1.7, owned: 0, effect: 20, icon: 'fa-bullhorn' },
+                    { id: 'pembantu', name: 'Pembantu', baseCost: 5000, multiplier: 1.8, owned: 0, effect: 100, icon: 'fa-hands-helping' },
+                    { id: 'franchise', name: 'Waralaba', baseCost: 25000, multiplier: 1.9, owned: 0, effect: 500, icon: 'fa-store' }
+                ],
+                managers: [
+                    { id: 'manager1', name: 'Manajer Penjualan', cost: 1000, hired: false, icon: 'fa-user-tie', description: 'Otomatis jual tahu' },
+                    { id: 'manager2', name: 'Manajer Pemasaran', cost: 15000, hired: false, icon: 'fa-bullhorn', description: 'x2 pendapatan/detik' }
+                ]
+            };
+
+            // --- DOM Elements ---
+            const moneyDisplay = document.getElementById('money');
+            const tahuPerClickDisplay = document.getElementById('tahu-per-click');
+            const tahuPerSecondDisplay = document.getElementById('tahu-per-second');
+            const clickButton = document.getElementById('click-button');
+            const upgradeList = document.getElementById('upgrade-list');
+            const managerList = document.getElementById('manager-list');
+            const gameImage = document.getElementById('game-image');
+
+            const stages = [
+                { name: 'Gerobak', image: 'https://i.ytimg.com/vi/u4Mfa53K_es/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLAX2pZgcmfX2p8LGxLsn9QcjwFM1Q' },
+                { name: 'Food Truck', image: 'https://i1.wp.com/miamibeef.com/wp-content/uploads/2018/10/Food-Trucks-Hamburgers-Wholesale-Meat-Supply-Miami-Beef.jpg?fit=2000%2C1333&ssl=1' }
+            ];
+
+            // --- Functions ---
+
+            const formatNumber = (num) => {
+                if (num >= 1e9) return (num / 1e9).toFixed(2) + ' Miliar';
+                if (num >= 1e6) return (num / 1e6).toFixed(2) + ' Juta';
+                if (num >= 1e3) return (num / 1e3).toFixed(2) + ' Ribu';
+                return Math.floor(num).toString();
+            };
+
+            const updateDisplay = () => {
+                moneyDisplay.textContent = formatNumber(gameState.money);
+                tahuPerClickDisplay.textContent = formatNumber(gameState.tahuPerClick);
+                tahuPerSecondDisplay.textContent = formatNumber(gameState.tahuPerSecond);
+            };
+
+            const calculateTahuPerSecond = () => {
+                let total = 0;
+                gameState.upgrades.forEach(upgrade => {
+                    total += upgrade.owned * upgrade.effect;
+                });
+                if (gameState.managers[1].hired) {
+                    total *= 2;
+                }
+                gameState.tahuPerSecond = total;
+            };
+
+            const saveGame = () => {
+                localStorage.setItem('tahuBulatTycoonState', JSON.stringify(gameState));
+            };
+
+            const loadGame = () => {
+                const savedState = localStorage.getItem('tahuBulatTycoonState');
+                if (savedState) {
+                    gameState = JSON.parse(savedState);
+                }
+            };
+
+            const sellTahu = () => {
+                gameState.money += gameState.tahuPerClick;
+                updateDisplay();
+                createFloatingText(`+${formatNumber(gameState.tahuPerClick)}`);
+            };
+
+            const createFloatingText = (text) => {
+                const floater = document.createElement('div');
+                floater.classList.add('floating-text');
+                floater.textContent = text;
+                
+                const buttonRect = clickButton.getBoundingClientRect();
+                floater.style.left = `${buttonRect.left + buttonRect.width / 2}px`;
+                floater.style.top = `${buttonRect.top}px`;
+
+                document.body.appendChild(floater);
+                setTimeout(() => floater.remove(), 1500);
+            };
+            
+            const checkStageUpgrade = () => {
+                if (gameState.money >= 10000 && gameState.currentStage === 0) {
+                    gameState.currentStage = 1;
+                    gameImage.src = stages[gameState.currentStage].image;
+                }
+            };
+
+            const buyUpgrade = (upgradeId) => {
+                const upgrade = gameState.upgrades.find(u => u.id === upgradeId);
+                const cost = Math.floor(upgrade.baseCost * Math.pow(upgrade.multiplier, upgrade.owned));
+
+                if (gameState.money >= cost) {
+                    gameState.money -= cost;
+                    upgrade.owned++;
+                    calculateTahuPerSecond();
+                    updateDisplay();
+                    saveGame();
+                    renderUpgrades();
+                    checkStageUpgrade();
+                }
+            };
+
+            const hireManager = (managerId) => {
+                const manager = gameState.managers.find(m => m.id === managerId);
+                if (gameState.money >= manager.cost && !manager.hired) {
+                    gameState.money -= manager.cost;
+                    manager.hired = true;
+                    calculateTahuPerSecond();
+                    updateDisplay();
+                    saveGame();
+                    renderManagers();
+                }
+            };
+
+            const renderUpgrades = () => {
+                upgradeList.innerHTML = '';
+                gameState.upgrades.forEach(upgrade => {
+                    const cost = Math.floor(upgrade.baseCost * Math.pow(upgrade.multiplier, upgrade.owned));
+                    const upgradeItem = document.createElement('div');
+                    upgradeItem.classList.add('upgrade-item');
+                    if (gameState.money < cost) {
+                        upgradeItem.classList.add('disabled');
+                    }
+
+                    upgradeItem.innerHTML = `
+                        <div class="upgrade-info">
+                            <i class="fas ${upgrade.icon}"></i>
+                            <div class="upgrade-details">
+                                <h3>${upgrade.name} (Lv. ${upgrade.owned})</h3>
+                                <p>+${formatNumber(upgrade.effect)} Tahu/detik</p>
+                            </div>
+                        </div>
+                        <div class="upgrade-cost">
+                            <i class="fas fa-coins"></i> ${formatNumber(cost)}
+                        </div>
+                    `;
+                    upgradeItem.addEventListener('click', () => buyUpgrade(upgrade.id));
+                    upgradeList.appendChild(upgradeItem);
+                });
+            };
+
+            const renderManagers = () => {
+                managerList.innerHTML = '';
+                gameState.managers.forEach(manager => {
+                    const managerItem = document.createElement('div');
+                    managerItem.classList.add('manager-item');
+                    if (manager.hired) {
+                        managerItem.classList.add('hired');
+                    }
+                    if (gameState.money < manager.cost || manager.hired) {
+                        managerItem.style.cursor = 'not-allowed';
+                    }
+
+                    managerItem.innerHTML = `
+                        <div class="manager-info">
+                            <i class="fas ${manager.icon}"></i>
+                            <div class="manager-details">
+                                <h3>${manager.name} ${manager.hired ? '(Dipekerjakan)' : ''}</h3>
+                                <p>${manager.description}</p>
+                            </div>
+                        </div>
+                        <div class="manager-cost">
+                            ${!manager.hired ? `<i class="fas fa-coins"></i> ${formatNumber(manager.cost)}` : '<i class="fas fa-check-circle"></i>'}
+                        </div>
+                    `;
+                    managerItem.addEventListener('click', () => hireManager(manager.id));
+                    managerList.appendChild(managerItem);
+                });
+            };
+            
+            // --- Game Loop ---
+            const gameLoop = () => {
+                if (gameState.managers[0].hired) {
+                    sellTahu();
+                }
+                gameState.money += gameState.tahuPerSecond / 10; // Update every 100ms
+                updateDisplay();
+            };
+
+            // --- Initial Setup ---
+            loadGame();
+            calculateTahuPerSecond();
+            updateDisplay();
+            renderUpgrades();
+            renderManagers();
+            checkStageUpgrade();
+
+            // --- Event Listeners ---
+            clickButton.addEventListener('click', sellTahu);
+            setInterval(gameLoop, 100); // Main game loop runs 10 times per second
+            setInterval(saveGame, 5000); // Auto-save every 5 seconds
+
+        });
+    </script>
+</body>
+</html>
