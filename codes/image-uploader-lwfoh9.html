@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image to URL Converter</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        /* --- General Setup & Variables --- */
+        :root {
+            --bg-color: #f0f4f8;
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --text-color: #333;
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.18);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: var(--text-color);
+            padding: 20px;
+        }
+
+        /* --- Glassmorphism Card --- */
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: auto;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            padding: 30px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+
+        h1 {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #e0e0e0;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+        }
+
+        /* --- Upload Area --- */
+        .upload-area {
+            border: 2px dashed #fff;
+            border-radius: 15px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .upload-area:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #f0f0f0;
+        }
+
+        .upload-area i {
+            font-size: 3rem;
+            color: #fff;
+            margin-bottom: 15px;
+        }
+
+        .upload-area p {
+            color: #fff;
+            font-size: 1.1rem;
+        }
+
+        .upload-area p span {
+            font-weight: bold;
+            color: #ffdd59;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        /* --- Image Preview & Results --- */
+        .image-preview-container {
+            margin-top: 30px;
+            display: none; /* Hidden by default */
+        }
+
+        .image-preview-container.active {
+            display: block;
+        }
+
+        .preview-item {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .preview-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .preview-info {
+            flex-grow: 1;
+        }
+
+        .preview-info h4 {
+            font-size: 1rem;
+            margin-bottom: 5px;
+            word-break: break-all;
+        }
+
+        .preview-info p {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .preview-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            text-decoration: none;
+            color: white;
+        }
+
+        .btn-copy {
+            background-color: #28a745;
+        }
+
+        .btn-copy:hover {
+            background-color: #218838;
+        }
+
+        .btn-view {
+            background-color: #007bff;
+        }
+
+        .btn-view:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-remove {
+            background-color: #dc3545;
+        }
+
+        .btn-remove:hover {
+            background-color: #c82333;
+        }
+
+        /* --- Loading & Status --- */
+        .status {
+            text-align: center;
+            padding: 10px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        .status.loading {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        /* --- Footer --- */
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1><i class="fa-solid fa-cloud-arrow-up"></i> Image to URL</h1>
+        <p class="subtitle">Unggah gambar dari HP Anda dan dapatkan link yang bisa dibagikan.</p>
+
+        <div class="upload-area" id="uploadArea">
+            <i class="fa-solid fa-images"></i>
+            <p>Klik atau seret gambar ke sini</p>
+            <p><span>Mendukung JPG, PNG, GIF, WebP (Maks. 5MB)</span></p>
+            <input type="file" id="fileInput" accept="image/*" multiple>
+        </div>
+
+        <div id="statusMessage" class="status" style="display: none;"></div>
+
+        <div id="imagePreviewContainer" class="image-preview-container"></div>
+    </div>
+
+    <div class="footer">
+        <p>Dibuat dengan <i class="fa-solid fa-heart" style="color: #ff6b6b;"></i> oleh Opus AI Coder</p>
+        <p>Menggunakan layanan <a href="https://freeimage.host/" target="_blank" style="color: #ffdd59;">freeimage.host</a></p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            const statusMessage = document.getElementById('statusMessage');
+
+            // --- Event Listeners ---
+            uploadArea.addEventListener('click', () => fileInput.click());
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.background = 'rgba(255, 255, 255, 0.3)';
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.background = 'rgba(255, 255, 255, 0.1)';
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.background = 'rgba(255, 255, 255, 0.1)';
+                if (e.dataTransfer.files.length > 0) {
+                    handleFiles(e.dataTransfer.files);
+                }
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleFiles(e.target.files);
+                }
+            });
+
+            // --- File Handling ---
+            async function handleFiles(files) {
+                previewContainer.innerHTML = ''; // Clear previous previews
+                previewContainer.classList.add('active');
+                statusMessage.style.display = 'none';
+
+                for (const file of files) {
+                    if (!file.type.startsWith('image/')) {
+                        showStatus(`File "${file.name}" bukan gambar.`, 'error');
+                        continue;
+                    }
+                    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                        showStatus(`File "${file.name}" terlalu besar. Maksimal 5MB.`, 'error');
+                        continue;
+                    }
+
+                    // Create preview element immediately
+                    const previewItem = createPreviewElement(file);
+                    previewContainer.appendChild(previewItem);
+
+                    // Start upload process
+                    await uploadImage(file, previewItem);
+                }
+            }
+
+            function createPreviewElement(file) {
+                const item = document.createElement('div');
+                item.className = 'preview-item';
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    item.querySelector('img').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+
+                item.innerHTML = `
+                    <img src="" alt="${file.name}">
+                    <div class="preview-info">
+                        <h4>${file.name}</h4>
+                        <p class="upload-status">Mengunggah...</p>
+                    </div>
+                    <div class="preview-actions">
+                        <button class="btn btn-copy" disabled><i class="fa-solid fa-copy"></i> Salin</button>
+                        <button class="btn btn-view" disabled><i class="fa-solid fa-eye"></i> Lihat</button>
+                        <button class="btn btn-remove"><i class="fa-solid fa-trash"></i> Hapus</button>
+                    </div>
+                `;
+                
+                // Add event listeners to buttons
+                item.querySelector('.btn-copy').addEventListener('click', (e) => {
+                    const url = e.target.closest('.preview-item').dataset.url;
+                    copyToClipboard(url);
+                });
+
+                item.querySelector('.btn-view').addEventListener('click', (e) => {
+                    const url = e.target.closest('.preview-item').dataset.url;
+                    window.open(url, '_blank');
+                });
+
+                item.querySelector('.btn-remove').addEventListener('click', (e) => {
+                    e.target.closest('.preview-item').remove();
+                    if (previewContainer.children.length === 0) {
+                        previewContainer.classList.remove('active');
+                    }
+                });
+
+                return item;
+            }
+
+            // --- Image Upload Logic ---
+            async function uploadImage(file, previewElement) {
+                const formData = new FormData();
+                formData.append('source', file);
+                formData.append('key', '6d207e02198a847aa98d0a2a901485a5'); // API Key for freeimage.host
+
+                try {
+                    const response = await fetch('https://freeimage.host/api/1/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Server error: ${response.statusText}`);
+                    }
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        const imageUrl = result.image.url;
+                        previewElement.dataset.url = imageUrl;
+                        
+                        // Update UI on success
+                        previewElement.querySelector('.upload-status').textContent = 'Berhasil diunggah!';
+                        previewElement.querySelector('.upload-status').style.color = '#28a745';
+                        previewElement.querySelector('.btn-copy').disabled = false;
+                        previewElement.querySelector('.btn-view').disabled = false;
+                        
+                        showStatus(`Gambar "${file.name}" berhasil diunggah!`, 'success');
+                    } else {
+                        throw new Error(result.status_code === 403 ? 'Kunci API tidak valid atau batas terlampaui.' : result.error.message);
+                    }
+                } catch (error) {
+                    console.error('Upload failed:', error);
+                    previewElement.querySelector('.upload-status').textContent = `Gagal: ${error.message}`;
+                    previewElement.querySelector('.upload-status').style.color = '#dc3545';
+                    showStatus(`Gagal mengunggah "${file.name}": ${error.message}`, 'error');
+                }
+            }
+
+            // --- Utility Functions ---
+            function copyToClipboard(text) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showStatus('URL berhasil disalin ke clipboard!', 'success');
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                    showStatus('Gagal menyalin URL.', 'error');
+                });
+            }
+
+            function showStatus(message, type) {
+                statusMessage.textContent = message;
+                statusMessage.className = `status ${type}`;
+                statusMessage.style.display = 'block';
+                
+                setTimeout(() => {
+                    statusMessage.style.display = 'none';
+                }, 5000);
+            }
+        });
+    </script>
+</body>
+</html>
