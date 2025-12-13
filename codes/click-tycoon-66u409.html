@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Click Tycoon - Bangun Kerajaan Bisnismu!</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+
+        header {
+            padding: 20px;
+            text-align: center;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .game-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            animation: fadeIn 0.8s ease-out 0.2s both;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .stat-card {
+            padding: 15px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .main-game {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            animation: fadeIn 1s ease-out 0.4s both;
+        }
+
+        @media (min-width: 768px) {
+            .main-game {
+                grid-template-columns: 2fr 1fr;
+            }
+        }
+
+        .click-area {
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .click-button {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #ff6b6b, #ee5a24);
+            border: none;
+            cursor: pointer;
+            font-size: 3rem;
+            color: white;
+            box-shadow: 0 10px 30px rgba(238, 90, 36, 0.5);
+            transition: all 0.1s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .click-button:hover {
+            transform: scale(1.05);
+        }
+
+        .click-button:active {
+            transform: scale(0.95);
+        }
+
+        .click-effect {
+            position: absolute;
+            pointer-events: none;
+            color: #ffd700;
+            font-size: 1.5rem;
+            font-weight: bold;
+            animation: floatUp 1s ease-out forwards;
+            z-index: 1000;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        .upgrades-panel {
+            padding: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .upgrade-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .upgrade-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+        }
+
+        .upgrade-item.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .upgrade-info {
+            flex: 1;
+        }
+
+        .upgrade-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .upgrade-desc {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        .upgrade-cost {
+            font-weight: bold;
+            color: #ffd700;
+            margin-left: 10px;
+        }
+
+        .achievement-popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 20px;
+            background: linear-gradient(145deg, #f093fb, #f5576c);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transform: translateX(400px);
+            transition: transform 0.5s ease;
+            z-index: 2000;
+            max-width: 300px;
+        }
+
+        .achievement-popup.show {
+            transform: translateX(0);
+        }
+
+        .achievement-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .achievement-desc {
+            font-size: 0.9rem;
+        }
+
+        .game-image {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            border-radius: 15px;
+            margin: 20px auto;
+            display: block;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .save-indicator {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background: rgba(0, 255, 0, 0.2);
+            border-radius: 10px;
+            display: none;
+            animation: pulse 0.5s ease;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .multiplier-display {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 215, 0, 0.2);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><i class="fas fa-coins"></i> Click Tycoon</h1>
+        <p>Bangun kerajaan bisnismu dengan satu klik!</p>
+    </header>
+
+    <div class="game-container">
+        <div class="stats-panel glass">
+            <div class="stat-card">
+                <div class="stat-label">Uang</div>
+                <div class="stat-value" id="money">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Per Klik</div>
+                <div class="stat-value" id="perClick">1</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Per Detik</div>
+                <div class="stat-value" id="perSecond">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Klik</div>
+                <div class="stat-value" id="totalClicks">0</div>
+            </div>
+        </div>
+
+        <div class="main-game">
+            <div class="click-area glass">
+                <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/919690/header.jpg?t=1537383272" alt="Click Tycoon Game" class="game-image">
+                <button class="click-button" id="clickButton">
+                    <i class="fas fa-hand-pointer"></i>
+                </button>
+                <div class="multiplier-display">
+                    <i class="fas fa-times-circle"></i> <span id="multiplier">1.0</span>x
+                </div>
+            </div>
+
+            <div class="upgrades-panel glass">
+                <h2><i class="fas fa-rocket"></i> Upgrade</h2>
+                <div id="upgradesList"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="achievement-popup" id="achievementPopup">
+        <div class="achievement-title"><i class="fas fa-trophy"></i> <span id="achievementTitle"></span></div>
+        <div class="achievement-desc" id="achievementDesc"></div>
+    </div>
+
+    <div class="save-indicator" id="saveIndicator">
+        <i class="fas fa-save"></i> Game Tersimpan!
+    </div>
+
+    <script>
+        // Game State
+        let gameState = {
+            money: 0,
+            perClick: 1,
+            perSecond: 0,
+            totalClicks: 0,
+            multiplier: 1,
+            upgrades: [
+                {
+                    id: 'autoClicker',
+                    name: 'Auto Clicker',
+                    desc: 'Mendapatkan uang otomatis',
+                    baseCost: 10,
+                    level: 0,
+                    effect: 1,
+                    icon: 'fa-robot'
+                },
+                {
+                    id: 'clickPower',
+                    name: 'Power Click',
+                    desc: 'Tingkatkan kekuatan klik',
+                    baseCost: 25,
+                    level: 0,
+                    effect: 2,
+                    icon: 'fa-fist-raised'
+                },
+                {
+                    id: 'business',
+                    name: 'Bisnis Kecil',
+                    desc: 'Buka bisnis kecil',
+                    baseCost: 100,
+                    level: 0,
+                    effect: 5,
+                    icon: 'fa-store'
+                },
+                {
+                    id: 'factory',
+                    name: 'Pabrik',
+                    desc: 'Bangun pabrik produksi',
+                    baseCost: 500,
+                    level: 0,
+                    effect: 20,
+                    icon: 'fa-industry'
+                },
+                {
+                    id: 'megaCorp',
+                    name: 'Mega Corporation',
+                    desc: 'Jadi CEO besar',
+                    baseCost: 2500,
+                    level: 0,
+                    effect: 100,
+                    icon: 'fa-building'
+                },
+                {
+                    id: 'quantum',
+                    name: 'Quantum Generator',
+                    desc: 'Teknologi masa depan',
+                    baseCost: 10000,
+                    level: 0,
+                    effect: 500,
+                    icon: 'fa-atom'
+                }
+            ],
+            achievements: []
+        };
+
+        // Load saved game
+        function loadGame() {
+            const saved = localStorage.getItem('clickTycoonSave');
+            if (saved) {
+                gameState = JSON.parse(saved);
+                updateDisplay();
+            }
+        }
+
+        // Save game
+        function saveGame() {
+            localStorage.setItem('clickTycoonSave', JSON.stringify(gameState));
+            const indicator = document.getElementById('saveIndicator');
+            indicator.style.display = 'block';
+            setTimeout(() => {
+                indicator.style.display = 'none';
+            }, 2000);
+        }
+
+        // Auto save every 30 seconds
+        setInterval(saveGame, 30000);
+
+        // Format number with commas
+        function formatNumber(num) {
+            if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
+            if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
+            if (num >= 1e3) return (num / 1e3).toFixed(2) + 'K';
+            return Math.floor(num).toString();
+        }
+
+        // Update display
+        function updateDisplay() {
+            document.getElementById('money').textContent = formatNumber(gameState.money);
+            document.getElementById('perClick').textContent = formatNumber(gameState.perClick * gameState.multiplier);
+            document.getElementById('perSecond').textContent = formatNumber(gameState.perSecond);
+            document.getElementById('totalClicks').textContent = formatNumber(gameState.totalClicks);
+            document.getElementById('multiplier').textContent = gameState.multiplier.toFixed(1);
+            
+            renderUpgrades();
+        }
+
+        // Click handler
+        document.getElementById('clickButton').addEventListener('click', function(e) {
+            const rect = this.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // Add money
+            const earned = gameState.perClick * gameState.multiplier;
+            gameState.money += earned;
+            gameState.totalClicks++;
+            
+            // Create floating text effect
+            const effect = document.createElement('div');
+            effect.className = 'click-effect';
+            effect.textContent = '+' + formatNumber(earned);
+            effect.style.left = x + 'px';
+            effect.style.top = y + 'px';
+            this.appendChild(effect);
+            
+            setTimeout(() => effect.remove(), 1000);
+            
+            // Animate button
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 100);
+            
+            updateDisplay();
+            checkAchievements();
+        });
+
+        // Render upgrades
+        function renderUpgrades() {
+            const container = document.getElementById('upgradesList');
+            container.innerHTML = '';
+            
+            gameState.upgrades.forEach(upgrade => {
+                const cost = getUpgradeCost(upgrade);
+                const canAfford = gameState.money >= cost;
+                
+                const div = document.createElement('div');
+                div.className = `upgrade-item ${!canAfford ? 'disabled' : ''}`;
+                div.innerHTML = `
+                    <div class="upgrade-info">
+                        <div class="upgrade-name">
+                            <i class="fas ${upgrade.icon}"></i> ${upgrade.name}
+                        </div>
+                        <div class="upgrade-desc">${upgrade.desc} (Level ${upgrade.level})</div>
+                    </div>
+                    <div class="upgrade-cost">
+                        <i class="fas fa-coins"></i> ${formatNumber(cost)}
+                    </div>
+                `;
+                
+                if (canAfford) {
+                    div.addEventListener('click', () => buyUpgrade(upgrade));
+                }
+                
+                container.appendChild(div);
+            });
+        }
+
+        // Calculate upgrade cost
+        function getUpgradeCost(upgrade) {
+            return Math.floor(upgrade.baseCost * Math.pow(1.5, upgrade.level));
+        }
+
+        // Buy upgrade
+        function buyUpgrade(upgrade) {
+            const cost = getUpgradeCost(upgrade);
+            if (gameState.money >= cost) {
+                gameState.money -= cost;
+                upgrade.level++;
+                
+                // Apply effects
+                if (upgrade.id === 'clickPower') {
+                    gameState.perClick += upgrade.effect;
+                } else {
+                    gameState.perSecond += upgrade.effect;
+                }
+                
+                // Update multiplier based on total upgrades
+                const totalUpgrades = gameState.upgrades.reduce((sum, u) => sum + u.level, 0);
+                gameState.multiplier = 1 + (totalUpgrades * 0.1);
+                
+                updateDisplay();
+                checkAchievements();
+            }
+        }
+
+        // Check achievements
+        function checkAchievements() {
+            const achievements = [
+                { id: 'firstClick', title: 'Klik Pertama!', desc: 'Melakukan klik pertama', condition: () => gameState.totalClicks === 1 },
+                { id: 'hundred', title: 'Ratusan!', desc: 'Mencapai 100 uang', condition: () => gameState.money >= 100 },
+                { id: 'thousand', title: 'Ribu!', desc: 'Mencapai 1.000 uang', condition: () => gameState.money >= 1000 },
+                { id: 'millionaire', title: 'Milyuner!', desc: 'Mencapai 1.000.000 uang', condition: () => gameState.money >= 1000000 },
+                { id: 'clickMaster', title: 'Master Klik', desc: '1000 total klik', condition: () => gameState.totalClicks >= 1000 },
+                { id: 'upgradePro', title: 'Pro Upgrade', desc: 'Beli 10 upgrade', condition: () => gameState.upgrades.reduce((sum, u) => sum + u.level, 0) >= 10 }
+            ];
+            
+            achievements.forEach(achievement => {
+                if (!gameState.achievements.includes(achievement.id) && achievement.condition()) {
+                    gameState.achievements.push(achievement.id);
+                    showAchievement(achievement.title, achievement.desc);
+                }
+            });
+        }
+
+        // Show achievement popup
+        function showAchievement(title, desc) {
+            const popup = document.getElementById('achievementPopup');
+            document.getElementById('achievementTitle').textContent = title;
+            document.getElementById('achievementDesc').textContent = desc;
+            
+            popup.classList.add('show');
+            setTimeout(() => {
+                popup.classList.remove('show');
+            }, 3000);
+        }
+
+        // Passive income
+        setInterval(() => {
+            if (gameState.perSecond > 0) {
+                gameState.money += gameState.perSecond;
+                updateDisplay();
+            }
+        }, 1000);
+
+        // Fetch external API for bonus content
+        fetch('https://api.publicapis.org/entries?category=Games&https=true')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Bonus games loaded:', data.entries);
+            })
+            .catch(error => console.log('API Error:', error));
+
+        // Initialize game
+        loadGame();
+        updateDisplay();
+    </script>
+</body>
+</html>
