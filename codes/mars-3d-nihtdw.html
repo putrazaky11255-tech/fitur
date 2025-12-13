@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mars 3D - Eksplorasi Planet Merah</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #ff6b6b;
+            --secondary-color: #4ecdc4;
+            --dark-bg: #0a0e27;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-primary: #ffffff;
+            --text-secondary: #b8bec8;
+            --mars-red: #d14e3a;
+            --mars-dark: #8b2f1f;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #2d1b69 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Stars Background */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* Header */
+        header {
+            position: relative;
+            z-index: 10;
+            padding: 1rem;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links {
+            display: none;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        @media (min-width: 768px) {
+            .nav-links {
+                display: flex;
+            }
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Main Content */
+        main {
+            position: relative;
+            z-index: 5;
+            padding: 2rem 1rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, var(--mars-red), var(--primary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* 3D Mars Container */
+        .mars-3d-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            height: 400px;
+            margin: 2rem auto;
+            perspective: 1000px;
+        }
+
+        .mars-3d {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotateMars 20s infinite linear;
+        }
+
+        @keyframes rotateMars {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
+        }
+
+        .mars-sphere {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            background: url('https://cdn.mos.cms.futurecdn.net/2LFXaMTJ5MKMRH4V5rPaXQ.jpeg') center/cover;
+            box-shadow: 
+                inset -30px -30px 50px rgba(0,0,0,0.5),
+                inset 10px 10px 50px rgba(255,100,50,0.3),
+                0 0 100px rgba(255,100,50,0.5);
+        }
+
+        .mars-sphere::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3), transparent 40%);
+        }
+
+        /* Info Cards */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        @media (min-width: 768px) {
+            .info-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .info-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .info-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 1.5rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
+        }
+
+        .info-card i {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .info-card h3 {
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .info-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Gallery Section */
+        .gallery {
+            margin-top: 3rem;
+        }
+
+        .gallery h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .gallery-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 15px;
+            height: 250px;
+            cursor: pointer;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.1);
+        }
+
+        .gallery-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            padding: 1rem;
+            transform: translateY(100%);
+            transition: transform 0.3s;
+        }
+
+        .gallery-item:hover .gallery-overlay {
+            transform: translateY(0);
+        }
+
+        /* Control Panel */
+        .control-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 2rem auto;
+            max-width: 600px;
+        }
+
+        .control-panel h3 {
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            background: linear-gradient(45deg, var(--mars-red), var(--primary-color));
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .control-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Footer */
+        footer {
+            position: relative;
+            z-index: 10;
+            margin-top: 4rem;
+            padding: 2rem 1rem;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--glass-border);
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .social-links a {
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            transition: color 0.3s;
+        }
+
+        .social-links a:hover {
+            color: var(--primary-color);
+        }
+
+        /* Mobile Menu */
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 80%;
+            max-width: 300px;
+            height: 100vh;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-left: 1px solid var(--glass-border);
+            transition: right 0.3s;
+            z-index: 100;
+            padding: 2rem;
+        }
+
+        .mobile-menu.active {
+            right: 0;
+        }
+
+        .mobile-menu-links {
+            list-style: none;
+            margin-top: 2rem;
+        }
+
+        .mobile-menu-links li {
+            margin-bottom: 1.5rem;
+        }
+
+        .mobile-menu-links a {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: color 0.3s;
+        }
+
+        .mobile-menu-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .close-menu {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Loading Animation */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--dark-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.5s;
+        }
+
+        .loading.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--glass-border);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading" id="loading">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Stars Background -->
+    <div class="stars" id="stars"></div>
+
+    <!-- Header -->
+    <header>
+        <nav>
+            <div class="logo">
+                <i class="fas fa-rocket"></i>
+                Mars 3D
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home">Beranda</a></li>
+                <li><a href="#explore">Eksplorasi</a></li>
+                <li><a href="#gallery">Galeri</a></li>
+                <li><a href="#about">Tentang</a></li>
+            </ul>
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </nav>
+    </header>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <button class="close-menu" id="closeMenu">
+            <i class="fas fa-times"></i>
+        </button>
+        <ul class="mobile-menu-links">
+            <li><a href="#home">Beranda</a></li>
+            <li><a href="#explore">Eksplorasi</a></li>
+            <li><a href="#gallery">Galeri</a></li>
+            <li><a href="#about">Tentang</a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section class="hero" id="home">
+            <h1>Selamat Datang di Mars</h1>
+            <p>Jelajahi planet merah dalam pengalaman 3D yang memukau. Temukan misteri dan keindahan Mars yang belum pernah Anda lihat sebelumnya.</p>
+        </section>
+
+        <!-- 3D Mars -->
+        <section class="mars-3d-container" id="explore">
+            <div class="mars-3d" id="mars3d">
+                <div class="mars-sphere"></div>
+            </div>
+        </section>
+
+        <!-- Control Panel -->
+        <section class="control-panel">
+            <h3>Kontrol Interaktif</h3>
+            <div class="controls">
+                <button class="control-btn" onclick="toggleRotation()">
+                    <i class="fas fa-pause"></i> Pause
+                </button>
+                <button class="control-btn" onclick="changeSpeed()">
+                    <i class="fas fa-forward"></i> Kecepatan
+                </button>
+                <button class="control-btn" onclick="resetView()">
+                    <i class="fas fa-undo"></i> Reset
+                </button>
+                <button class="control-btn" onclick="toggleFullscreen()">
+                    <i class="fas fa-expand"></i> Fullscreen
+                </button>
+            </div>
+        </section>
+
+        <!-- Info Cards -->
+        <section class="info-grid">
+            <div class="info-card">
+                <i class="fas fa-globe"></i>
+                <h3>Diameter</h3>
+                <p>6.779 km - Planet Mars memiliki diameter sekitar setengah dari diameter Bumi, menjadikannya planet terbesar ketujuh dalam tata surya kita.</p>
+            </div>
+            <div class="info-card">
+                <i class="fas fa-thermometer-half"></i>
+                <h3>Suhu</h3>
+                <p>Suhu rata-rata -63°C dengan variasi ekstrem dari -143°C di kutub hingga 35°C di ekuator saat siang hari.</p>
+            </div>
+            <div class="info-card">
+                <i class="fas fa-clock"></i>
+                <h3>Hari Mars</h3>
+                <p>Satu hari di Mars (Sol) berlangsung 24 jam 37 menit, sedikit lebih lama dari hari di Bumi.</p>
+            </div>
+            <div class="info-card">
+                <i class="fas fa-satellite"></i>
+                <h3>Bulan</h3>
+                <p>Mars memiliki dua bulan kecil: Phobos dan Deimos, yang kemungkinan besar adalah asteroid yang ditangkap gravitasi Mars.</p>
+            </div>
+            <div class="info-card">
+                <i class="fas fa-mountain"></i>
+                <h3>Gunung Tertinggi</h3>
+                <p>Olympus Mons adalah gunung berapi terbesar di tata surya dengan ketinggian 21 km, hampir 3 kali Gunung Everest.</p>
+            </div>
+            <div class="info-card">
+                <i class="fas fa-water"></i>
+                <h3>Es</h3>
+                <p>Mars memiliki kutub yang tertutup es air dan karbon dioksida, dengan bukti adanya air cair di masa lalu.</p>
+            </div>
+        </section>
+
+        <!-- Gallery -->
+        <section class="gallery" id="gallery">
+            <h2>Galeri Mars</h2>
+            <div class="gallery-grid">
+                <div class="gallery-item">
+                    <img src="https://relivingmbadays.wordpress.com/wp-content/uploads/2012/09/mars-model.jpg?w=640" alt="Mars Model">
+                    <div class="gallery-overlay">
+                        <h4>Model 3D Mars</h4>
+                        <p>Representasi detail permukaan Mars</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://news.mit.edu/sites/default/files/images/202409/MIT-MissMars-01-press.jpg" alt="Mars Surface">
+                    <div class="gallery-overlay">
+                        <h4>Permukaan Mars</h4>
+                        <p>Lanskap bebatuan dan debu merah</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://spacegrant.org/wp-content/uploads/2020/03/Mars-surface-1014x487.jpg" alt="Mars Terrain">
+                    <div class="gallery-overlay">
+                        <h4>Terrain Mars</h4>
+                        <p>Padang pasir dan kawah kuno</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://mars.nasa.gov/system/resources/list_images/24881_Mars_1_6792-320x240.jpg" alt="Mars View">
+                    <div class="gallery-overlay">
+                        <h4>Pemandangan Mars</h4>
+                        <p>Horizon planet merah yang megah</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer id="about">
+        <div class="footer-content">
+            <p>&copy; 2024 Mars 3D Explorer. Semua hak dilindungi.</p>
+            <div class="social-links">
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-youtube"></i></a>
+                <a href="#"><i class="fab fa-github"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Generate stars
+        function generateStars() {
+            const starsContainer = document.getElementById('stars');
+            const numberOfStars = 100;
+            
+            for (let i = 0; i < numberOfStars; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // Mobile menu toggle
+        const menuToggle = document.getElementById('menuToggle');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const closeMenu = document.getElementById('closeMenu');
+
+        menuToggle.addEventListener('click', () => {
+            mobileMenu.classList.add('active');
+        });
+
+        closeMenu.addEventListener('click', () => {
+            mobileMenu.classList.remove('active');
+        });
+
+        // Close mobile menu when clicking links
+        document.querySelectorAll('.mobile-menu-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.remove('active');
+            });
+        });
+
+        // Mars 3D Controls
+        let isRotating = true;
+        let rotationSpeed = 20;
+        const mars3d = document.getElementById('mars3d');
+
+        function toggleRotation() {
+            isRotating = !isRotating;
+            const btn = event.target.closest('.control-btn');
+            if (isRotating) {
+                mars3d.style.animationPlayState = 'running';
+                btn.innerHTML = '<i class="fas fa-pause"></i> Pause';
+            } else {
+                mars3d.style.animationPlayState = 'paused';
+                btn.innerHTML = '<i class="fas fa-play"></i> Play';
+            }
+        }
+
+        function changeSpeed() {
+            const speeds = [10, 20, 30, 40];
+            const currentIndex = speeds.indexOf(rotationSpeed);
+            rotationSpeed = speeds[(currentIndex + 1) % speeds.length];
+            mars3d.style.animationDuration = rotationSpeed + 's';
+            
+            // Show speed indicator
+            const speedIndicator = document.createElement('div');
+            speedIndicator.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(255, 107, 107, 0.9);
+                color: white;
+                padding: 1rem 2rem;
+                border-radius: 10px;
+                font-size: 1.2rem;
+                z-index: 1000;
+                animation: fadeInOut 1s;
+            `;
+            speedIndicator.textContent = `Kecepatan: ${rotationSpeed}s`;
+            document.body.appendChild(speedIndicator);
+            setTimeout(() => speedIndicator.remove(), 1000);
+        }
+
+        function resetView() {
+            mars3d.style.animation = 'none';
+            setTimeout(() => {
+                mars3d.style.animation = `rotateMars ${rotationSpeed}s infinite linear`;
+                if (!isRotating) {
+                    mars3d.style.animationPlayState = 'paused';
+                }
+            }, 10);
+        }
+
+        function toggleFullscreen() {
+            const marsContainer = document.querySelector('.mars-3d-container');
+            if (!document.fullscreenElement) {
+                marsContainer.requestFullscreen().catch(err => {
+                    console.log(`Error attempting to enable fullscreen: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // Mouse interaction with Mars
+        let isDragging = false;
+        let currentX;
+        let currentY;
+        let initialX;
+        let initialY;
+        let xOffset = 0;
+        let yOffset = 0;
+
+        const marsSphere = document.querySelector('.mars-sphere');
+
+        marsSphere.addEventListener('mousedown', dragStart);
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', dragEnd);
+
+        // Touch events for mobile
+        marsSphere.addEventListener('touchstart', dragStart);
+        document.addEventListener('touchmove', drag);
+        document.addEventListener('touchend', dragEnd);
+
+        function dragStart(e) {
+            if (e.type === "touchstart") {
+                initialX = e.touches[0].clientX - xOffset;
+                initialY = e.touches[0].clientY - yOffset;
+            } else {
+                initialX = e.clientX - xOffset;
+                initialY = e.clientY - yOffset;
+            }
+
+            if (e.target === marsSphere) {
+                isDragging = true;
+                mars3d.style.animationPlayState = 'paused';
+            }
+        }
+
+        function drag(e) {
+            if (isDragging) {
+                e.preventDefault();
+                
+                if (e.type === "touchmove") {
+                    currentX = e.touches[0].clientX - initialX;
+                    currentY = e.touches[0].clientY - initialY;
+                } else {
+                    currentX = e.clientX - initialX;
+                    currentY = e.clientY - initialY;
+                }
+
+                xOffset = currentX;
+                yOffset = currentY;
+
+                mars3d.style.transform = `rotateY(${currentX}deg) rotateX(${-currentY}deg)`;
+            }
+        }
+
+        function dragEnd(e) {
+            initialX = currentX;
+            initialY = currentY;
+            isDragging = false;
+            
+            if (isRotating) {
+                mars3d.style.animationPlayState = 'running';
+            }
+        }
+
+        // Smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Hide loading screen
+        window.addEventListener('load', () => {
+            generateStars();
+            setTimeout(() => {
+                document.getElementById('loading').classList.add('hidden');
+            }, 1000);
+        });
+
+        // Add fade in animation style
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeInOut {
+                0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                50% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Parallax effect on scroll
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const stars = document.getElementById('stars');
+            stars.style.transform = `translateY(${scrolled * 0.5}px)`;
+        });
+
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe all info cards and gallery items
+        document.querySelectorAll('.info-card, .gallery-item').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s, transform 0.6s';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
