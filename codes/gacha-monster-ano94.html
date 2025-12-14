@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokéDigi Gacha</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #FF6B6B;
+            --secondary-color: #4ECDC4;
+            --accent-color: #FFE66D;
+            --dark-color: #2C3E50;
+            --light-color: #F7F9FC;
+            --pokemon-color: #3B4CCA;
+            --digimon-color: #F0AD4E;
+            --card-shadow: 0 10px 20px rgba(0,0,0,0.1), 0 6px 6px rgba(0,0,0,0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--dark-color);
+            padding-bottom: 70px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: var(--card-shadow);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .subtitle {
+            color: var(--secondary-color);
+            font-size: 1.2rem;
+        }
+
+        .gacha-section {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .gacha-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .tab-button {
+            background: var(--light-color);
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 10px 10px 0 0;
+            margin: 0 5px;
+            transition: all 0.3s ease;
+            color: var(--dark-color);
+        }
+
+        .tab-button.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .tab-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .gacha-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .gacha-machine {
+            width: 250px;
+            height: 300px;
+            background: linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%);
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gacha-machine::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .gacha-ball {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .gacha-ball::after {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%);
+        }
+
+        .gacha-button {
+            background: var(--accent-color);
+            color: var(--dark-color);
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 1;
+        }
+
+        .gacha-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .gacha-button:active {
+            transform: translateY(1px);
+        }
+
+        .gacha-results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            width: 100%;
+        }
+
+        .gacha-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            animation: cardAppear 0.5s ease-out;
+        }
+
+        @keyframes cardAppear {
+            0% { opacity: 0; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .gacha-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .card-content {
+            padding: 15px;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--dark-color);
+        }
+
+        .card-type {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+
+        .pokemon-type {
+            background: var(--pokemon-color);
+            color: white;
+        }
+
+        .digimon-type {
+            background: var(--digimon-color);
+            color: white;
+        }
+
+        .card-rarity {
+            font-size: 0.9rem;
+            color: #777;
+            margin-top: 5px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            max-width: 300px;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--primary-color);
+        }
+
+        .notification-message {
+            color: var(--dark-color);
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 5px 15px;
+            color: var(--dark-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item i {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+        }
+
+        .nav-item:hover {
+            transform: translateY(-3px);
+        }
+
+        .nav-text {
+            font-size: 0.8rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #777;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #ddd;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .gacha-results {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .tab-button {
+                padding: 10px 15px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-gamepad"></i> PokéDigi Gacha</h1>
+            <p class="subtitle">Collect your favorite Pokémon and Digimon!</p>
+        </header>
+
+        <div class="gacha-section">
+            <div class="gacha-tabs">
+                <button class="tab-button active" data-tab="pokemon">
+                    <i class="fas fa-dragon"></i> Pokémon
+                </button>
+                <button class="tab-button" data-tab="digimon">
+                    <i class="fas fa-dog"></i> Digimon
+                </button>
+            </div>
+
+            <div class="gacha-container">
+                <div class="gacha-machine">
+                    <div class="gacha-ball">
+                        <i class="fas fa-question" style="font-size: 3rem; color: white;"></i>
+                    </div>
+                    <button class="gacha-button" id="gacha-btn">
+                        <i class="fas fa-dice"></i> Pull!
+                    </button>
+                </div>
+
+                <div class="gacha-results" id="gacha-results">
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>No characters yet. Try your luck!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification">
+        <div class="notification-title">Notification</div>
+        <div class="notification-message">You got a new character!</div>
+    </div>
+
+    <nav class="navigation">
+        <a href="#" class="nav-item active">
+            <i class="fas fa-home"></i>
+            <span class="nav-text">Home</span>
+        </a>
+        <a href="#" class="nav-item">
+            <i class="fas fa-th"></i>
+            <span class="nav-text">Collection</span>
+        </a>
+        <a href="#" class="nav-item">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="nav-text">Shop</span>
+        </a>
+        <a href="#" class="nav-item">
+            <i class="fas fa-user"></i>
+            <span class="nav-text">Profile</span>
+        </a>
+    </nav>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const gachaBtn = document.getElementById('gacha-btn');
+            const gachaResults = document.getElementById('gacha-results');
+            const notification = document.getElementById('notification');
+            
+            // State
+            let currentTab = 'pokemon';
+            let collection = [];
+            
+            // Pokemon data (using placeholder images as specified)
+            const pokemonData = [
+                { id: 1, name: 'Pikachu', type: 'Electric', rarity: 'Common', image: 'https://pokemonletsgo.pokemon.com/assets/img/common/char-pikachu.png' },
+                { id: 2, name: 'Charizard', type: 'Fire/Flying', rarity: 'Rare', image: 'https://i.etsystatic.com/7869055/r/il/1217d9/2193195372/il_fullxfull.2193195372_637g.jpg' },
+                { id: 3, name: 'Bulbasaur', type: 'Grass/Poison', rarity: 'Common', image: 'https://pokemonletsgo.pokemon.com/assets/img/common/char-pikachu.png' },
+                { id: 4, name: 'Squirtle', type: 'Water', rarity: 'Common', image: 'https://i.etsystatic.com/7869055/r/il/1217d9/2193195372/il_fullxfull.2193195372_637g.jpg' },
+                { id: 5, name: 'Mewtwo', type: 'Psychic', rarity: 'Legendary', image: 'https://pokemonletsgo.pokemon.com/assets/img/common/char-pikachu.png' },
+                { id: 6, name: 'Gengar', type: 'Ghost/Poison', rarity: 'Rare', image: 'https://i.etsystatic.com/7869055/r/il/1217d9/2193195372/il_fullxfull.2193195372_637g.jpg' },
+                { id: 7, name: 'Dragonite', type: 'Dragon/Flying', rarity: 'Rare', image: 'https://pokemonletsgo.pokemon.com/assets/img/common/char-pikachu.png' },
+                { id: 8, name: 'Mew', type: 'Psychic', rarity: 'Legendary', image: 'https://i.etsystatic.com/7869055/r/il/1217d9/2193195372/il_fullxfull.2193195372_637g.jpg' }
+            ];
+            
+            // Digimon data (using placeholder images as specified)
+            const digimonData = [
+                { id: 1, name: 'Agumon', type: 'Reptile', rarity: 'Common', image: 'https://m.media-amazon.com/images/I/81JPoux6CsL._AC_UF894,1000_QL80_.jpg' },
+                { id: 2, name: 'Gabumon', type: 'Reptile', rarity: 'Common', image: 'https://m.media-amazon.com/images/M/MV5BZmZjN2I2OGEtMzJkMS00Y2I2LWI0ZGQtMjExNzY0Mzk1YjEwXkEyXkFqcGc@._V1_.jpg' },
+                { id: 3, name: 'WarGreymon', type: 'Dragon', rarity: 'Mega', image: 'https://m.media-amazon.com/images/I/81JPoux6CsL._AC_UF894,1000_QL80_.jpg' },
+                { id: 4, name: 'MetalGarurumon', type: 'Beast', rarity: 'Mega', image: 'https://m.media-amazon.com/images/M/MV5BZmZjN2I2OGEtMzJkMS00Y2I2LWI0ZGQtMjExNzY0Mzk1YjEwXkEyXkFqcGc@._V1_.jpg' },
+                { id: 5, name: 'Omnimon', type: 'Holy Knight', rarity: 'Mega', image: 'https://m.media-amazon.com/images/I/81JPoux6CsL._AC_UF894,1000_QL80_.jpg' },
+                { id: 6, name: 'Patamon', type: 'Mammal', rarity: 'Common', image: 'https://m.media-amazon.com/images/M/MV5BZmZjN2I2OGEtMzJkMS00Y2I2LWI0ZGQtMjExNzY0Mzk1YjEwXkEyXkFqcGc@._V1_.jpg' },
+                { id: 7, name: 'Gatomon', type: 'Beast', rarity: 'Common', image: 'https://m.media-amazon.com/images/I/81JPoux6CsL._AC_UF894,1000_QL80_.jpg' },
+                { id: 8, name: 'Imperialdramon', type: 'Ancient Dragon', rarity: 'Mega', image: 'https://m.media-amazon.com/images/M/MV5BZmZjN2I2OGEtMzJkMS00Y2I2LWI0ZGQtMjExNzY0Mzk1YjEwXkEyXkFqcGc@._V1_.jpg' }
+            ];
+            
+            // Gacha images for animation
+            const gachaImages = [
+                'https://img.itch.zone/aW1hZ2UvMzI5MDIwLzE2Mjc4NzMucG5n/original/J2N9FM.png',
+                'https://i.pinimg.com/736x/d3/07/d5/d307d585b74a6da6dac554eb0ede68e0.jpg'
+            ];
+            
+            // Initialize
+            function init() {
+                // Set up event listeners
+                tabButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const tab = this.getAttribute('data-tab');
+                        switchTab(tab);
+                    });
+                });
+                
+                gachaBtn.addEventListener('click', pullGacha);
+                
+                // Load collection from localStorage
+                loadCollection();
+            }
+            
+            // Switch between Pokemon and Digimon tabs
+            function switchTab(tab) {
+                currentTab = tab;
+                
+                // Update active tab button
+                tabButtons.forEach(button => {
+                    button.classList.remove('active');
+                    if (button.getAttribute('data-tab') === tab) {
+                        button.classList.add('active');
+                    }
+                });
+                
+                // Update gacha button text
+                if (tab === 'pokemon') {
+                    gachaBtn.innerHTML = '<i class="fas fa-dice"></i> Pull Pokémon!';
+                } else {
+                    gachaBtn.innerHTML = '<i class="fas fa-dice"></i> Pull Digimon!';
+                }
+                
+                // Update results display
+                updateResultsDisplay();
+            }
+            
+            // Pull from gacha
+            function pullGacha() {
+                // Disable button during animation
+                gachaBtn.disabled = true;
+                gachaBtn.innerHTML = '<span class="loading"></span> Pulling...';
+                
+                // Simulate API call with setTimeout
+                setTimeout(() => {
+                    // Determine rarity
+                    const rand = Math.random();
+                    let rarity;
+                    
+                    if (rand < 0.6) {
+                        rarity = 'Common';
+                    } else if (rand < 0.9) {
+                        rarity = 'Rare';
+                    } else if (rand < 0.98) {
+                        rarity = 'Legendary';
+                    } else {
+                        rarity = 'Mega';
+                    }
+                    
+                    // Get character based on current tab and rarity
+                    let character;
+                    if (currentTab === 'pokemon') {
+                        const filteredPokemon = pokemonData.filter(p => p.rarity === rarity);
+                        character = filteredPokemon[Math.floor(Math.random() * filteredPokemon.length)];
+                    } else {
+                        const filteredDigimon = digimonData.filter(d => d.rarity === rarity);
+                        character = filteredDigimon[Math.floor(Math.random() * filteredDigimon.length)];
+                    }
+                    
+                    // Add to collection
+                    collection.push({
+                        ...character,
+                        tab: currentTab,
+                        id: Date.now() // Unique ID for this instance
+                    });
+                    
+                    // Save to localStorage
+                    saveCollection();
+                    
+                    // Update display
+                    updateResultsDisplay();
+                    
+                    // Show notification
+                    showNotification(`You got ${character.name}!`, `Rarity: ${character.rarity}`);
+                    
+                    // Re-enable button
+                    gachaBtn.disabled = false;
+                    if (currentTab === 'pokemon') {
+                        gachaBtn.innerHTML = '<i class="fas fa-dice"></i> Pull Pokémon!';
+                    } else {
+                        gachaBtn.innerHTML = '<i class="fas fa-dice"></i> Pull Digimon!';
+                    }
+                }, 1500);
+            }
+            
+            // Update results display
+            function updateResultsDisplay() {
+                // Filter collection by current tab
+                const filteredCollection = collection.filter(item => item.tab === currentTab);
+                
+                if (filteredCollection.length === 0) {
+                    gachaResults.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <p>No characters yet. Try your luck!</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Create HTML for each character
+                const resultsHTML = filteredCollection.map(character => {
+                    const typeClass = currentTab === 'pokemon' ? 'pokemon-type' : 'digimon-type';
+                    return `
+                        <div class="gacha-card">
+                            <img src="${character.image}" alt="${character.name}" class="card-image">
+                            <div class="card-content">
+                                <h3 class="card-title">${character.name}</h3>
+                                <span class="card-type ${typeClass}">${character.type}</span>
+                                <div class="card-rarity">Rarity: ${character.rarity}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                gachaResults.innerHTML = resultsHTML;
+            }
+            
+            // Show notification
+            function showNotification(title, message) {
+                const notificationTitle = notification.querySelector('.notification-title');
+                const notificationMessage = notification.querySelector('.notification-message');
+                
+                notificationTitle.textContent = title;
+                notificationMessage.textContent = message;
+                
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+            
+            // Save collection to localStorage
+            function saveCollection() {
+                localStorage.setItem('gachaCollection', JSON.stringify(collection));
+            }
+            
+            // Load collection from localStorage
+            function loadCollection() {
+                const savedCollection = localStorage.getItem('gachaCollection');
+                if (savedCollection) {
+                    collection = JSON.parse(savedCollection);
+                    updateResultsDisplay();
+                }
+            }
+            
+            // Initialize the app
+            init();
+        });
+    </script>
+</body>
+</html>
