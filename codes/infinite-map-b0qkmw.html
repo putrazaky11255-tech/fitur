@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infinite Map Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            background: #1a1a2e;
+            color: #eee;
+        }
+
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        #info-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(22, 33, 62, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            z-index: 10;
+            min-width: 200px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        #info-panel h3 {
+            margin-bottom: 10px;
+            color: #4fbdba;
+            font-size: 1.1rem;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            font-size: 0.9rem;
+        }
+
+        .info-value {
+            color: #f8b500;
+            font-weight: bold;
+        }
+
+        #controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(22, 33, 62, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            z-index: 10;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .control-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .control-btn i {
+            margin-right: 8px;
+        }
+
+        #minimap {
+            position: absolute;
+            bottom: 80px;
+            right: 20px;
+            width: 200px;
+            height: 200px;
+            background: rgba(22, 33, 62, 0.8);
+            border-radius: 10px;
+            overflow: hidden;
+            z-index: 10;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        #minimap-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(22, 33, 62, 0.9);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #aaa;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .nav-item.active {
+            color: #4fbdba;
+        }
+
+        .nav-item:hover {
+            color: #fff;
+            background: rgba(79, 189, 186, 0.1);
+        }
+
+        .nav-item i {
+            font-size: 1.2rem;
+            margin-bottom: 3px;
+        }
+
+        .nav-item span {
+            font-size: 0.7rem;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -250px;
+            width: 250px;
+            height: 100%;
+            background: rgba(22, 33, 62, 0.95);
+            backdrop-filter: blur(10px);
+            transition: left 0.3s ease;
+            z-index: 101;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            background: rgba(79, 189, 186, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.2rem;
+            color: #4fbdba;
+        }
+
+        .close-sidebar {
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close-sidebar:hover {
+            color: #fff;
+        }
+
+        .sidebar-content {
+            padding: 20px;
+        }
+
+        .sidebar-section {
+            margin-bottom: 25px;
+        }
+
+        .sidebar-section h3 {
+            font-size: 1rem;
+            margin-bottom: 10px;
+            color: #f8b500;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            transition: background 0.3s ease;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(79, 189, 186, 0.1);
+        }
+
+        .sidebar-item i {
+            margin-right: 10px;
+            color: #4fbdba;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background: #333;
+            border-radius: 12px;
+            margin-left: auto;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: #4fbdba;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(26px);
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(26, 26, 46, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(79, 189, 186, 0.2);
+            border-top-color: #4fbdba;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            color: #4fbdba;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(22, 33, 62, 0.9);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        @media (min-width: 768px) {
+            .nav-bar {
+                display: none;
+            }
+            
+            .sidebar {
+                left: 0;
+                width: 70px;
+            }
+            
+            .sidebar.active {
+                width: 250px;
+            }
+            
+            .sidebar-header h2,
+            .sidebar-section h3,
+            .sidebar-item span {
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+            
+            .sidebar.active .sidebar-header h2,
+            .sidebar.active .sidebar-section h3,
+            .sidebar.active .sidebar-item span {
+                opacity: 1;
+            }
+            
+            #minimap {
+                bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    
+    <div id="info-panel">
+        <h3><i class="fa-solid fa-map"></i> Informasi Peta</h3>
+        <div class="info-item">
+            <span>Posisi X:</span>
+            <span class="info-value" id="pos-x">0</span>
+        </div>
+        <div class="info-item">
+            <span>Posisi Z:</span>
+            <span class="info-value" id="pos-z">0</span>
+        </div>
+        <div class="info-item">
+            <span>Chunk Terload:</span>
+            <span class="info-value" id="chunk-count">0</span>
+        </div>
+        <div class="info-item">
+            <span>FPS:</span>
+            <span class="info-value" id="fps">60</span>
+        </div>
+    </div>
+    
+    <div id="controls">
+        <button class="control-btn" id="regenerate-btn">
+            <i class="fa-solid fa-arrows-rotate"></i> Regenerasi Peta
+        </button>
+        <button class="control-btn" id="change-biome-btn">
+            <i class="fa-solid fa-palette"></i> Ganti Bioma
+        </button>
+        <button class="control-btn" id="toggle-grid-btn">
+            <i class="fa-solid fa-border-all"></i> Toggle Grid
+        </button>
+        <button class="control-btn" id="toggle-wireframe-btn">
+            <i class="fa-solid fa-cube"></i> Toggle Wireframe
+        </button>
+    </div>
+    
+    <div id="minimap">
+        <canvas id="minimap-canvas"></canvas>
+    </div>
+    
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>Peta Generator</h2>
+            <button class="close-sidebar" id="close-sidebar">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </div>
+        <div class="sidebar-content">
+            <div class="sidebar-section">
+                <h3>Mode Peta</h3>
+                <div class="sidebar-item" data-mode="terrain">
+                    <i class="fa-solid fa-mountain"></i>
+                    <span>Terrain</span>
+                </div>
+                <div class="sidebar-item" data-mode="city">
+                    <i class="fa-solid fa-city"></i>
+                    <span>Kota</span>
+                </div>
+                <div class="sidebar-item" data-mode="islands">
+                    <i class="fa-solid fa-umbrella-beach"></i>
+                    <span>Pulau</span>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3>Pengaturan</h3>
+                <div class="sidebar-item">
+                    <i class="fa-solid fa-sun"></i>
+                    <span>Siang/Malam</span>
+                    <div class="toggle-switch" id="day-night-toggle"></div>
+                </div>
+                <div class="sidebar-item">
+                    <i class="fa-solid fa-cloud"></i>
+                    <span>Kabut</span>
+                    <div class="toggle-switch" id="fog-toggle"></div>
+                </div>
+                <div class="sidebar-item">
+                    <i class="fa-solid fa-tree"></i>
+                    <span>Vegetasi</span>
+                    <div class="toggle-switch active" id="vegetation-toggle"></div>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3>Kontrol</h3>
+                <div class="sidebar-item">
+                    <i class="fa-solid fa-keyboard"></i>
+                    <span>WASD - Gerak</span>
+                </div>
+                <div class="sidebar-item">
+                    <i class="fa-solid fa-mouse"></i>
+                    <span>Klik Kanan - Rotasi</span>
+                </div>
+                <div class="sidebar-item">
+                    <i class="fa-solid fa-arrows-up-down-left-right"></i>
+                    <span>Scroll - Zoom</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="nav-bar">
+        <a href="#" class="nav-item active" data-view="map">
+            <i class="fa-solid fa-map"></i>
+            <span>Peta</span>
+        </a>
+        <a href="#" class="nav-item" data-view="settings">
+            <i class="fa-solid fa-gear"></i>
+            <span>Pengaturan</span>
+        </a>
+        <a href="#" class="nav-item" data-view="explore">
+            <i class="fa-solid fa-compass"></i>
+            <span>Jelajah</span>
+        </a>
+        <a href="#" class="nav-item" data-view="menu">
+            <i class="fa-solid fa-bars"></i>
+            <span>Menu</span>
+        </a>
+    </div>
+    
+    <div class="loading-overlay" id="loading">
+        <div class="loader"></div>
+        <div class="loading-text">Membuat peta tak hingga...</div>
+    </div>
+    
+    <div class="toast" id="toast"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Global variables
+        let scene, camera, renderer, controls;
+        let chunks = {};
+        let chunkSize = 50;
+        let renderDistance = 3;
+        let position = { x: 0, z: 0 };
+        let lastChunkPosition = { x: 0, z: 0 };
+        let mapMode = 'terrain';
+        let showGrid = false;
+        let showWireframe = false;
+        let dayNight = false;
+        let showFog = false;
+        let showVegetation = true;
+        let lastFrameTime = Date.now();
+        let frameCount = 0;
+        let fps = 60;
+        
+        // Biome colors
+        const biomeColors = {
+            terrain: {
+                water: 0x006994,
+                sand: 0xe2c88a,
+                grass: 0x4a7c59,
+                stone: 0x8b8680,
+                snow: 0xffffff
+            },
+            city: {
+                water: 0x003d5c,
+                road: 0x333333,
+                building: 0x8b8680,
+                park: 0x4a7c59,
+                concrete: 0x9e9e9e
+            },
+            islands: {
+                water: 0x0077be,
+                sand: 0xf4e4c1,
+                grass: 0x7cb342,
+                palm: 0x4e342e,
+                rock: 0x757575
+            }
+        };
+        
+        // Initialize the scene
+        function init() {
+            // Create scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x87ceeb);
+            scene.fog = new THREE.FogExp2(0x87ceeb, 0.01);
+            
+            // Create camera
+            camera = new THREE.PerspectiveCamera(
+                75,
+                window.innerWidth / window.innerHeight,
+                0.1,
+                1000
+            );
+            camera.position.set(0, 30, 50);
+            camera.lookAt(0, 0, 0);
+            
+            // Create renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+            
+            // Add lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(50, 100, 50);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.camera.left = -100;
+            directionalLight.shadow.camera.right = 100;
+            directionalLight.shadow.camera.top = 100;
+            directionalLight.shadow.camera.bottom = -100;
+            directionalLight.shadow.camera.near = 0.1;
+            directionalLight.shadow.camera.far = 500;
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
+            scene.add(directionalLight);
+            
+            // Add controls
+            setupControls();
+            
+            // Generate initial chunks
+            updateChunks();
+            
+            // Start animation loop
+            animate();
+            
+            // Hide loading screen
+            setTimeout(() => {
+                document.getElementById('loading').classList.add('hidden');
+                showToast('Peta tak hingga berhasil dibuat!');
+            }, 1500);
+        }
+        
+        // Setup controls
+        function setupControls() {
+            // Mouse controls
+            let isMouseDown = false;
+            let mouseX = 0;
+            let mouseY = 0;
+            
+            renderer.domElement.addEventListener('mousedown', (event) => {
+                if (event.button === 2) { // Right click
+                    isMouseDown = true;
+                    mouseX = event.clientX;
+                    mouseY = event.clientY;
+                }
+            });
+            
+            renderer.domElement.addEventListener('mouseup', () => {
+                isMouseDown = false;
+            });
+            
+            renderer.domElement.addEventListener('mousemove', (event) => {
+                if (isMouseDown) {
+                    const deltaX = event.clientX - mouseX;
+                    const deltaY = event.clientY - mouseY;
+                    
+                    // Rotate camera around the scene
+                    const spherical = new THREE.Spherical();
+                    spherical.setFromVector3(camera.position);
+                    spherical.theta -= deltaX * 0.01;
+                    spherical.phi += deltaY * 0.01;
+                    spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi));
+                    
+                    camera.position.setFromSpherical(spherical);
+                    camera.lookAt(0, 0, 0);
+                    
+                    mouseX = event.clientX;
+                    mouseY = event.clientY;
+                }
+            });
+            
+            // Prevent context menu on right click
+            renderer.domElement.addEventListener('contextmenu', (event) => {
+                event.preventDefault();
+            });
+            
+            // Zoom controls
+            renderer.domElement.addEventListener('wheel', (event) => {
+                const zoomSpeed = 0.1;
+                const direction = new THREE.Vector3();
+                camera.getWorldDirection(direction);
+                
+                if (event.deltaY > 0) {
+                    camera.position.addScaledVector(direction, -zoomSpeed * 10);
+                } else {
+                    camera.position.addScaledVector(direction, zoomSpeed * 10);
+                }
+                
+                // Limit camera distance
+                const distance = camera.position.length();
+                if (distance < 10) {
+                    camera.position.normalize().multiplyScalar(10);
+                } else if (distance > 200) {
+                    camera.position.normalize().multiplyScalar(200);
+                }
+            });
+            
+            // Keyboard controls
+            const keys = {};
+            
+            document.addEventListener('keydown', (event) => {
+                keys[event.key.toLowerCase()] = true;
+            });
+            
+            document.addEventListener('keyup', (event) => {
+                keys[event.key.toLowerCase()] = false;
+            });
+            
+            // Update camera position based on keyboard input
+            function updateCameraPosition() {
+                const moveSpeed = 0.5;
+                const direction = new THREE.Vector3();
+                
+                if (keys['w']) {
+                    camera.getWorldDirection(direction);
+                    camera.position.addScaledVector(direction, moveSpeed);
+                }
+                if (keys['s']) {
+                    camera.getWorldDirection(direction);
+                    camera.position.addScaledVector(direction, -moveSpeed);
+                }
+                if (keys['a']) {
+                    direction.set(-1, 0, 0);
+                    direction.applyQuaternion(camera.quaternion);
+                    camera.position.addScaledVector(direction, moveSpeed);
+                }
+                if (keys['d']) {
+                    direction.set(1, 0, 0);
+                    direction.applyQuaternion(camera.quaternion);
+                    camera.position.addScaledVector(direction, moveSpeed);
+                }
+                
+                // Update position for chunk loading
+                position.x = Math.floor(camera.position.x / chunkSize);
+                position.z = Math.floor(camera.position.z / chunkSize);
+                
+                requestAnimationFrame(updateCameraPosition);
+            }
+            
+            updateCameraPosition();
+        }
+        
+        // Generate terrain height map using Perlin noise simulation
+        function generateHeightMap(chunkX, chunkZ, size) {
+            const heightMap = [];
+            const scale = 0.1;
+            
+            for (let z = 0; z < size; z++) {
+                heightMap[z] = [];
+                for (let x = 0; x < size; x++) {
+                    // Simple noise simulation (not true Perlin noise)
+                    const nx = (chunkX * size + x) * scale;
+                    const nz = (chunkZ * size + z) * scale;
+                    
+                    // Multi-octave noise simulation
+                    let height = 0;
+                    let amplitude = 1;
+                    let frequency = 1;
+                    
+                    for (let i = 0; i < 4; i++) {
+                        height += amplitude * Math.sin(frequency * nx + Math.random() * 0.1) * Math.cos(frequency * nz + Math.random() * 0.1);
+                        amplitude *= 0.5;
+                        frequency *= 2;
+                    }
+                    
+                    // Normalize to 0-1 range
+                    height = (height + 1) / 2;
+                    
+                    // Apply biome-specific modifications
+                    if (mapMode === 'islands') {
+                        // Create islands by making edges lower
+                        const centerX = size / 2;
+                        const centerZ = size / 2;
+                        const distFromCenter = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(z - centerZ, 2));
+                        const maxDist = Math.sqrt(Math.pow(centerX, 2) + Math.pow(centerZ, 2));
+                        const islandFactor = 1 - (distFromCenter / maxDist);
+                        height = height * islandFactor * islandFactor;
+                    } else if (mapMode === 'city') {
+                        // Flatten terrain for city
+                        height = height * 0.3 + 0.2;
+                    }
+                    
+                    heightMap[z][x] = height;
+                }
+            }
+            
+            return heightMap;
+        }
+        
+        // Create a chunk
+        function createChunk(chunkX, chunkZ) {
+            const chunk = new THREE.Group();
+            const heightMap = generateHeightMap(chunkX, chunkZ, chunkSize);
+            
+            // Create terrain
+            const geometry = new THREE.PlaneGeometry(chunkSize, chunkSize, chunkSize - 1, chunkSize - 1);
+            const vertices = geometry.attributes.position.array;
+            
+            for (let i = 0; i < vertices.length; i += 3) {
+                const x = i / 3 % chunkSize;
+                const z = Math.floor(i / 3 / chunkSize);
+                vertices[i + 1] = heightMap[z][x] * 10; // Scale height
+            }
+            
+            geometry.computeVertexNormals();
+            
+            // Create material based on map mode
+            let material;
+            
+            if (mapMode === 'terrain') {
+                material = new THREE.MeshStandardMaterial({
+                    vertexColors: true,
+                    wireframe: showWireframe,
+                    flatShading: true
+                });
+                
+                // Add vertex colors based on height
+                const colors = [];
+                for (let i = 0; i < vertices.length; i += 3) {
+                    const height = vertices[i + 1];
+                    let color;
+                    
+                    if (height < 2) {
+                        color = new THREE.Color(biomeColors.terrain.water);
+                    } else if (height < 3) {
+                        color = new THREE.Color(biomeColors.terrain.sand);
+                    } else if (height < 6) {
+                        color = new THREE.Color(biomeColors.terrain.grass);
+                    } else if (height < 8) {
+                        color = new THREE.Color(biomeColors.terrain.stone);
+                    } else {
+                        color = new THREE.Color(biomeColors.terrain.snow);
+                    }
+                    
+                    colors.push(color.r, color.g, color.b);
+                }
+                
+                geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+            } else if (mapMode === 'city') {
+                material = new THREE.MeshStandardMaterial({
+                    color: biomeColors.city.concrete,
+                    wireframe: showWireframe,
+                    flatShading: true
+                });
+            } else if (mapMode === 'islands') {
+                material = new THREE.MeshStandardMaterial({
+                    vertexColors: true,
+                    wireframe: showWireframe,
+                    flatShading: true
+                });
+                
+                // Add vertex colors based on height
+                const colors = [];
+                for (let i = 0; i < vertices.length; i += 3) {
+                    const height = vertices[i + 1];
+                    let color;
+                    
+                    if (height < 1) {
+                        color = new THREE.Color(biomeColors.islands.water);
+                    } else if (height < 3) {
+                        color = new THREE.Color(biomeColors.islands.sand);
+                    } else if (height < 6) {
+                        color = new THREE.Color(biomeColors.islands.grass);
+                    } else {
+                        color = new THREE.Color(biomeColors.islands.rock);
+                    }
+                    
+                    colors.push(color.r, color.g, color.b);
+                }
+                
+                geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+            }
+            
+            const terrain = new THREE.Mesh(geometry, material);
+            terrain.rotation.x = -Math.PI / 2;
+            terrain.castShadow = true;
+            terrain.receiveShadow = true;
+            terrain.position.set(chunkX * chunkSize, 0, chunkZ * chunkSize);
+            chunk.add(terrain);
+            
+            // Add grid if enabled
+            if (showGrid) {
+                const gridHelper = new THREE.GridHelper(chunkSize, chunkSize, 0x444444, 0x222222);
+                gridHelper.position.set(chunkX * chunkSize, 0.01, chunkZ * chunkSize);
+                chunk.add(gridHelper);
+            }
+            
+            // Add vegetation if enabled
+            if (showVegetation) {
+                const vegetationCount = Math.floor(Math.random() * 20) + 10;
+                
+                for (let i = 0; i < vegetationCount; i++) {
+                    const x = Math.random() * chunkSize;
+                    const z = Math.random() * chunkSize;
+                    const heightIndex = Math.floor(z) * chunkSize + Math.floor(x);
+                    const height = vertices[heightIndex * 3 + 1];
+                    
+                    // Only add vegetation on suitable terrain
+                    if (mapMode === 'terrain' && height > 3 && height < 7) {
+                        // Add trees
+                        const treeGeometry = new THREE.ConeGeometry(1, 4, 8);
+                        const treeMaterial = new THREE.MeshStandardMaterial({ color: 0x2d5016 });
+                        const tree = new THREE.Mesh(treeGeometry, treeMaterial);
+                        tree.position.set(
+                            chunkX * chunkSize + x,
+                            height + 2,
+                            chunkZ * chunkSize + z
+                        );
+                        tree.castShadow = true;
+                        tree.receiveShadow = true;
+                        chunk.add(tree);
+                    } else if (mapMode === 'city' && height > 0.5) {
+                        // Add buildings
+                        const buildingHeight = Math.random() * 10 + 5;
+                        const buildingGeometry = new THREE.BoxGeometry(3, buildingHeight, 3);
+                        const buildingMaterial = new THREE.MeshStandardMaterial({ 
+                            color: new THREE.Color().setHSL(Math.random() * 0.1, 0.5, 0.5)
+                        });
+                        const building = new THREE.Mesh(buildingGeometry, buildingMaterial);
+                        building.position.set(
+                            chunkX * chunkSize + x,
+                            height + buildingHeight / 2,
+                            chunkZ * chunkSize + z
+                        );
+                        building.castShadow = true;
+                        building.receiveShadow = true;
+                        chunk.add(building);
+                    } else if (mapMode === 'islands' && height > 2 && height < 6) {
+                        // Add palm trees
+                        const trunkGeometry = new THREE.CylinderGeometry(0.3, 0.5, 3, 8);
+                        const trunkMaterial = new THREE.MeshStandardMaterial({ color: 0x8d6e63 });
+                        const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+                        trunk.position.set(
+                            chunkX * chunkSize + x,
+                            height + 1.5,
+                            chunkZ * chunkSize + z
+                        );
+                        trunk.castShadow = true;
+                        trunk.receiveShadow = true;
+                        chunk.add(trunk);
+                        
+                        // Add leaves
+                        const leavesGeometry = new THREE.SphereGeometry(2, 8, 6);
+                        const leavesMaterial = new THREE.MeshStandardMaterial({ color: 0x2e7d32 });
+                        const leaves = new THREE.Mesh(leavesGeometry, leavesMaterial);
+                        leaves.position.set(
+                            chunkX * chunkSize + x,
+                            height + 4,
+                            chunkZ * chunkSize + z
+                        );
+                        leaves.castShadow = true;
+                        leaves.receiveShadow = true;
+                        chunk.add(leaves);
+                    }
+                }
+            }
+            
+            return chunk;
+        }
+        
+        // Update chunks based on camera position
+        function updateChunks() {
+            const currentChunkX = Math.floor(position.x);
+            const currentChunkZ = Math.floor(position.z);
+            
+            // Check if we've moved to a new chunk
+            if (currentChunkX !== lastChunkPosition.x || currentChunkZ !== lastChunkPosition.z) {
+                lastChunkPosition.x = currentChunkX;
+                lastChunkPosition.z = currentChunkZ;
+                
+                // Load new chunks
+                for (let x = currentChunkX - renderDistance; x <= currentChunkX + renderDistance; x++) {
+                    for (let z = currentChunkZ - renderDistance; z <= currentChunkZ + renderDistance; z++) {
+                        const chunkKey = `${x},${z}`;
+                        
+                        if (!chunks[chunkKey]) {
+                            const chunk = createChunk(x, z);
+                            scene.add(chunk);
+                            chunks[chunkKey] = chunk;
+                        }
+                    }
+                }
+                
+                // Unload distant chunks
+                const keysToRemove = [];
+                for (const key in chunks) {
+                    const [x, z] = key.split(',').map(Number);
+                    
+                    if (Math.abs(x - currentChunkX) > renderDistance || Math.abs(z - currentChunkZ) > renderDistance) {
+                        scene.remove(chunks[key]);
+                        keysToRemove.push(key);
+                    }
+                }
+                
+                keysToRemove.forEach(key => delete chunks[key]);
+                
+                // Update info panel
+                updateInfoPanel();
+                
+                // Update minimap
+                updateMinimap();
+            }
+        }
+        
+        // Update info panel
+        function updateInfoPanel() {
+            document.getElementById('pos-x').textContent = Math.floor(camera.position.x);
+            document.getElementById('pos-z').textContent = Math.floor(camera.position.z);
+            document.getElementById('chunk-count').textContent = Object.keys(chunks).length;
+        }
+        
+        // Update minimap
+        function updateMinimap() {
+            const canvas = document.getElementById('minimap-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 200;
+            canvas.height = 200;
+            
+            // Clear canvas
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw chunks
+            const scale = 10;
+            const offsetX = canvas.width / 2 - position.x * scale;
+            const offsetY = canvas.height / 2 - position.z * scale;
+            
+            for (const key in chunks) {
+                const [x, z] = key.split(',').map(Number);
+                
+                ctx.fillStyle = '#4fbdba';
+                ctx.fillRect(
+                    x * chunkSize * scale + offsetX,
+                    z * chunkSize * scale + offsetY,
+                    chunkSize * scale,
+                    chunkSize * scale
+                );
+            }
+            
+            // Draw player position
+            ctx.fillStyle = '#f8b500';
+            ctx.beginPath();
+            ctx.arc(
+                canvas.width / 2,
+                canvas.height / 2,
+                3,
+                0,
+                Math.PI * 2
+            );
+            ctx.fill();
+        }
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Update chunks
+            updateChunks();
+            
+            // Calculate FPS
+            frameCount++;
+            const currentTime = Date.now();
+            if (currentTime - lastFrameTime >= 1000) {
+                fps = frameCount;
+                frameCount = 0;
+                lastFrameTime = currentTime;
+                document.getElementById('fps').textContent = fps;
+            }
+            
+            // Render scene
+            renderer.render(scene, camera);
+        }
+        
+        // Show toast notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            init();
+            
+            // Navigation bar
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    
+                    // Update active state
+                    document.querySelectorAll('.nav-item').forEach(navItem => {
+                        navItem.classList.remove('active');
+                    });
+                    item.classList.add('active');
+                    
+                    // Handle navigation
+                    const view = item.getAttribute('data-view');
+                    
+                    if (view === 'menu') {
+                        document.getElementById('sidebar').classList.toggle('active');
+                    } else if (view === 'settings') {
+                        showToast('Pengaturan akan segera hadir');
+                    } else if (view === 'explore') {
+                        // Move camera to random position
+                        const randomX = (Math.random() - 0.5) * 200;
+                        const randomZ = (Math.random() - 0.5) * 200;
+                        camera.position.set(randomX, 30, randomZ);
+                        showToast('Menjelajahi lokasi baru...');
+                    }
+                });
+            });
+            
+            // Sidebar
+            document.getElementById('close-sidebar').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.remove('active');
+            });
+            
+            // Map mode selection
+            document.querySelectorAll('.sidebar-item[data-mode]').forEach(item => {
+                item.addEventListener('click', () => {
+                    mapMode = item.getAttribute('data-mode');
+                    
+                    // Regenerate all chunks with new mode
+                    for (const key in chunks) {
+                        scene.remove(chunks[key]);
+                    }
+                    chunks = {};
+                    
+                    updateChunks();
+                    showToast(`Mode peta diubah ke ${item.textContent.trim()}`);
+                });
+            });
+            
+            // Toggle switches
+            document.getElementById('day-night-toggle').addEventListener('click', function() {
+                this.classList.toggle('active');
+                dayNight = !dayNight;
+                
+                if (dayNight) {
+                    scene.background = new THREE.Color(0x000814);
+                    scene.fog = new THREE.FogExp2(0x000814, 0.02);
+                } else {
+                    scene.background = new THREE.Color(0x87ceeb);
+                    scene.fog = new THREE.FogExp2(0x87ceeb, 0.01);
+                }
+                
+                showToast(dayNight ? 'Mode malam diaktifkan' : 'Mode siang diaktifkan');
+            });
+            
+            document.getElementById('fog-toggle').addEventListener('click', function() {
+                this.classList.toggle('active');
+                showFog = !showFog;
+                
+                if (showFog) {
+                    scene.fog = new THREE.FogExp2(
+                        dayNight ? 0x000814 : 0x87ceeb,
+                        0.02
+                    );
+                } else {
+                    scene.fog = null;
+                }
+                
+                showToast(showFog ? 'Kabut diaktifkan' : 'Kabut dinonaktifkan');
+            });
+            
+            document.getElementById('vegetation-toggle').addEventListener('click', function() {
+                this.classList.toggle('active');
+                showVegetation = !showVegetation;
+                
+                // Regenerate all chunks
+                for (const key in chunks) {
+                    scene.remove(chunks[key]);
+                }
+                chunks = {};
+                
+                updateChunks();
+                showToast(showVegetation ? 'Vegetasi diaktifkan' : 'Vegetasi dinonaktifkan');
+            });
+            
+            // Control buttons
+            document.getElementById('regenerate-btn').addEventListener('click', () => {
+                // Regenerate all chunks
+                for (const key in chunks) {
+                    scene.remove(chunks[key]);
+                }
+                chunks = {};
+                
+                updateChunks();
+                showToast('Peta diregenerasi');
+            });
+            
+            document.getElementById('change-biome-btn').addEventListener('click', () => {
+                // Cycle through biomes
+                const modes = ['terrain', 'city', 'islands'];
+                const currentIndex = modes.indexOf(mapMode);
+                mapMode = modes[(currentIndex + 1) % modes.length];
+                
+                // Regenerate all chunks with new biome
+                for (const key in chunks) {
+                    scene.remove(chunks[key]);
+                }
+                chunks = {};
+                
+                updateChunks();
+                
+                const modeNames = {
+                    'terrain': 'Terrain',
+                    'city': 'Kota',
+                    'islands': 'Pulau'
+                };
+                showToast(`Bioma diubah ke ${modeNames[mapMode]}`);
+            });
+            
+            document.getElementById('toggle-grid-btn').addEventListener('click', () => {
+                showGrid = !showGrid;
+                
+                // Regenerate all chunks
+                for (const key in chunks) {
+                    scene.remove(chunks[key]);
+                }
+                chunks = {};
+                
+                updateChunks();
+                showToast(showGrid ? 'Grid diaktifkan' : 'Grid dinonaktifkan');
+            });
+            
+            document.getElementById('toggle-wireframe-btn').addEventListener('click', () => {
+                showWireframe = !showWireframe;
+                
+                // Update material for all chunks
+                for (const key in chunks) {
+                    const chunk = chunks[key];
+                    chunk.traverse((child) => {
+                        if (child.isMesh) {
+                            child.material.wireframe = showWireframe;
+                        }
+                    });
+                }
+                
+                showToast(showWireframe ? 'Wireframe diaktifkan' : 'Wireframe dinonaktifkan');
+            });
+            
+            // Window resize
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        });
+    </script>
+</body>
+</html>
