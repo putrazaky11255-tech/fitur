@@ -1,0 +1,1685 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuizAI - Aplikasi Kuis Cerdas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4A90E2;
+            --secondary-color: #7B68EE;
+            --success-color: #5CB85C;
+            --danger-color: #D9534F;
+            --warning-color: #F0AD4E;
+            --light-color: #F8F9FA;
+            --dark-color: #343A40;
+            --sidebar-width: 250px;
+            --bottom-bar-height: 60px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Sidebar for desktop */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: white;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-header p {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: var(--dark-color);
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background-color: rgba(74, 144, 226, 0.1);
+            color: var(--primary-color);
+        }
+
+        .menu-item i {
+            margin-right: 15px;
+            font-size: 1.2rem;
+        }
+
+        /* Main content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+            flex: 1;
+            transition: margin-left 0.3s ease;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-header {
+            margin-bottom: 25px;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            color: var(--dark-color);
+            margin-bottom: 5px;
+        }
+
+        .page-subtitle {
+            color: #6c757d;
+            font-size: 1rem;
+        }
+
+        /* Cards */
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: rgba(74, 144, 226, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            color: var(--dark-color);
+        }
+
+        .card-subtitle {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        /* Quiz section */
+        .quiz-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .quiz-option {
+            flex: 1 1 45%;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quiz-option:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(74, 144, 226, 0.05);
+        }
+
+        .quiz-option.selected {
+            border-color: var(--primary-color);
+            background-color: rgba(74, 144, 226, 0.1);
+        }
+
+        .quiz-option.correct {
+            border-color: var(--success-color);
+            background-color: rgba(92, 184, 92, 0.1);
+        }
+
+        .quiz-option.incorrect {
+            border-color: var(--danger-color);
+            background-color: rgba(217, 83, 79, 0.1);
+        }
+
+        .quiz-question {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .quiz-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn i {
+            margin-right: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #3a7bc8;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #4cae4c;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c9302c;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(74, 144, 226, 0.1);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Quiz results */
+        .result-container {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .result-score {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 20px 0;
+            color: var(--primary-color);
+        }
+
+        .result-message {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            color: #6c757d;
+        }
+
+        .result-details {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+        }
+
+        .result-stat {
+            text-align: center;
+        }
+
+        .result-stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--dark-color);
+        }
+
+        .result-stat-label {
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        /* History section */
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-date {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .history-score {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        /* Settings section */
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            font-weight: 500;
+        }
+
+        .setting-description {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        /* Toggle switch */
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 24px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Bottom navigation for mobile */
+        .bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: white;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .bottom-nav-items {
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            color: #6c757d;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .bottom-nav-item.active {
+            color: var(--primary-color);
+        }
+
+        .bottom-nav-item i {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .bottom-nav-item span {
+            font-size: 0.7rem;
+        }
+
+        /* Mobile menu toggle */
+        .mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1001;
+            background-color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: var(--primary-color);
+            animation: spin 1s ease infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 60px 15px 80px;
+            }
+
+            .mobile-menu-toggle {
+                display: block;
+            }
+
+            .bottom-nav {
+                display: block;
+            }
+
+            .quiz-options {
+                flex-direction: column;
+            }
+
+            .quiz-option {
+                width: 100%;
+            }
+        }
+
+        /* Form elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 1rem;
+            background-color: white;
+            transition: border-color 0.3s;
+        }
+
+        .form-select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        /* Progress bar */
+        .progress {
+            height: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary-color);
+            transition: width 0.3s;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: transform 0.3s, opacity 0.3s;
+            z-index: 2000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast-icon {
+            margin-right: 15px;
+            font-size: 1.5rem;
+        }
+
+        .toast-success .toast-icon {
+            color: var(--success-color);
+        }
+
+        .toast-error .toast-icon {
+            color: var(--danger-color);
+        }
+
+        .toast-info .toast-icon {
+            color: var(--primary-color);
+        }
+
+        .toast-message {
+            flex: 1;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile menu toggle -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h1>QuizAI</h1>
+            <p>Aplikasi Kuis Cerdas</p>
+        </div>
+        <nav class="sidebar-menu">
+            <a href="#" class="menu-item active" data-page="home">
+                <i class="fas fa-home"></i>
+                <span>Beranda</span>
+            </a>
+            <a href="#" class="menu-item" data-page="quiz">
+                <i class="fas fa-question-circle"></i>
+                <span>Mulai Kuis</span>
+            </a>
+            <a href="#" class="menu-item" data-page="history">
+                <i class="fas fa-history"></i>
+                <span>Riwayat</span>
+            </a>
+            <a href="#" class="menu-item" data-page="settings">
+                <i class="fas fa-cog"></i>
+                <span>Pengaturan</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content">
+        <!-- Home page -->
+        <div class="page active" id="home-page">
+            <div class="page-header">
+                <h1 class="page-title">Selamat Datang di QuizAI</h1>
+                <p class="page-subtitle">Uji pengetahuan Anda dengan kuis yang dibuat oleh AI</p>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <div>
+                        <h2 class="card-title">Tentang QuizAI</h2>
+                        <p class="card-subtitle">Platform kuis interaktif dengan teknologi AI</p>
+                    </div>
+                </div>
+                <p>QuizAI adalah aplikasi kuis yang menggunakan kecerdasan buatan untuk menghasilkan pertanyaan yang menarik dan menantang. Dengan berbagai kategori yang tersedia, Anda dapat menguji pengetahuan Anda dalam berbagai bidang.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div>
+                        <h2 class="card-title">Statistik Anda</h2>
+                        <p class="card-subtitle">Pencapaian Anda sejauh ini</p>
+                    </div>
+                </div>
+                <div class="result-details">
+                    <div class="result-stat">
+                        <div class="result-stat-value" id="totalQuizzes">0</div>
+                        <div class="result-stat-label">Total Kuis</div>
+                    </div>
+                    <div class="result-stat">
+                        <div class="result-stat-value" id="avgScore">0%</div>
+                        <div class="result-stat-label">Skor Rata-rata</div>
+                    </div>
+                    <div class="result-stat">
+                        <div class="result-stat-value" id="bestScore">0%</div>
+                        <div class="result-stat-label">Skor Terbaik</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <div>
+                        <h2 class="card-title">Mulai Kuis Baru</h2>
+                        <p class="card-subtitle">Pilih kategori dan tingkat kesulitan</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Kategori</label>
+                    <select class="form-select" id="categorySelect">
+                        <option value="general">Pengetahuan Umum</option>
+                        <option value="science">Sains</option>
+                        <option value="history">Sejarah</option>
+                        <option value="geography">Geografi</option>
+                        <option value="sports">Olahraga</option>
+                        <option value="entertainment">Hiburan</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Tingkat Kesulitan</label>
+                    <select class="form-select" id="difficultySelect">
+                        <option value="easy">Mudah</option>
+                        <option value="medium">Sedang</option>
+                        <option value="hard">Sulit</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" id="startQuizBtn">
+                    <i class="fas fa-play"></i> Mulai Kuis
+                </button>
+            </div>
+        </div>
+
+        <!-- Quiz page -->
+        <div class="page" id="quiz-page">
+            <div class="page-header">
+                <h1 class="page-title">Kuis</h1>
+                <p class="page-subtitle">Jawab pertanyaan berikut dengan benar</p>
+            </div>
+
+            <div class="progress">
+                <div class="progress-bar" id="quizProgress" style="width: 0%"></div>
+            </div>
+
+            <div class="quiz-container">
+                <div class="card">
+                    <div class="quiz-question" id="quizQuestion">
+                        Memuat pertanyaan...
+                    </div>
+                    <div class="quiz-options" id="quizOptions">
+                        <!-- Options will be dynamically generated -->
+                    </div>
+                    <div class="quiz-actions">
+                        <button class="btn btn-outline" id="skipBtn">
+                            <i class="fas fa-forward"></i> Lewati
+                        </button>
+                        <button class="btn btn-primary" id="nextBtn" disabled>
+                            <i class="fas fa-arrow-right"></i> Selanjutnya
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result page -->
+        <div class="page" id="result-page">
+            <div class="page-header">
+                <h1 class="page-title">Hasil Kuis</h1>
+                <p class="page-subtitle">Lihat hasil Anda</p>
+            </div>
+
+            <div class="card">
+                <div class="result-container">
+                    <div class="result-score" id="resultScore">0%</div>
+                    <div class="result-message" id="resultMessage">Terus berlatih untuk hasil yang lebih baik!</div>
+                    <div class="result-details">
+                        <div class="result-stat">
+                            <div class="result-stat-value" id="correctAnswers">0</div>
+                            <div class="result-stat-label">Jawaban Benar</div>
+                        </div>
+                        <div class="result-stat">
+                            <div class="result-stat-value" id="totalQuestions">0</div>
+                            <div class="result-stat-label">Total Pertanyaan</div>
+                        </div>
+                        <div class="result-stat">
+                            <div class="result-stat-value" id="timeSpent">0m 0s</div>
+                            <div class="result-stat-label">Waktu yang Dibutuhkan</div>
+                        </div>
+                    </div>
+                    <div class="quiz-actions">
+                        <button class="btn btn-outline" id="reviewBtn">
+                            <i class="fas fa-eye"></i> Lihat Jawaban
+                        </button>
+                        <button class="btn btn-primary" id="newQuizBtn">
+                            <i class="fas fa-redo"></i> Kuis Baru
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- History page -->
+        <div class="page" id="history-page">
+            <div class="page-header">
+                <h1 class="page-title">Riwayat Kuis</h1>
+                <p class="page-subtitle">Lihat hasil kuis sebelumnya</p>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div>
+                        <h2 class="card-title">Riwayat Terbaru</h2>
+                        <p class="card-subtitle">5 kuis terakhir yang Anda kerjakan</p>
+                    </div>
+                </div>
+                <div id="historyList">
+                    <!-- History items will be dynamically generated -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings page -->
+        <div class="page" id="settings-page">
+            <div class="page-header">
+                <h1 class="page-title">Pengaturan</h1>
+                <p class="page-subtitle">Sesuaikan pengalaman kuis Anda</p>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <div>
+                        <h2 class="card-title">Pengaturan Umum</h2>
+                        <p class="card-subtitle">Konfigurasi aplikasi</p>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <div>
+                        <div class="setting-label">Notifikasi</div>
+                        <div class="setting-description">Terima notifikasi tentang kuis baru</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="notificationToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <div>
+                        <div class="setting-label">Mode Gelap</div>
+                        <div class="setting-description">Aktifkan tema gelap untuk aplikasi</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="darkModeToggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <div>
+                        <div class="setting-label">Efek Suara</div>
+                        <div class="setting-description">Mainkan efek suara saat menjawab</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="soundToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div>
+                        <h2 class="card-title">Profil Pengguna</h2>
+                        <p class="card-subtitle">Informasi akun Anda</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Nama</label>
+                    <input type="text" class="form-control" id="userName" value="Pengguna">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-control" id="userEmail" value="user@example.com">
+                </div>
+                <button class="btn btn-primary" id="saveProfileBtn">
+                    <i class="fas fa-save"></i> Simpan Profil
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom navigation for mobile -->
+    <nav class="bottom-nav">
+        <div class="bottom-nav-items">
+            <a href="#" class="bottom-nav-item active" data-page="home">
+                <i class="fas fa-home"></i>
+                <span>Beranda</span>
+            </a>
+            <a href="#" class="bottom-nav-item" data-page="quiz">
+                <i class="fas fa-question-circle"></i>
+                <span>Kuis</span>
+            </a>
+            <a href="#" class="bottom-nav-item" data-page="history">
+                <i class="fas fa-history"></i>
+                <span>Riwayat</span>
+            </a>
+            <a href="#" class="bottom-nav-item" data-page="settings">
+                <i class="fas fa-cog"></i>
+                <span>Pengaturan</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Toast notification -->
+    <div class="toast" id="toast">
+        <div class="toast-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="toast-message" id="toastMessage">
+            Notifikasi
+        </div>
+        <button class="toast-close" id="toastClose">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM elements
+            const pages = document.querySelectorAll('.page');
+            const menuItems = document.querySelectorAll('.menu-item');
+            const bottomNavItems = document.querySelectorAll('.bottom-nav-item');
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const sidebar = document.getElementById('sidebar');
+            const startQuizBtn = document.getElementById('startQuizBtn');
+            const categorySelect = document.getElementById('categorySelect');
+            const difficultySelect = document.getElementById('difficultySelect');
+            const quizPage = document.getElementById('quiz-page');
+            const quizQuestion = document.getElementById('quizQuestion');
+            const quizOptions = document.getElementById('quizOptions');
+            const nextBtn = document.getElementById('nextBtn');
+            const skipBtn = document.getElementById('skipBtn');
+            const quizProgress = document.getElementById('quizProgress');
+            const resultPage = document.getElementById('result-page');
+            const resultScore = document.getElementById('resultScore');
+            const resultMessage = document.getElementById('resultMessage');
+            const correctAnswers = document.getElementById('correctAnswers');
+            const totalQuestions = document.getElementById('totalQuestions');
+            const timeSpent = document.getElementById('timeSpent');
+            const reviewBtn = document.getElementById('reviewBtn');
+            const newQuizBtn = document.getElementById('newQuizBtn');
+            const historyList = document.getElementById('historyList');
+            const notificationToggle = document.getElementById('notificationToggle');
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            const soundToggle = document.getElementById('soundToggle');
+            const userName = document.getElementById('userName');
+            const userEmail = document.getElementById('userEmail');
+            const saveProfileBtn = document.getElementById('saveProfileBtn');
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastClose = document.getElementById('toastClose');
+            const totalQuizzes = document.getElementById('totalQuizzes');
+            const avgScore = document.getElementById('avgScore');
+            const bestScore = document.getElementById('bestScore');
+
+            // Quiz state
+            let currentQuiz = {
+                questions: [],
+                currentQuestionIndex: 0,
+                correctAnswersCount: 0,
+                startTime: null,
+                endTime: null,
+                category: '',
+                difficulty: ''
+            };
+
+            // History state
+            let quizHistory = JSON.parse(localStorage.getItem('quizHistory')) || [];
+
+            // Initialize app
+            function init() {
+                // Set up event listeners
+                setupEventListeners();
+                
+                // Load user settings
+                loadUserSettings();
+                
+                // Update statistics
+                updateStatistics();
+                
+                // Render history
+                renderHistory();
+            }
+
+            // Set up event listeners
+            function setupEventListeners() {
+                // Navigation
+                menuItems.forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const page = item.getAttribute('data-page');
+                        showPage(page);
+                        
+                        // Update active state
+                        menuItems.forEach(i => i.classList.remove('active'));
+                        item.classList.add('active');
+                        
+                        // Update bottom nav active state
+                        bottomNavItems.forEach(navItem => {
+                            navItem.classList.remove('active');
+                            if (navItem.getAttribute('data-page') === page) {
+                                navItem.classList.add('active');
+                            }
+                        });
+                        
+                        // Close mobile menu
+                        sidebar.classList.remove('active');
+                    });
+                });
+
+                bottomNavItems.forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const page = item.getAttribute('data-page');
+                        showPage(page);
+                        
+                        // Update active state
+                        bottomNavItems.forEach(i => i.classList.remove('active'));
+                        item.classList.add('active');
+                        
+                        // Update sidebar active state
+                        menuItems.forEach(menuItem => {
+                            menuItem.classList.remove('active');
+                            if (menuItem.getAttribute('data-page') === page) {
+                                menuItem.classList.add('active');
+                            }
+                        });
+                    });
+                });
+
+                // Mobile menu toggle
+                mobileMenuToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('active');
+                });
+
+                // Start quiz
+                startQuizBtn.addEventListener('click', startQuiz);
+
+                // Quiz navigation
+                nextBtn.addEventListener('click', nextQuestion);
+                skipBtn.addEventListener('click', skipQuestion);
+
+                // Result page actions
+                reviewBtn.addEventListener('click', reviewAnswers);
+                newQuizBtn.addEventListener('click', () => {
+                    showPage('home');
+                    menuItems[0].click();
+                });
+
+                // Settings
+                notificationToggle.addEventListener('change', saveUserSettings);
+                darkModeToggle.addEventListener('change', toggleDarkMode);
+                soundToggle.addEventListener('change', saveUserSettings);
+                saveProfileBtn.addEventListener('click', saveUserProfile);
+
+                // Toast close
+                toastClose.addEventListener('click', () => {
+                    toast.classList.remove('show');
+                });
+            }
+
+            // Show page
+            function showPage(pageId) {
+                pages.forEach(page => {
+                    page.classList.remove('active');
+                });
+                
+                const targetPage = document.getElementById(`${pageId}-page`);
+                if (targetPage) {
+                    targetPage.classList.add('active');
+                }
+            }
+
+            // Start quiz
+            async function startQuiz() {
+                const category = categorySelect.value;
+                const difficulty = difficultySelect.value;
+                
+                // Reset quiz state
+                currentQuiz = {
+                    questions: [],
+                    currentQuestionIndex: 0,
+                    correctAnswersCount: 0,
+                    startTime: new Date(),
+                    endTime: null,
+                    category: category,
+                    difficulty: difficulty
+                };
+                
+                // Show loading state
+                showPage('quiz');
+                quizQuestion.textContent = 'Memuat pertanyaan...';
+                quizOptions.innerHTML = '<div class="spinner"></div>';
+                nextBtn.disabled = true;
+                
+                try {
+                    // Fetch questions from API
+                    const questions = await fetchQuestions(category, difficulty);
+                    
+                    if (questions.length === 0) {
+                        showToast('Tidak dapat memuat pertanyaan. Silakan coba lagi.', 'error');
+                        showPage('home');
+                        return;
+                    }
+                    
+                    currentQuiz.questions = questions;
+                    
+                    // Display first question
+                    displayQuestion();
+                } catch (error) {
+                    console.error('Error starting quiz:', error);
+                    showToast('Terjadi kesalahan saat memuat kuis. Silakan coba lagi.', 'error');
+                    showPage('home');
+                }
+            }
+
+            // Fetch questions from API
+            async function fetchQuestions(category, difficulty) {
+                const categoryMap = {
+                    'general': 'General Knowledge',
+                    'science': 'Science',
+                    'history': 'History',
+                    'geography': 'Geography',
+                    'sports': 'Sports',
+                    'entertainment': 'Entertainment'
+                };
+                
+                const difficultyMap = {
+                    'easy': 'easy',
+                    'medium': 'medium',
+                    'hard': 'hard'
+                };
+                
+                const categoryParam = categoryMap[category] || 'General Knowledge';
+                const difficultyParam = difficultyMap[difficulty] || 'medium';
+                
+                try {
+                    const response = await fetch(`https://opentdb.com/api.php?amount=10&category=${getCategoryId(categoryParam)}&difficulty=${difficultyParam}&type=multiple`);
+                    const data = await response.json();
+                    
+                    if (data.response_code === 0 && data.results.length > 0) {
+                        return data.results.map(question => {
+                            // Format the question and answers
+                            const formattedQuestion = {
+                                question: decodeHTMLEntities(question.question),
+                                options: shuffleArray([
+                                    ...question.incorrect_answers.map(answer => decodeHTMLEntities(answer)),
+                                    decodeHTMLEntities(question.correct_answer)
+                                ]),
+                                correctAnswer: decodeHTMLEntities(question.correct_answer)
+                            };
+                            
+                            return formattedQuestion;
+                        });
+                    } else {
+                        // Fallback to generated questions if API fails
+                        return generateFallbackQuestions(category, difficulty);
+                    }
+                } catch (error) {
+                    console.error('Error fetching questions:', error);
+                    // Fallback to generated questions if API fails
+                    return generateFallbackQuestions(category, difficulty);
+                }
+            }
+
+            // Get category ID for OpenTDB API
+            function getCategoryId(categoryName) {
+                const categoryMap = {
+                    'General Knowledge': 9,
+                    'Science': 17,
+                    'History': 23,
+                    'Geography': 22,
+                    'Sports': 21,
+                    'Entertainment': 11
+                };
+                
+                return categoryMap[categoryName] || 9;
+            }
+
+            // Generate fallback questions if API fails
+            function generateFallbackQuestions(category, difficulty) {
+                const questionSets = {
+                    'general': [
+                        {
+                            question: "Apa ibu kota Indonesia?",
+                            options: ["Jakarta", "Surabaya", "Bandung", "Medan"],
+                            correctAnswer: "Jakarta"
+                        },
+                        {
+                            question: "Berapa jumlah provinsi di Indonesia?",
+                            options: ["34", "35", "36", "37"],
+                            correctAnswer: "38"
+                        },
+                        {
+                            question: "Siapa presiden pertama Indonesia?",
+                            options: ["Soekarno", "Soeharto", "BJ Habibie", "Megawati"],
+                            correctAnswer: "Soekarno"
+                        },
+                        {
+                            question: "Apa mata uang Indonesia?",
+                            options: ["Rupiah", "Ringgit", "Dollar", "Baht"],
+                            correctAnswer: "Rupiah"
+                        },
+                        {
+                            question: "Kapan Indonesia merdeka?",
+                            options: ["17 Agustus 1945", "1 Juni 1945", "28 Oktober 1928", "20 Mei 1908"],
+                            correctAnswer: "17 Agustus 1945"
+                        }
+                    ],
+                    'science': [
+                        {
+                            question: "Apa unsur kimia dengan simbol 'O'?",
+                            options: ["Oksigen", "Emas", "Perak", "Besi"],
+                            correctAnswer: "Oksigen"
+                        },
+                        {
+                            question: "Planet manakah yang dikenal sebagai 'Planet Merah'?",
+                            options: ["Mars", "Venus", "Jupiter", "Saturnus"],
+                            correctAnswer: "Mars"
+                        },
+                        {
+                            question: "Berapa jumlah tulang dalam tubuh manusia dewasa?",
+                            options: ["206", "208", "210", "212"],
+                            correctAnswer: "206"
+                        },
+                        {
+                            question: "Apa organ terbesar dalam tubuh manusia?",
+                            options: ["Kulit", "Hati", "Jantung", "Otak"],
+                            correctAnswer: "Kulit"
+                        },
+                        {
+                            question: "Siapa yang menemukan teori relativitas?",
+                            options: ["Albert Einstein", "Isaac Newton", "Stephen Hawking", "Galileo Galilei"],
+                            correctAnswer: "Albert Einstein"
+                        }
+                    ],
+                    'history': [
+                        {
+                            question: "Kapan Perang Dunia II berakhir?",
+                            options: ["1945", "1944", "1946", "1943"],
+                            correctAnswer: "1945"
+                        },
+                        {
+                            question: "Siapa pendiri Dinasti Ming di Cina?",
+                            options: ["Zhu Yuanzhang", "Kublai Khan", "Qin Shi Huang", "Sun Yat-sen"],
+                            correctAnswer: "Zhu Yuanzhang"
+                        },
+                        {
+                            question: "Di manakah letak Peradaban Mesir Kuno?",
+                            options: ["Sekitar Sungai Nil", "Sekitar Sungai Tigris", "Sekitar Sungai Gangga", "Sekitar Sungai Amazon"],
+                            correctAnswer: "Sekitar Sungai Nil"
+                        },
+                        {
+                            question: "Kapan Tembok Besar Cina selesai dibangun?",
+                            options: ["Ming Dynasty", "Qin Dynasty", "Han Dynasty", "Tang Dynasty"],
+                            correctAnswer: "Ming Dynasty"
+                        },
+                        {
+                            question: "Siapa yang menulis 'Decline and Fall of the Roman Empire'?",
+                            options: ["Edward Gibbon", "Thomas Carlyle", "Winston Churchill", "Herodotus"],
+                            correctAnswer: "Edward Gibbon"
+                        }
+                    ],
+                    'geography': [
+                        {
+                            question: "Apa gunung tertinggi di dunia?",
+                            options: ["Mount Everest", "K2", "Kangchenjunga", "Lhotse"],
+                            correctAnswer: "Mount Everest"
+                        },
+                        {
+                            question: "Apa samudra terbesar di dunia?",
+                            options: ["Pasifik", "Atlantik", "Hindia", "Arktik"],
+                            correctAnswer: "Pasifik"
+                        },
+                        {
+                            question: "Berapa jumlah benua di dunia?",
+                            options: ["7", "6", "5", "8"],
+                            correctAnswer: "7"
+                        },
+                        {
+                            question: "Apa negara terbesar di dunia berdasarkan luas wilayah?",
+                            options: ["Rusia", "Kanada", "Amerika Serikat", "Cina"],
+                            correctAnswer: "Rusia"
+                        },
+                        {
+                            question: "Apa gurun terbesar di dunia?",
+                            options: ["Sahara", "Arab", "Gobi", "Kalahari"],
+                            correctAnswer: "Sahara"
+                        }
+                    ],
+                    'sports': [
+                        {
+                            question: "Berapa jumlah pemain dalam satu tim sepak bola?",
+                            options: ["11", "10", "9", "12"],
+                            correctAnswer: "11"
+                        },
+                        {
+                            question: "Di manakah letaknya Olimpiade pertama kali diadakan?",
+                            options: ["Olympia, Yunani", "Athens, Yunani", "Roma, Italia", "Paris, Prancis"],
+                            correctAnswer: "Olympia, Yunani"
+                        },
+                        {
+                            question: "Siapa pemain bola basket yang dijuluki 'Black Mamba'?",
+                            options: ["Kobe Bryant", "Michael Jordan", "LeBron James", "Magic Johnson"],
+                            correctAnswer: "Kobe Bryant"
+                        },
+                        {
+                            question: "Berapa jumlah hole dalam satu ronde golf standar?",
+                            options: ["18", "9", "27", "36"],
+                            correctAnswer: "18"
+                        },
+                        {
+                            question: "Apa olahraga nasional Jepang?",
+                            options: ["Sumo", "Baseball", "Judo", "Karate"],
+                            correctAnswer: "Sumo"
+                        }
+                    ],
+                    'entertainment': [
+                        {
+                            question: "Siapa sutradara film 'Titanic'?",
+                            options: ["James Cameron", "Steven Spielberg", "Martin Scorsese", "Christopher Nolan"],
+                            correctAnswer: "James Cameron"
+                        },
+                        {
+                            question: "Apa film terlaris sepanjang masa (disesuaikan dengan inflasi)?",
+                            options: ["Gone with the Wind", "Avatar", "Titanic", "Star Wars"],
+                            correctAnswer: "Gone with the Wind"
+                        },
+                        {
+                            question: "Siapa penulis 'Harry Potter'?",
+                            options: ["J.K. Rowling", "Stephen King", "J.R.R. Tolkien", "George R.R. Martin"],
+                            correctAnswer: "J.K. Rowling"
+                        },
+                        {
+                            question: "Apa acara TV terlama yang masih tayang?",
+                            options: ["Meet the Press", "The Tonight Show", "Guiding Light", "General Hospital"],
+                            correctAnswer: "Meet the Press"
+                        },
+                        {
+                            question: "Siapa artis dengan Grammy terbanyak?",
+                            options: ["Beyoncé", "Alison Krauss", "Quincy Jones", "Jay-Z"],
+                            correctAnswer: "Beyoncé"
+                        }
+                    ]
+                };
+                
+                const questions = questionSets[category] || questionSets['general'];
+                
+                // Adjust difficulty
+                if (difficulty === 'hard') {
+                    // For hard difficulty, we could modify questions to be more challenging
+                    // For this example, we'll just return the questions as is
+                    return questions;
+                } else if (difficulty === 'easy') {
+                    // For easy difficulty, we could simplify questions
+                    // For this example, we'll just return the questions as is
+                    return questions;
+                } else {
+                    // Medium difficulty
+                    return questions;
+                }
+            }
+
+            // Display current question
+            function displayQuestion() {
+                if (currentQuiz.currentQuestionIndex >= currentQuiz.questions.length) {
+                    // Quiz completed
+                    endQuiz();
+                    return;
+                }
+                
+                const question = currentQuiz.questions[currentQuiz.currentQuestionIndex];
+                
+                // Update progress bar
+                const progress = ((currentQuiz.currentQuestionIndex + 1) / currentQuiz.questions.length) * 100;
+                quizProgress.style.width = `${progress}%`;
+                
+                // Display question
+                quizQuestion.textContent = question.question;
+                
+                // Clear previous options
+                quizOptions.innerHTML = '';
+                
+                // Add new options
+                question.options.forEach((option, index) => {
+                    const optionElement = document.createElement('div');
+                    optionElement.className = 'quiz-option';
+                    optionElement.textContent = option;
+                    optionElement.addEventListener('click', () => selectOption(index));
+                    quizOptions.appendChild(optionElement);
+                });
+                
+                // Reset button state
+                nextBtn.disabled = true;
+            }
+
+            // Select an option
+            function selectOption(index) {
+                const question = currentQuiz.questions[currentQuiz.currentQuestionIndex];
+                const selectedOption = question.options[index];
+                const isCorrect = selectedOption === question.correctAnswer;
+                
+                // Update UI to show correct/incorrect
+                const optionElements = quizOptions.querySelectorAll('.quiz-option');
+                optionElements.forEach((element, i) => {
+                    element.style.pointerEvents = 'none';
+                    
+                    if (i === index) {
+                        if (isCorrect) {
+                            element.classList.add('correct');
+                            currentQuiz.correctAnswersCount++;
+                        } else {
+                            element.classList.add('incorrect');
+                        }
+                    } else if (element.textContent === question.correctAnswer) {
+                        element.classList.add('correct');
+                    }
+                });
+                
+                // Enable next button
+                nextBtn.disabled = false;
+                
+                // Play sound effect if enabled
+                if (soundToggle.checked) {
+                    const audio = new Audio(isCorrect ? 'https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3' : 'https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3');
+                    audio.play().catch(e => console.log('Audio play failed:', e));
+                }
+            }
+
+            // Move to next question
+            function nextQuestion() {
+                currentQuiz.currentQuestionIndex++;
+                displayQuestion();
+            }
+
+            // Skip current question
+            function skipQuestion() {
+                currentQuiz.currentQuestionIndex++;
+                displayQuestion();
+            }
+
+            // End quiz
+            function endQuiz() {
+                currentQuiz.endTime = new Date();
+                
+                // Calculate score
+                const score = Math.round((currentQuiz.correctAnswersCount / currentQuiz.questions.length) * 100);
+                
+                // Calculate time spent
+                const timeDiff = currentQuiz.endTime - currentQuiz.startTime;
+                const minutes = Math.floor(timeDiff / 60000);
+                const seconds = Math.floor((timeDiff % 60000) / 1000);
+                
+                // Update result page
+                resultScore.textContent = `${score}%`;
+                correctAnswers.textContent = currentQuiz.correctAnswersCount;
+                totalQuestions.textContent = currentQuiz.questions.length;
+                timeSpent.textContent = `${minutes}m ${seconds}s`;
+                
+                // Set result message based on score
+                if (score >= 80) {
+                    resultMessage.textContent = 'Luar biasa! Anda sangat berpengetahuan!';
+                } else if (score >= 60) {
+                    resultMessage.textContent = 'Bagus! Terus tingkatkan pengetahuan Anda!';
+                } else if (score >= 40) {
+                    resultMessage.textContent = 'Cukup baik. Terus berlatih untuk hasil yang lebih baik!';
+                } else {
+                    resultMessage.textContent = 'Terus berlatih untuk hasil yang lebih baik!';
+                }
+                
+                // Save to history
+                const historyItem = {
+                    date: new Date().toISOString(),
+                    category: currentQuiz.category,
+                    difficulty: currentQuiz.difficulty,
+                    score: score,
+                    correctAnswers: currentQuiz.correctAnswersCount,
+                    totalQuestions: currentQuiz.questions.length,
+                    timeSpent: timeDiff
+                };
+                
+                quizHistory.unshift(historyItem);
+                
+                // Keep only the last 10 quiz results
+                if (quizHistory.length > 10) {
+                    quizHistory = quizHistory.slice(0, 10);
+                }
+                
+                localStorage.setItem('quizHistory', JSON.stringify(quizHistory));
+                
+                // Update statistics
+                updateStatistics();
+                
+                // Show result page
+                showPage('result');
+            }
+
+            // Review answers
+            function reviewAnswers() {
+                // This would typically show a detailed review of all questions and answers
+                // For simplicity, we'll just show a toast notification
+                showToast('Fitur tinjau jawaban akan segera hadir!', 'info');
+            }
+
+            // Render history
+            function renderHistory() {
+                if (quizHistory.length === 0) {
+                    historyList.innerHTML = '<p>Belum ada riwayat kuis. Mulai kuis sekarang!</p>';
+                    return;
+                }
+                
+                historyList.innerHTML = '';
+                
+                quizHistory.forEach(item => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'history-item';
+                    
+                    const date = new Date(item.date);
+                    const formattedDate = date.toLocaleDateString('id-ID', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric'
+                    });
+                    
+                    const timeDiff = item.timeSpent;
+                    const minutes = Math.floor(timeDiff / 60000);
+                    const seconds = Math.floor((timeDiff % 60000) / 1000);
+                    
+                    historyItem.innerHTML = `
+                        <div>
+                            <div>${formattedDate}</div>
+                            <div class="history-date">${item.category} - ${item.difficulty} - ${minutes}m ${seconds}s</div>
+                        </div>
+                        <div class="history-score">${item.score}%</div>
+                    `;
+                    
+                    historyList.appendChild(historyItem);
+                });
+            }
+
+            // Update statistics
+            function updateStatistics() {
+                if (quizHistory.length === 0) {
+                    totalQuizzes.textContent = '0';
+                    avgScore.textContent = '0%';
+                    bestScore.textContent = '0%';
+                    return;
+                }
+                
+                const total = quizHistory.length;
+                const scores = quizHistory.map(item => item.score);
+                const average = Math.round(scores.reduce((sum, score) => sum + score, 0) / total);
+                const best = Math.max(...scores);
+                
+                totalQuizzes.textContent = total;
+                avgScore.textContent = `${average}%`;
+                bestScore.textContent = `${best}%`;
+            }
+
+            // Load user settings
+            function loadUserSettings() {
+                const settings = JSON.parse(localStorage.getItem('userSettings')) || {};
+                
+                notificationToggle.checked = settings.notifications !== false;
+                darkModeToggle.checked = settings.darkMode === true;
+                soundToggle.checked = settings.soundEffects !== false;
+                
+                const profile = JSON.parse(localStorage.getItem('userProfile')) || {};
+                userName.value = profile.name || 'Pengguna';
+                userEmail.value = profile.email || 'user@example.com';
+                
+                // Apply dark mode if enabled
+                if (settings.darkMode) {
+                    document.body.classList.add('dark-mode');
+                }
+            }
+
+            // Save user settings
+            function saveUserSettings() {
+                const settings = {
+                    notifications: notificationToggle.checked,
+                    darkMode: darkModeToggle.checked,
+                    soundEffects: soundToggle.checked
+                };
+                
+                localStorage.setItem('userSettings', JSON.stringify(settings));
+                
+                showToast('Pengaturan berhasil disimpan!', 'success');
+            }
+
+            // Toggle dark mode
+            function toggleDarkMode() {
+                document.body.classList.toggle('dark-mode');
+                saveUserSettings();
+            }
+
+            // Save user profile
+            function saveUserProfile() {
+                const profile = {
+                    name: userName.value,
+                    email: userEmail.value
+                };
+                
+                localStorage.setItem('userProfile', JSON.stringify(profile));
+                
+                showToast('Profil berhasil disimpan!', 'success');
+            }
+
+            // Show toast notification
+            function showToast(message, type = 'success') {
+                toastMessage.textContent = message;
+                
+                // Set toast type
+                toast.className = 'toast';
+                toast.classList.add(`toast-${type}`);
+                
+                // Set icon based on type
+                const icon = toast.querySelector('.toast-icon i');
+                icon.className = '';
+                
+                if (type === 'success') {
+                    icon.className = 'fas fa-check-circle';
+                } else if (type === 'error') {
+                    icon.className = 'fas fa-exclamation-circle';
+                } else if (type === 'info') {
+                    icon.className = 'fas fa-info-circle';
+                }
+                
+                // Show toast
+                toast.classList.add('show');
+                
+                // Auto hide after 3 seconds
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            }
+
+            // Utility function to shuffle array
+            function shuffleArray(array) {
+                const newArray = [...array];
+                for (let i = newArray.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+                }
+                return newArray;
+            }
+
+            // Utility function to decode HTML entities
+            function decodeHTMLEntities(text) {
+                const textArea = document.createElement('textarea');
+                textArea.innerHTML = text;
+                return textArea.value;
+            }
+
+            // Initialize app
+            init();
+        });
+    </script>
+</body>
+</html>
