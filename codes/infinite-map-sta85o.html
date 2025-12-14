@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infinite Map</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            background: #1a1a2e;
+            color: #eee;
+        }
+
+        #map-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            overflow: hidden;
+            background: #f5e6ca;
+        }
+
+        #map-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            cursor: grab;
+        }
+
+        #map-canvas:active {
+            cursor: grabbing;
+        }
+
+        #info-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(245, 230, 202, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            z-index: 10;
+            min-width: 200px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(139, 69, 19, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        #info-panel h3 {
+            margin-bottom: 10px;
+            color: #5d4037;
+            font-size: 1.1rem;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            font-size: 0.9rem;
+        }
+
+        .info-value {
+            color: #8d6e63;
+            font-weight: bold;
+        }
+
+        #controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(245, 230, 202, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            z-index: 10;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(139, 69, 19, 0.3);
+        }
+
+        .control-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            background: linear-gradient(135deg, #8d6e63 0%, #5d4037 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(139, 110, 99, 0.4);
+        }
+
+        .control-btn i {
+            margin-right: 8px;
+        }
+
+        #minimap {
+            position: absolute;
+            bottom: 80px;
+            right: 20px;
+            width: 200px;
+            height: 200px;
+            background: rgba(245, 230, 202, 0.8);
+            border-radius: 10px;
+            overflow: hidden;
+            z-index: 10;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(139, 69, 19, 0.3);
+        }
+
+        #minimap-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(245, 230, 202, 0.9);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+            border-top: 1px solid rgba(139, 69, 19, 0.3);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #8d6e63;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .nav-item.active {
+            color: #5d4037;
+        }
+
+        .nav-item:hover {
+            color: #3e2723;
+            background: rgba(139, 110, 99, 0.1);
+        }
+
+        .nav-item i {
+            font-size: 1.2rem;
+            margin-bottom: 3px;
+        }
+
+        .nav-item span {
+            font-size: 0.7rem;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -250px;
+            width: 250px;
+            height: 100%;
+            background: rgba(245, 230, 202, 0.95);
+            backdrop-filter: blur(10px);
+            transition: left 0.3s ease;
+            z-index: 101;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+            border-right: 1px solid rgba(139, 69, 19, 0.3);
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            background: rgba(139, 110, 99, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.2rem;
+            color: #5d4037;
+        }
+
+        .close-sidebar {
+            background: none;
+            border: none;
+            color: #8d6e63;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close-sidebar:hover {
+            color: #3e2723;
+        }
+
+        .sidebar-content {
+            padding: 20px;
+        }
+
+        .sidebar-section {
+            margin-bottom: 25px;
+        }
+
+        .sidebar-section h3 {
+            font-size: 1rem;
+            margin-bottom: 10px;
+            color: #8d6e63;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            transition: background 0.3s ease;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(139, 110, 99, 0.1);
+        }
+
+        .sidebar-item i {
+            margin-right: 10px;
+            color: #5d4037;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background: #8d6e63;
+            border-radius: 12px;
+            margin-left: auto;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: #5d4037;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(26px);
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(245, 230, 202, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(139, 110, 99, 0.2);
+            border-top-color: #8d6e63;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            color: #5d4037;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(245, 230, 202, 0.9);
+            color: #5d4037;
+            padding: 12px 24px;
+            border-radius: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(139, 69, 19, 0.3);
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        @media (min-width: 768px) {
+            .nav-bar {
+                display: none;
+            }
+            
+            .sidebar {
+                left: 0;
+                width: 70px;
+            }
+            
+            .sidebar.active {
+                width: 250px;
+            }
+            
+            .sidebar-header h2,
+            .sidebar-section h3,
+            .sidebar-item span {
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+            
+            .sidebar.active .sidebar-header h2,
+            .sidebar.active .sidebar-section h3,
+            .sidebar.active .sidebar-item span {
+                opacity: 1;
+            }
+            
+            #minimap {
+                bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="map-container">
+        <canvas id="map-canvas"></canvas>
+    </div>
+    
+    <div id="info-panel">
+        <h3><i class="fa-solid fa-map"></i> Informasi Peta</h3>
+        <div class="info-item">
+            <span>Posisi X:</span>
+            <span class="info-value" id="pos-x">0</span>
+        </div>
+        <div class="info-item">
+            <span>Posisi Y:</span>
+            <span class="info-value" id="pos-y">0</span>
+        </div>
+        <div class="info-item">
+            <span>Zoom:</span>
+            <span class="info-value" id="zoom-level">1.0x</span>
+        </div>
+        <div class="info-item">
+            <span>Wilayah Terload:</span>
+            <span class="info-value" id="region-count">0</span>
+        </div>
+    </div>
+    
+    <div id="controls">
+        <button class="control-btn" id="regenerate-btn">
+            <i class="fa-solid fa-arrows-rotate"></i> Regenerasi Peta
+        </button>
+        <button class="control-btn" id="change-style-btn">
+            <i class="fa-solid fa-palette"></i> Ganti Gaya
+        </button>
+        <button class="control-btn" id="toggle-grid-btn">
+            <i class="fa-solid fa-border-all"></i> Toggle Grid
+        </button>
+        <button class="control-btn" id="toggle-labels-btn">
+            <i class="fa-solid fa-tag"></i> Toggle Label
+        </button>
+    </div>
+    
+    <div id="minimap">
+        <canvas id="minimap-canvas"></canvas>
+    </div>
+    
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>Peta Kuno</h2>
+            <button class="close-sidebar" id="close-sidebar">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </div>
+        <div class="sidebar-content">
+            <div class="sidebar-section">
+                <h3>Gaya Peta</h3>
+                <div class="sidebar-item" data-style="parchment">
+                    <i class="fa-solid fa-scroll"></i>
+                    <span>Pergameno</span>
+                </div>
+                <div class="sidebar-item" data-style="aged">
+                    <i class="fa-solid fa-hourglass-half"></i>
+                    <span>Tua</span>
+                </div>
+                <div class="sidebar-item" data-style="nautical">
+                    <i class="fa-solid fa-anchor"></i>
+                    <span>Nautika</span>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3>Pengaturan</h3>
+                <div class="sidebar-item">
+                    <i class="fa-solid fa-compass"></i>
+                    <span>Kompas</span>
+                    <div class="toggle-switch active" id="compass-toggle"></div>
+                </div>
+                <div class="sidebar-item">
+                    <i class="fa-solid fa-monument"></i>
+                    <span>Penanda</span>
+                    <div class="toggle-switch active" id="markers-toggle"></div>
+                </div>
+                <div class="sidebar-item">
+                    <i class="fa-solid fa-route"></i>
+                    <span>Jalur</span>
+                    <div class="toggle-switch" id="paths-toggle"></div>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3>Kontrol</h3>
+                <div class="sidebar-item">
+                    <i class="fa-solid fa-hand"></i>
+                    <span>Klik & Seret - Geser</span>
+                </div>
+                <div class="sidebar-item">
+                    <i class="fa-solid fa-magnifying-glass-plus"></i>
+                    <span>Scroll - Zoom</span>
+                </div>
+                <div class="sidebar-item">
+                    <i class="fa-solid fa-arrows-alt"></i>
+                    <span>WASD - Navigasi</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="nav-bar">
+        <a href="#" class="nav-item active" data-view="map">
+            <i class="fa-solid fa-map"></i>
+            <span>Peta</span>
+        </a>
+        <a href="#" class="nav-item" data-view="settings">
+            <i class="fa-solid fa-gear"></i>
+            <span>Pengaturan</span>
+        </a>
+        <a href="#" class="nav-item" data-view="explore">
+            <i class="fa-solid fa-compass"></i>
+            <span>Jelajah</span>
+        </a>
+        <a href="#" class="nav-item" data-view="menu">
+            <i class="fa-solid fa-bars"></i>
+            <span>Menu</span>
+        </a>
+    </div>
+    
+    <div class="loading-overlay" id="loading">
+        <div class="loader"></div>
+        <div class="loading-text">Membuat peta kuno tak hingga...</div>
+    </div>
+    
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Global variables
+        let mapCanvas, mapCtx, minimapCanvas, minimapCtx;
+        let regions = {};
+        let regionSize = 200;
+        let renderDistance = 3;
+        let position = { x: 0, y: 0 };
+        let lastRegionPosition = { x: 0, y: 0 };
+        let mapStyle = 'parchment';
+        let showGrid = false;
+        let showLabels = true;
+        let showCompass = true;
+        let showMarkers = true;
+        let showPaths = false;
+        let zoom = 1.0;
+        let isDragging = false;
+        let dragStart = { x: 0, y: 0 };
+        let offset = { x: 0, y: 0 };
+        let lastOffset = { x: 0, y: 0 };
+        
+        // Map style colors
+        const mapStyles = {
+            parchment: {
+                background: '#f5e6ca',
+                water: '#4a7c7e',
+                land: '#d4af37',
+                forest: '#7a8a4a',
+                mountain: '#8d8680',
+                desert: '#e2c88a',
+                border: '#8b4513',
+                text: '#5d4037',
+                grid: 'rgba(139, 69, 19, 0.2)'
+            },
+            aged: {
+                background: '#e6d7b5',
+                water: '#5d8a8c',
+                land: '#c9a040',
+                forest: '#6a7a3a',
+                mountain: '#7d7660',
+                desert: '#d2b87a',
+                border: '#7b3513',
+                text: '#4d3027',
+                grid: 'rgba(119, 59, 13, 0.2)'
+            },
+            nautical: {
+                background: '#e6f0f5',
+                water: '#1e5a7e',
+                land: '#c4a048',
+                forest: '#5a7a3a',
+                mountain: '#7d7660',
+                desert: '#d2b87a',
+                border: '#2a4d6e',
+                text: '#1a3d5e',
+                grid: 'rgba(42, 77, 110, 0.2)'
+            }
+        };
+        
+        // Location names generator
+        const locationPrefixes = ['Kota', 'Kerajaan', 'Provinsi', 'Wilayah', 'Negeri', 'Desa', 'Pulau'];
+        const locationSuffixes = ['Baru', 'Tua', 'Besar', 'Kecil', 'Indah', 'Jaya', 'Makmur', 'Sejahtera', 'Permai', 'Agung'];
+        const locationNames = ['Harapan', 'Makmur', 'Jaya', 'Bahari', 'Permai', 'Indah', 'Sejahtera', 'Mulya', 'Jauhari', 'Melati'];
+        
+        // Initialize the map
+        function init() {
+            // Setup main map canvas
+            mapCanvas = document.getElementById('map-canvas');
+            mapCtx = mapCanvas.getContext('2d');
+            
+            // Setup minimap canvas
+            minimapCanvas = document.getElementById('minimap-canvas');
+            minimapCtx = minimapCanvas.getContext('2d');
+            
+            // Set canvas size
+            resizeCanvas();
+            
+            // Setup controls
+            setupControls();
+            
+            // Generate initial regions
+            updateRegions();
+            
+            // Start render loop
+            render();
+            
+            // Hide loading screen
+            setTimeout(() => {
+                document.getElementById('loading').classList.add('hidden');
+                showToast('Peta kuno tak hingga berhasil dibuat!');
+            }, 1500);
+        }
+        
+        // Resize canvas to fill window
+        function resizeCanvas() {
+            mapCanvas.width = window.innerWidth;
+            mapCanvas.height = window.innerHeight;
+            
+            minimapCanvas.width = 200;
+            minimapCanvas.height = 200;
+        }
+        
+        // Setup controls
+        function setupControls() {
+            // Mouse controls for dragging
+            mapCanvas.addEventListener('mousedown', (event) => {
+                isDragging = true;
+                dragStart.x = event.clientX - offset.x;
+                dragStart.y = event.clientY - offset.y;
+            });
+            
+            mapCanvas.addEventListener('mousemove', (event) => {
+                if (isDragging) {
+                    offset.x = event.clientX - dragStart.x;
+                    offset.y = event.clientY - dragStart.y;
+                    
+                    // Update position based on offset
+                    position.x = Math.floor(-offset.x / (regionSize * zoom));
+                    position.y = Math.floor(-offset.y / (regionSize * zoom));
+                }
+            });
+            
+            mapCanvas.addEventListener('mouseup', () => {
+                isDragging = false;
+                lastOffset.x = offset.x;
+                lastOffset.y = offset.y;
+            });
+            
+            mapCanvas.addEventListener('mouseleave', () => {
+                isDragging = false;
+            });
+            
+            // Touch controls for mobile
+            mapCanvas.addEventListener('touchstart', (event) => {
+                if (event.touches.length === 1) {
+                    isDragging = true;
+                    dragStart.x = event.touches[0].clientX - offset.x;
+                    dragStart.y = event.touches[0].clientY - offset.y;
+                }
+            });
+            
+            mapCanvas.addEventListener('touchmove', (event) => {
+                if (event.touches.length === 1 && isDragging) {
+                    offset.x = event.touches[0].clientX - dragStart.x;
+                    offset.y = event.touches[0].clientY - dragStart.y;
+                    
+                    // Update position based on offset
+                    position.x = Math.floor(-offset.x / (regionSize * zoom));
+                    position.y = Math.floor(-offset.y / (regionSize * zoom));
+                }
+            });
+            
+            mapCanvas.addEventListener('touchend', () => {
+                isDragging = false;
+                lastOffset.x = offset.x;
+                lastOffset.y = offset.y;
+            });
+            
+            // Zoom controls
+            mapCanvas.addEventListener('wheel', (event) => {
+                event.preventDefault();
+                
+                const zoomSpeed = 0.1;
+                const delta = event.deltaY > 0 ? -zoomSpeed : zoomSpeed;
+                const newZoom = Math.max(0.5, Math.min(3.0, zoom + delta));
+                
+                // Adjust offset to zoom toward mouse position
+                const mouseX = event.clientX;
+                const mouseY = event.clientY;
+                
+                offset.x = mouseX - (mouseX - offset.x) * (newZoom / zoom);
+                offset.y = mouseY - (mouseY - offset.y) * (newZoom / zoom);
+                
+                zoom = newZoom;
+                
+                // Update zoom display
+                document.getElementById('zoom-level').textContent = zoom.toFixed(1) + 'x';
+            });
+            
+            // Keyboard controls
+            const keys = {};
+            
+            document.addEventListener('keydown', (event) => {
+                keys[event.key.toLowerCase()] = true;
+            });
+            
+            document.addEventListener('keyup', (event) => {
+                keys[event.key.toLowerCase()] = false;
+            });
+            
+            // Update position based on keyboard input
+            function updatePosition() {
+                const moveSpeed = 10;
+                
+                if (keys['w']) {
+                    offset.y += moveSpeed;
+                }
+                if (keys['s']) {
+                    offset.y -= moveSpeed;
+                }
+                if (keys['a']) {
+                    offset.x += moveSpeed;
+                }
+                if (keys['d']) {
+                    offset.x -= moveSpeed;
+                }
+                
+                // Update position based on offset
+                position.x = Math.floor(-offset.x / (regionSize * zoom));
+                position.y = Math.floor(-offset.y / (regionSize * zoom));
+                
+                requestAnimationFrame(updatePosition);
+            }
+            
+            updatePosition();
+            
+            // Window resize
+            window.addEventListener('resize', () => {
+                resizeCanvas();
+            });
+        }
+        
+        // Generate terrain type for a region
+        function generateTerrainType(regionX, regionY) {
+            // Simple pseudo-random based on position
+            const seed = regionX * 10000 + regionY;
+            const random = Math.sin(seed) * 10000;
+            const normalized = random - Math.floor(random);
+            
+            if (normalized < 0.2) return 'water';
+            else if (normalized < 0.4) return 'forest';
+            else if (normalized < 0.5) return 'mountain';
+            else if (normalized < 0.6) return 'desert';
+            else return 'land';
+        }
+        
+        // Generate a location name
+        function generateLocationName() {
+            const prefix = locationPrefixes[Math.floor(Math.random() * locationPrefixes.length)];
+            const name = locationNames[Math.floor(Math.random() * locationNames.length)];
+            const suffix = Math.random() > 0.5 ? '' : ' ' + locationSuffixes[Math.floor(Math.random() * locationSuffixes.length)];
+            
+            return prefix + ' ' + name + suffix;
+        }
+        
+        // Create a region
+        function createRegion(regionX, regionY) {
+            const terrainType = generateTerrainType(regionX, regionY);
+            const hasLocation = terrainType !== 'water' && Math.random() > 0.5;
+            const locationName = hasLocation ? generateLocationName() : '';
+            
+            return {
+                x: regionX,
+                y: regionY,
+                terrainType: terrainType,
+                locationName: locationName,
+                paths: generatePaths(regionX, regionY)
+            };
+        }
+        
+        // Generate paths between regions
+        function generatePaths(regionX, regionY) {
+            const paths = [];
+            
+            // Generate paths to adjacent regions with some probability
+            if (Math.random() > 0.5) {
+                paths.push({ to: { x: regionX + 1, y: regionY }, type: 'road' });
+            }
+            if (Math.random() > 0.5) {
+                paths.push({ to: { x: regionX, y: regionY + 1 }, type: 'road' });
+            }
+            if (Math.random() > 0.7) {
+                paths.push({ to: { x: regionX - 1, y: regionY }, type: 'trail' });
+            }
+            if (Math.random() > 0.7) {
+                paths.push({ to: { x: regionX, y: regionY - 1 }, type: 'trail' });
+            }
+            
+            return paths;
+        }
+        
+        // Update regions based on camera position
+        function updateRegions() {
+            const currentRegionX = Math.floor(position.x);
+            const currentRegionY = Math.floor(position.y);
+            
+            // Check if we've moved to a new region
+            if (currentRegionX !== lastRegionPosition.x || currentRegionY !== lastRegionPosition.y) {
+                lastRegionPosition.x = currentRegionX;
+                lastRegionPosition.y = currentRegionY;
+                
+                // Load new regions
+                for (let x = currentRegionX - renderDistance; x <= currentRegionX + renderDistance; x++) {
+                    for (let y = currentRegionY - renderDistance; y <= currentRegionY + renderDistance; y++) {
+                        const regionKey = `${x},${y}`;
+                        
+                        if (!regions[regionKey]) {
+                            regions[regionKey] = createRegion(x, y);
+                        }
+                    }
+                }
+                
+                // Unload distant regions
+                const keysToRemove = [];
+                for (const key in regions) {
+                    const [x, y] = key.split(',').map(Number);
+                    
+                    if (Math.abs(x - currentRegionX) > renderDistance || Math.abs(y - currentRegionY) > renderDistance) {
+                        keysToRemove.push(key);
+                    }
+                }
+                
+                keysToRemove.forEach(key => delete regions[key]);
+                
+                // Update info panel
+                updateInfoPanel();
+                
+                // Update minimap
+                updateMinimap();
+            }
+        }
+        
+        // Update info panel
+        function updateInfoPanel() {
+            document.getElementById('pos-x').textContent = position.x;
+            document.getElementById('pos-y').textContent = position.y;
+            document.getElementById('region-count').textContent = Object.keys(regions).length;
+        }
+        
+        // Update minimap
+        function updateMinimap() {
+            const canvas = minimapCanvas;
+            const ctx = minimapCtx;
+            
+            // Clear canvas
+            ctx.fillStyle = mapStyles[mapStyle].background;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw regions
+            const scale = 5;
+            const offsetX = canvas.width / 2 - position.x * regionSize * scale;
+            const offsetY = canvas.height / 2 - position.y * regionSize * scale;
+            
+            for (const key in regions) {
+                const [x, y] = key.split(',').map(Number);
+                const region = regions[key];
+                
+                // Set color based on terrain type
+                ctx.fillStyle = mapStyles[mapStyle][region.terrainType];
+                
+                ctx.fillRect(
+                    x * regionSize * scale + offsetX,
+                    y * regionSize * scale + offsetY,
+                    regionSize * scale,
+                    regionSize * scale
+                );
+                
+                // Draw border
+                ctx.strokeStyle = mapStyles[mapStyle].border;
+                ctx.lineWidth = 1;
+                ctx.strokeRect(
+                    x * regionSize * scale + offsetX,
+                    y * regionSize * scale + offsetY,
+                    regionSize * scale,
+                    regionSize * scale
+                );
+            }
+            
+            // Draw viewport indicator
+            ctx.strokeStyle = '#ff0000';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(
+                canvas.width / 2 - (mapCanvas.width / 2) / (regionSize * zoom) * scale,
+                canvas.height / 2 - (mapCanvas.height / 2) / (regionSize * zoom) * scale,
+                mapCanvas.width / (regionSize * zoom) * scale,
+                mapCanvas.height / (regionSize * zoom) * scale
+            );
+        }
+        
+        // Draw a region
+        function drawRegion(region) {
+            const colors = mapStyles[mapStyle];
+            const x = region.x * regionSize * zoom + offset.x;
+            const y = region.y * regionSize * zoom + offset.y;
+            const size = regionSize * zoom;
+            
+            // Draw terrain
+            mapCtx.fillStyle = colors[region.terrainType];
+            mapCtx.fillRect(x, y, size, size);
+            
+            // Draw border
+            mapCtx.strokeStyle = colors.border;
+            mapCtx.lineWidth = 2;
+            mapCtx.strokeRect(x, y, size, size);
+            
+            // Draw grid if enabled
+            if (showGrid) {
+                mapCtx.strokeStyle = colors.grid;
+                mapCtx.lineWidth = 1;
+                
+                // Vertical lines
+                for (let i = 1; i < 5; i++) {
+                    mapCtx.beginPath();
+                    mapCtx.moveTo(x + i * size / 5, y);
+                    mapCtx.lineTo(x + i * size / 5, y + size);
+                    mapCtx.stroke();
+                }
+                
+                // Horizontal lines
+                for (let i = 1; i < 5; i++) {
+                    mapCtx.beginPath();
+                    mapCtx.moveTo(x, y + i * size / 5);
+                    mapCtx.lineTo(x + size, y + i * size / 5);
+                    mapCtx.stroke();
+                }
+            }
+            
+            // Draw paths if enabled
+            if (showPaths && region.paths.length > 0) {
+                mapCtx.strokeStyle = colors.border;
+                mapCtx.lineWidth = 2;
+                
+                region.paths.forEach(path => {
+                    const toRegionKey = `${path.to.x},${path.to.y}`;
+                    const toRegion = regions[toRegionKey];
+                    
+                    if (toRegion) {
+                        const toX = toRegion.x * regionSize * zoom + offset.x;
+                        const toY = toRegion.y * regionSize * zoom + offset.y;
+                        
+                        // Draw path from center of current region to center of target region
+                        mapCtx.beginPath();
+                        mapCtx.moveTo(x + size / 2, y + size / 2);
+                        mapCtx.lineTo(toX + size / 2, toY + size / 2);
+                        
+                        // Different line styles for different path types
+                        if (path.type === 'road') {
+                            mapCtx.setLineDash([]);
+                        } else {
+                            mapCtx.setLineDash([5, 5]);
+                        }
+                        
+                        mapCtx.stroke();
+                        mapCtx.setLineDash([]);
+                    }
+                });
+            }
+            
+            // Draw location marker if enabled
+            if (showMarkers && region.locationName) {
+                // Draw a simple marker
+                mapCtx.fillStyle = colors.border;
+                mapCtx.beginPath();
+                mapCtx.arc(x + size / 2, y + size / 2, 5 * zoom, 0, Math.PI * 2);
+                mapCtx.fill();
+                
+                // Draw location name if labels are enabled
+                if (showLabels) {
+                    mapCtx.fillStyle = colors.text;
+                    mapCtx.font = `${12 * zoom}px serif`;
+                    mapCtx.textAlign = 'center';
+                    mapCtx.fillText(region.locationName, x + size / 2, y + size / 2 - 10 * zoom);
+                }
+            }
+            
+            // Draw terrain-specific features
+            if (region.terrainType === 'mountain') {
+                // Draw mountains
+                mapCtx.fillStyle = colors.mountain;
+                mapCtx.beginPath();
+                mapCtx.moveTo(x + size * 0.3, y + size * 0.7);
+                mapCtx.lineTo(x + size * 0.5, y + size * 0.3);
+                mapCtx.lineTo(x + size * 0.7, y + size * 0.7);
+                mapCtx.closePath();
+                mapCtx.fill();
+                
+                mapCtx.beginPath();
+                mapCtx.moveTo(x + size * 0.5, y + size * 0.7);
+                mapCtx.lineTo(x + size * 0.7, y + size * 0.4);
+                mapCtx.lineTo(x + size * 0.9, y + size * 0.7);
+                mapCtx.closePath();
+                mapCtx.fill();
+            } else if (region.terrainType === 'forest') {
+                // Draw trees
+                mapCtx.fillStyle = colors.forest;
+                for (let i = 0; i < 5; i++) {
+                    const treeX = x + size * (0.2 + i * 0.15);
+                    const treeY = y + size * (0.3 + Math.random() * 0.4);
+                    
+                    mapCtx.beginPath();
+                    mapCtx.arc(treeX, treeY, 3 * zoom, 0, Math.PI * 2);
+                    mapCtx.fill();
+                }
+            } else if (region.terrainType === 'water') {
+                // Draw waves
+                mapCtx.strokeStyle = colors.water;
+                mapCtx.lineWidth = 1;
+                
+                for (let i = 0; i < 3; i++) {
+                    const waveY = y + size * (0.3 + i * 0.2);
+                    
+                    mapCtx.beginPath();
+                    mapCtx.moveTo(x + size * 0.1, waveY);
+                    
+                    for (let j = 0.1; j <= 0.9; j += 0.1) {
+                        const waveX = x + size * j;
+                        const waveHeight = Math.sin(j * 10) * 3 * zoom;
+                        mapCtx.lineTo(waveX, waveY + waveHeight);
+                    }
+                    
+                    mapCtx.stroke();
+                }
+            }
+        }
+        
+        // Draw compass
+        function drawCompass() {
+            if (!showCompass) return;
+            
+            const colors = mapStyles[mapStyle];
+            const compassX = mapCanvas.width - 80;
+            const compassY = 80;
+            const compassSize = 60;
+            
+            // Draw compass background
+            mapCtx.fillStyle = colors.background;
+            mapCtx.beginPath();
+            mapCtx.arc(compassX, compassY, compassSize / 2, 0, Math.PI * 2);
+            mapCtx.fill();
+            
+            mapCtx.strokeStyle = colors.border;
+            mapCtx.lineWidth = 2;
+            mapCtx.beginPath();
+            mapCtx.arc(compassX, compassY, compassSize / 2, 0, Math.PI * 2);
+            mapCtx.stroke();
+            
+            // Draw compass directions
+            mapCtx.fillStyle = colors.text;
+            mapCtx.font = 'bold 16px serif';
+            mapCtx.textAlign = 'center';
+            mapCtx.textBaseline = 'middle';
+            
+            // North
+            mapCtx.fillText('N', compassX, compassY - compassSize / 2 - 10);
+            
+            // Draw compass needle
+            mapCtx.fillStyle = '#ff0000';
+            mapCtx.beginPath();
+            mapCtx.moveTo(compassX, compassY - compassSize / 2 + 10);
+            mapCtx.lineTo(compassX - 5, compassY);
+            mapCtx.lineTo(compassX + 5, compassY);
+            mapCtx.closePath();
+            mapCtx.fill();
+            
+            // South
+            mapCtx.fillStyle = colors.text;
+            mapCtx.fillText('S', compassX, compassY + compassSize / 2 + 10);
+            
+            // East
+            mapCtx.fillText('E', compassX + compassSize / 2 + 10, compassY);
+            
+            // West
+            mapCtx.fillText('W', compassX - compassSize / 2 - 10, compassY);
+        }
+        
+        // Render the map
+        function render() {
+            // Clear canvas
+            mapCtx.fillStyle = mapStyles[mapStyle].background;
+            mapCtx.fillRect(0, 0, mapCanvas.width, mapCanvas.height);
+            
+            // Add texture effect for ancient map
+            mapCtx.globalAlpha = 0.05;
+            for (let i = 0; i < 100; i++) {
+                const x = Math.random() * mapCanvas.width;
+                const y = Math.random() * mapCanvas.height;
+                const size = Math.random() * 5 + 1;
+                
+                mapCtx.fillStyle = '#8b4513';
+                mapCtx.beginPath();
+                mapCtx.arc(x, y, size, 0, Math.PI * 2);
+                mapCtx.fill();
+            }
+            mapCtx.globalAlpha = 1.0;
+            
+            // Update regions
+            updateRegions();
+            
+            // Draw regions
+            for (const key in regions) {
+                drawRegion(regions[key]);
+            }
+            
+            // Draw compass
+            drawCompass();
+            
+            // Continue render loop
+            requestAnimationFrame(render);
+        }
+        
+        // Show toast notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            init();
+            
+            // Navigation bar
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    
+                    // Update active state
+                    document.querySelectorAll('.nav-item').forEach(navItem => {
+                        navItem.classList.remove('active');
+                    });
+                    item.classList.add('active');
+                    
+                    // Handle navigation
+                    const view = item.getAttribute('data-view');
+                    
+                    if (view === 'menu') {
+                        document.getElementById('sidebar').classList.toggle('active');
+                    } else if (view === 'settings') {
+                        showToast('Pengaturan akan segera hadir');
+                    } else if (view === 'explore') {
+                        // Move to random position
+                        const randomX = (Math.random() - 0.5) * 10;
+                        const randomY = (Math.random() - 0.5) * 10;
+                        offset.x = -randomX * regionSize * zoom;
+                        offset.y = -randomY * regionSize * zoom;
+                        position.x = randomX;
+                        position.y = randomY;
+                        showToast('Menjelajahi lokasi baru...');
+                    }
+                });
+            });
+            
+            // Sidebar
+            document.getElementById('close-sidebar').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.remove('active');
+            });
+            
+            // Map style selection
+            document.querySelectorAll('.sidebar-item[data-style]').forEach(item => {
+                item.addEventListener('click', () => {
+                    mapStyle = item.getAttribute('data-style');
+                    
+                    // Update map background
+                    document.getElementById('map-container').style.background = mapStyles[mapStyle].background;
+                    
+                    showToast(`Gaya peta diubah ke ${item.textContent.trim()}`);
+                });
+            });
+            
+            // Toggle switches
+            document.getElementById('compass-toggle').addEventListener('click', function() {
+                this.classList.toggle('active');
+                showCompass = !showCompass;
+                showToast(showCompass ? 'Kompas diaktifkan' : 'Kompas dinonaktifkan');
+            });
+            
+            document.getElementById('markers-toggle').addEventListener('click', function() {
+                this.classList.toggle('active');
+                showMarkers = !showMarkers;
+                showToast(showMarkers ? 'Penanda diaktifkan' : 'Penanda dinonaktifkan');
+            });
+            
+            document.getElementById('paths-toggle').addEventListener('click', function() {
+                this.classList.toggle('active');
+                showPaths = !showPaths;
+                showToast(showPaths ? 'Jalur diaktifkan' : 'Jalur dinonaktifkan');
+            });
+            
+            // Control buttons
+            document.getElementById('regenerate-btn').addEventListener('click', () => {
+                // Regenerate all regions
+                regions = {};
+                updateRegions();
+                showToast('Peta diregenerasi');
+            });
+            
+            document.getElementById('change-style-btn').addEventListener('click', () => {
+                // Cycle through styles
+                const styles = ['parchment', 'aged', 'nautical'];
+                const currentIndex = styles.indexOf(mapStyle);
+                mapStyle = styles[(currentIndex + 1) % styles.length];
+                
+                // Update map background
+                document.getElementById('map-container').style.background = mapStyles[mapStyle].background;
+                
+                const styleNames = {
+                    'parchment': 'Pergameno',
+                    'aged': 'Tua',
+                    'nautical': 'Nautika'
+                };
+                showToast(`Gaya peta diubah ke ${styleNames[mapStyle]}`);
+            });
+            
+            document.getElementById('toggle-grid-btn').addEventListener('click', () => {
+                showGrid = !showGrid;
+                showToast(showGrid ? 'Grid diaktifkan' : 'Grid dinonaktifkan');
+            });
+            
+            document.getElementById('toggle-labels-btn').addEventListener('click', () => {
+                showLabels = !showLabels;
+                showToast(showLabels ? 'Label diaktifkan' : 'Label dinonaktifkan');
+            });
+        });
+    </script>
+</body>
+</html>
