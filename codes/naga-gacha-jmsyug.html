@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gacha Naga - Koleksi Naga Legendaris</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-attachment: fixed;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1rem;
+        }
+
+        .game-stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 15px 25px;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: fadeIn 1s ease;
+        }
+
+        .stat-card i {
+            font-size: 1.5rem;
+            color: #ffd700;
+        }
+
+        .stat-value {
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        .gacha-section {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255,255,255,0.2);
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .gacha-machine {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .gacha-display {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 30px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            border: 3px solid rgba(255,255,255,0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .gacha-display:hover {
+            transform: scale(1.05);
+        }
+
+        .gacha-display.spinning {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .gacha-display img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .gacha-display img.revealed {
+            opacity: 1;
+        }
+
+        .gacha-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102,126,234,0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102,126,234,0.6);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(245,87,108,0.4);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245,87,108,0.6);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .collection-section {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255,255,255,0.2);
+            animation: fadeInUp 1s ease;
+        }
+
+        .section-title {
+            color: white;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .collection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 20px;
+        }
+
+        .dragon-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dragon-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255,255,255,0.2);
+        }
+
+        .dragon-card.new {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255,215,0,0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255,215,0,0); }
+            100% { box-shadow: 0 0 0 0 rgba(255,215,0,0); }
+        }
+
+        .dragon-card img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .dragon-name {
+            color: white;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .dragon-rarity {
+            font-size: 0.9rem;
+            padding: 3px 10px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        .rarity-common {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .rarity-rare {
+            background: #3498db;
+            color: white;
+        }
+
+        .rarity-epic {
+            background: #9b59b6;
+            color: white;
+        }
+
+        .rarity-legendary {
+            background: linear-gradient(135deg, #f39c12, #e74c3c);
+            color: white;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            max-width: 300px;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .notification-message {
+            color: #666;
+        }
+
+        footer {
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            margin-top: 50px;
+            padding: 20px;
+            font-size: 0.9rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (min-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            h1 {
+                font-size: 3rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .gacha-display {
+                width: 150px;
+                height: 150px;
+            }
+            
+            .gacha-display img {
+                width: 100px;
+                height: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-dragon"></i> Gacha Naga</h1>
+            <p class="subtitle">Kumpulkan semua naga legendaris!</p>
+        </header>
+
+        <div class="game-stats">
+            <div class="stat-card">
+                <i class="fas fa-coins"></i>
+                <div>
+                    <div class="stat-value" id="coins">1000</div>
+                    <div>Koin</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-gem"></i>
+                <div>
+                    <div class="stat-value" id="gems">10</div>
+                    <div>Gem</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-trophy"></i>
+                <div>
+                    <div class="stat-value" id="collection">0</div>
+                    <div>Koleksi</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <section class="gacha-section">
+                <h2 class="section-title"><i class="fas fa-dice"></i> Mesin Gacha</h2>
+                <div class="gacha-machine">
+                    <div class="gacha-display" id="gachaDisplay">
+                        <i class="fas fa-question" style="font-size: 4rem; color: white;"></i>
+                    </div>
+                    <div class="gacha-buttons">
+                        <button class="btn btn-primary" onclick="pullGacha('single')">
+                            <i class="fas fa-coins"></i> Pull (100 Koin)
+                        </button>
+                        <button class="btn btn-secondary" onclick="pullGacha('multi')">
+                            <i class="fas fa-gem"></i> Multi Pull (1 Gem)
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="collection-section">
+                <h2 class="section-title"><i class="fas fa-book"></i> Koleksi Naga</h2>
+                <div class="collection-grid" id="collectionGrid">
+                    <!-- Dragon cards will be inserted here -->
+                </div>
+            </section>
+        </div>
+
+        <footer>
+            <p>&copy; 2024 Gacha Naga Game | Gambar dari Guild Wars 2 Wiki & Monster Wiki</p>
+        </footer>
+    </div>
+
+    <div class="notification" id="notification">
+        <div class="notification-title" id="notificationTitle"></div>
+        <div class="notification-message" id="notificationMessage"></div>
+    </div>
+
+    <script>
+        // Game Data
+        const dragons = [
+            { id: 1, name: 'Naga Api', rarity: 'common', image: 'https://static.wikia.nocookie.net/monster/images/d/d7/Naga1.jpg/revision/latest/thumbnail/width/360/height/360?cb=20230315063953' },
+            { id: 2, name: 'Naga Es', rarity: 'common', image: 'https://static.wikia.nocookie.net/monster/images/d/d7/Naga1.jpg/revision/latest/thumbnail/width/360/height/360?cb=20230315063953' },
+            { id: 3, name: 'Naga Petir', rarity: 'rare', image: 'https://wiki.guildwars2.com/images/thumb/f/f0/Bestiary_Naga.jpg/800px-Bestiary_Naga.jpg' },
+            { id: 4, name: 'Naga Angin', rarity: 'rare', image: 'https://wiki.guildwars2.com/images/thumb/f/f0/Bestiary_Naga.jpg/800px-Bestiary_Naga.jpg' },
+            { id: 5, name: 'Naga Kegelapan', rarity: 'epic', image: 'https://static.wikia.nocookie.net/monster/images/d/d7/Naga1.jpg/revision/latest/thumbnail/width/360/height/360?cb=20230315063953' },
+            { id: 6, name: 'Naga Cahaya', rarity: 'epic', image: 'https://wiki.guildwars2.com/images/thumb/f/f0/Bestiary_Naga.jpg/800px-Bestiary_Naga.jpg' },
+            { id: 7, name: 'Naga Primordial', rarity: 'legendary', image: 'https://static.wikia.nocookie.net/monster/images/d/d7/Naga1.jpg/revision/latest/thumbnail/width/360/height/360?cb=20230315063953' },
+            { id: 8, name: 'Naga Abadi', rarity: 'legendary', image: 'https://wiki.guildwars2.com/images/thumb/f/f0/Bestiary_Naga.jpg/800px-Bestiary_Naga.jpg' }
+        ];
+
+        // Game State
+        let gameState = {
+            coins: 1000,
+            gems: 10,
+            collection: [],
+            isNewDragon: false
+        };
+
+        // Initialize game
+        function initGame() {
+            loadGameState();
+            updateUI();
+            renderCollection();
+        }
+
+        // Load game state from localStorage
+        function loadGameState() {
+            const saved = localStorage.getItem('gachaNagaState');
+            if (saved) {
+                gameState = JSON.parse(saved);
+            }
+        }
+
+        // Save game state to localStorage
+        function saveGameState() {
+            localStorage.setItem('gachaNagaState', JSON.stringify(gameState));
+        }
+
+        // Update UI elements
+        function updateUI() {
+            document.getElementById('coins').textContent = gameState.coins;
+            document.getElementById('gems').textContent = gameState.gems;
+            document.getElementById('collection').textContent = gameState.collection.length;
+        }
+
+        // Gacha pull function
+        function pullGacha(type) {
+            const cost = type === 'single' ? 100 : 1;
+            const currency = type === 'single' ? 'coins' : 'gems';
+            
+            if (gameState[currency] < cost) {
+                showNotification('Koin/Gem Tidak Cukup!', `Butuh ${cost} ${currency === 'coins' ? 'koin' : 'gem'} untuk pull.`);
+                return;
+            }
+
+            // Deduct currency
+            gameState[currency] -= cost;
+            
+            // Start gacha animation
+            const display = document.getElementById('gachaDisplay');
+            display.classList.add('spinning');
+            display.innerHTML = '<i class="fas fa-spinner fa-spin" style="font-size: 4rem; color: white;"></i>';
+            
+            // Disable buttons during animation
+            document.querySelectorAll('.btn').forEach(btn => btn.disabled = true);
+            
+            // Simulate gacha result
+            setTimeout(() => {
+                const dragon = getRandomDragon();
+                display.classList.remove('spinning');
+                
+                // Show result
+                display.innerHTML = `<img src="${dragon.image}" alt="${dragon.name}" class="revealed">`;
+                
+                // Add to collection
+                if (!gameState.collection.find(d => d.id === dragon.id)) {
+                    gameState.collection.push(dragon);
+                    gameState.isNewDragon = true;
+                    showNotification('Naga Baru!', `Selamat! Anda mendapatkan ${dragon.name} (${getRarityText(dragon.rarity)})`);
+                } else {
+                    gameState.isNewDragon = false;
+                    showNotification('Duplikat!', `Anda mendapatkan ${dragon.name} lagi`);
+                }
+                
+                // Update UI
+                updateUI();
+                renderCollection();
+                saveGameState();
+                
+                // Re-enable buttons
+                document.querySelectorAll('.btn').forEach(btn => btn.disabled = false);
+                
+                // Add reward
+                if (type === 'single') {
+                    gameState.coins += 10; // Bonus coins
+                } else {
+                    gameState.gems += 1; // Bonus gem
+                }
+                updateUI();
+                saveGameState();
+            }, 2000);
+        }
+
+        // Get random dragon based on rarity
+        function getRandomDragon() {
+            const rand = Math.random();
+            let rarity;
+            
+            if (rand < 0.5) rarity = 'common';
+            else if (rand < 0.8) rarity = 'rare';
+            else if (rand < 0.95) rarity = 'epic';
+            else rarity = 'legendary';
+            
+            const filtered = dragons.filter(d => d.rarity === rarity);
+            return filtered[Math.floor(Math.random() * filtered.length)];
+        }
+
+        // Get rarity text in Indonesian
+        function getRarityText(rarity) {
+            const rarityMap = {
+                'common': 'Umum',
+                'rare': 'Langka',
+                'epic': 'Epik',
+                'legendary': 'Legendaris'
+            };
+            return rarityMap[rarity] || rarity;
+        }
+
+        // Render collection grid
+        function renderCollection() {
+            const grid = document.getElementById('collectionGrid');
+            grid.innerHTML = '';
+            
+            if (gameState.collection.length === 0) {
+                grid.innerHTML = '<p style="color: white; text-align: center; grid-column: 1/-1;">Belum ada naga yang dikoleksi. Lakukan gacha sekarang!</p>';
+                return;
+            }
+            
+            gameState.collection.forEach((dragon, index) => {
+                const card = document.createElement('div');
+                card.className = `dragon-card ${index === gameState.collection.length - 1 && gameState.isNewDragon ? 'new' : ''}`;
+                card.innerHTML = `
+                    <img src="${dragon.image}" alt="${dragon.name}">
+                    <div class="dragon-name">${dragon.name}</div>
+                    <span class="dragon-rarity rarity-${dragon.rarity}">${getRarityText(dragon.rarity)}</span>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Show notification
+        function showNotification(title, message) {
+            const notification = document.getElementById('notification');
+            document.getElementById('notificationTitle').textContent = title;
+            document.getElementById('notificationMessage').textContent = message;
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Initialize game on load
+        window.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>
