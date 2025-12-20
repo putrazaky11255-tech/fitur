@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DigiGacha - Aplikasi Gacha Digimon</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #4ECDC4;
+            --accent: #FFE66D;
+            --dark: #2C3E50;
+            --light: #F7F9FC;
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: var(--dark);
+            padding-bottom: 70px;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            text-align: center;
+            font-size: 2em;
+            background: var(--gradient-2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* Main Container */
+        .container {
+            flex: 1;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Stats Section */
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card i {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .stat-card h3 {
+            font-size: 1.5em;
+            color: var(--primary);
+        }
+
+        .stat-card p {
+            color: var(--dark);
+            opacity: 0.7;
+        }
+
+        /* Gacha Machine */
+        .gacha-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .gacha-machine {
+            text-align: center;
+            position: relative;
+        }
+
+        .gacha-display {
+            width: 250px;
+            height: 250px;
+            margin: 0 auto 30px;
+            background: var(--gradient-3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .gacha-display::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.5) 50%, transparent 70%);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .digimon-preview {
+            width: 200px;
+            height: 200px;
+            border-radius: 15px;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        .gacha-button {
+            background: var(--gradient-2);
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(240, 147, 251, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gacha-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(240, 147, 251, 0.6);
+        }
+
+        .gacha-button:active {
+            transform: scale(0.98);
+        }
+
+        .gacha-button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .gacha-button:active::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        .gacha-cost {
+            margin-top: 15px;
+            font-size: 1.1em;
+            color: var(--dark);
+            opacity: 0.8;
+        }
+
+        .gacha-cost i {
+            color: var(--accent);
+        }
+
+        /* Collection */
+        .collection-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            text-align: center;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .collection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+        }
+
+        .digimon-card {
+            background: white;
+            border-radius: 15px;
+            padding: 10px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .digimon-card:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .digimon-card img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+
+        .digimon-name {
+            font-weight: bold;
+            font-size: 0.9em;
+            color: var(--dark);
+        }
+
+        .digimon-rarity {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: var(--accent);
+            color: var(--dark);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75em;
+            font-weight: bold;
+        }
+
+        .rarity-common { background: #95E1D3; }
+        .rarity-rare { background: #A8E6CF; }
+        .rarity-epic { background: #FFD3B6; }
+        .rarity-legendary { background: #FFAAA5; }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: var(--dark);
+            opacity: 0.5;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-close:hover {
+            opacity: 1;
+        }
+
+        .modal-digimon {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 15px;
+            margin: 20px auto;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .modal-title {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            background: var(--gradient-2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .modal-description {
+            color: var(--dark);
+            opacity: 0.8;
+            line-height: 1.6;
+            margin-top: 15px;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 -2px 20px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+
+        .nav-items {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+        }
+
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--dark);
+            opacity: 0.6;
+        }
+
+        .nav-item:hover {
+            opacity: 1;
+            background: rgba(0,0,0,0.05);
+        }
+
+        .nav-item.active {
+            opacity: 1;
+            color: var(--primary);
+        }
+
+        .nav-item i {
+            font-size: 1.5em;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .nav-item span {
+            font-size: 0.8em;
+        }
+
+        /* Chat Section */
+        .chat-section {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .chat-section.active {
+            display: block;
+        }
+
+        .chat-container {
+            height: 400px;
+            overflow-y: auto;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            margin-bottom: 15px;
+        }
+
+        .chat-message {
+            margin-bottom: 15px;
+            display: flex;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .chat-message.user {
+            justify-content: flex-end;
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            word-wrap: break-word;
+        }
+
+        .chat-message.ai .message-bubble {
+            background: var(--gradient-3);
+            color: white;
+        }
+
+        .chat-message.user .message-bubble {
+            background: var(--gradient-2);
+            color: white;
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .chat-send {
+            background: var(--gradient-2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .chat-send:hover {
+            transform: scale(1.05);
+        }
+
+        /* Responsive */
+        @media (min-width: 768px) {
+            .container {
+                display: grid;
+                grid-template-columns: 1fr 350px;
+                gap: 20px;
+            }
+
+            .main-content {
+                grid-column: 1;
+            }
+
+            .sidebar {
+                grid-column: 2;
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .bottom-nav {
+                display: none;
+            }
+
+            .sidebar-nav {
+                background: rgba(255, 255, 255, 0.95);
+                border-radius: 20px;
+                padding: 20px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            }
+
+            .sidebar-nav .nav-item {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                padding: 15px;
+                margin-bottom: 10px;
+                border-radius: 10px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .sidebar-nav .nav-item:hover {
+                background: rgba(0,0,0,0.05);
+            }
+
+            .sidebar-nav .nav-item.active {
+                background: var(--gradient-3);
+                color: white;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .sidebar {
+                display: none;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--dark);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            z-index: 1001;
+            display: none;
+            animation: toastSlide 0.3s ease;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        @keyframes toastSlide {
+            from { transform: translateX(-50%) translateY(100px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <h1><i class="fas fa-dragon"></i> DigiGacha</h1>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <div class="main-content">
+            <!-- Stats Section -->
+            <section class="stats-section">
+                <div class="stat-card">
+                    <i class="fas fa-coins" style="color: var(--accent);"></i>
+                    <h3 id="coins">1000</h3>
+                    <p>DigiCoins</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-gem" style="color: var(--secondary);"></i>
+                    <h3 id="gems">10</h3>
+                    <p>DigiGems</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-layer-group" style="color: var(--primary);"></i>
+                    <h3 id="collection-count">0</h3>
+                    <p>Koleksi</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-trophy" style="color: #FFD700;"></i>
+                    <h3 id="level">1</h3>
+                    <p>Level</p>
+                </div>
+            </section>
+
+            <!-- Gacha Section -->
+            <section class="gacha-section">
+                <h2 class="section-title"><i class="fas fa-dice"></i> Gacha Machine</h2>
+                <div class="gacha-machine">
+                    <div class="gacha-display">
+                        <img id="preview-digimon" src="https://i.ebayimg.com/images/g/xK8AAOSwWXVnwI7M/s-l1200.jpg" alt="Preview" class="digimon-preview">
+                    </div>
+                    <button class="gacha-button" onclick="pullGacha()">
+                        <i class="fas fa-magic"></i> Pull Gacha!
+                    </button>
+                    <div class="gacha-cost">
+                        <i class="fas fa-coins"></i> 100 Coins atau <i class="fas fa-gem"></i> 1 Gem
+                    </div>
+                </div>
+            </section>
+
+            <!-- Collection Section -->
+            <section class="collection-section">
+                <h2 class="section-title"><i class="fas fa-book"></i> Koleksi Digimon</h2>
+                <div class="collection-grid" id="collection-grid">
+                    <!-- Collection cards will be added here dynamically -->
+                </div>
+            </section>
+
+            <!-- Chat Section -->
+            <section class="chat-section" id="chat-section">
+                <h2 class="section-title"><i class="fas fa-comments"></i> Tanya Digimon Expert</h2>
+                <div class="chat-container" id="chat-container">
+                    <div class="chat-message ai">
+                        <div class="message-bubble">
+                            Halo! Saya adalah Digimon Expert. Tanyakan apa saja tentang Digimon kepada saya!
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-input-container">
+                    <input type="text" class="chat-input" id="chat-input" placeholder="Ketik pertanyaan Anda...">
+                    <button class="chat-send" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </section>
+        </div>
+
+        <!-- Sidebar (Desktop) -->
+        <div class="sidebar">
+            <div class="sidebar-nav">
+                <div class="nav-item active" onclick="showSection('gacha')">
+                    <i class="fas fa-dice"></i>
+                    <span>Gacha</span>
+                </div>
+                <div class="nav-item" onclick="showSection('collection')">
+                    <i class="fas fa-book"></i>
+                    <span>Koleksi</span>
+                </div>
+                <div class="nav-item" onclick="showSection('chat')">
+                    <i class="fas fa-comments"></i>
+                    <span>Chat AI</span>
+                </div>
+                <div class="nav-item" onclick="showSection('profile')">
+                    <i class="fas fa-user"></i>
+                    <span>Profil</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation (Mobile) -->
+    <nav class="bottom-nav">
+        <div class="nav-items">
+            <div class="nav-item active" onclick="showSection('gacha')">
+                <i class="fas fa-dice"></i>
+                <span>Gacha</span>
+            </div>
+            <div class="nav-item" onclick="showSection('collection')">
+                <i class="fas fa-book"></i>
+                <span>Koleksi</span>
+            </div>
+            <div class="nav-item" onclick="showSection('chat')">
+                <i class="fas fa-comments"></i>
+                <span>Chat AI</span>
+            </div>
+            <div class="nav-item" onclick="showSection('profile')">
+                <i class="fas fa-user"></i>
+                <span>Profil</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Modal -->
+    <div class="modal" id="result-modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2 class="modal-title">Selamat!</h2>
+            <img id="modal-digimon-img" src="" alt="Digimon" class="modal-digimon">
+            <h3 id="modal-digimon-name"></h3>
+            <div class="modal-description" id="modal-digimon-desc"></div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Helper Function for AI
+        async function fetchGptOss(userMessage) {
+            const proxy = "https://cors-anywhere.herokuapp.com/";
+            const url = "https://chat.gradient.network/api/generate";
+            const messages = [
+                { role: "system", content: "Gunakan Bahasa Indonesia." },
+                { role: "user", content: userMessage }
+            ];
+            
+            try {
+                const response = await fetch(proxy + url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Origin': 'https://chat.gradient.network',
+                        'Referer': 'https://chat.gradient.network/'
+                    },
+                    body: JSON.stringify({
+                        model: "GPT OSS 120B",
+                        clusterMode: "nvidia",
+                        messages: messages,
+                        enableThinking: true
+                    })
+                });
+
+                if (!response.ok) return "Maaf, terjadi kesalahan jaringan (Cek Proxy).";
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = "";
+                let final = "";
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split("\n");
+                    buffer = lines.pop();
+                    for (const line of lines) {
+                        const clean = line.trim().replace(/^data: /, '');
+                        if(!clean) continue;
+                        try {
+                            const obj = JSON.parse(clean);
+                            if (obj.type === 'reply' && obj.data?.content) {
+                                final += obj.data.content;
+                            }
+                        } catch(e){}
+                    }
+                }
+                return final;
+            } catch (e) { return "Error: " + e.message; }
+        }
+
+        // Game State
+        let gameState = {
+            coins: 1000,
+            gems: 10,
+            collection: [],
+            level: 1,
+            experience: 0
+        };
+
+        // Digimon Database
+        const digimonDatabase = [
+            { name: "Agumon", rarity: "common", image: "https://i.ebayimg.com/images/g/xK8AAOSwWXVnwI7M/s-l1200.jpg", description: "Digimon reptil kecil yang bisa berevolusi menjadi Greymon." },
+            { name: "Gabumon", rarity: "common", image: "https://i.ytimg.com/vi/AxVqB9pR1ZE/maxresdefault.jpg", description: "Digimon serigala dengan kulit Garurumon." },
+            { name: "Patamon", rarity: "rare", image: "https://upload.wikimedia.org/wikipedia/en/4/43/Digimon_Digital_Monsters_Season_1_DVD_Cover.png", description: "Digimon mamalia yang mirip hamster dengan sayap." },
+            { name: "Gatomon", rarity: "rare", image: "https://m.media-amazon.com/images/M/MV5BZWJkMWZlOWEtNTliMS00NzQ0LTlmMzAtYWU2NjZiMDQxM2JkXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", description: "Digimon kucing suci dengan cincin suci di ekornya." },
+            { name: "Omnimon", rarity: "legendary", image: "https://upload.wikimedia.org/wikipedia/commons/a/a0/Digimon_Mini.jpg", description: "Fusi WarGreymon dan MetalGarurumon, ksatria digital terkuat." },
+            { name: "Imperialdramon", rarity: "epic", image: "https://upload.wikimedia.org/wikipedia/en/4/43/Digimon_Digital_Monsters_Season_1_DVD_Cover.png", description: "Naga kaisar dari mode fighter." },
+            { name: "Veemon", rarity: "common", image: "https://i.ebayimg.com/images/g/xK8AAOSwWXVnwI7M/s-l1200.jpg", description: "Digimon naga kecil dengan V di dadanya." },
+            { name: "Terriermon", rarity: "rare", image: "https://i.ytimg.com/vi/AxVqB9pR1ZE/maxresdefault.jpg", description: "Digimon mamalia bertelinga panjang yang suka berkata 'Moumantai'." }
+        ];
+
+        // Initialize Game
+        function initGame() {
+            loadGameState();
+            updateUI();
+            renderCollection();
+        }
+
+        // Load Game State from LocalStorage
+        function loadGameState() {
+            const saved = localStorage.getItem('digiGachaState');
+            if (saved) {
+                gameState = JSON.parse(saved);
+            }
+        }
+
+        // Save Game State
+        function saveGameState() {
+            localStorage.setItem('digiGachaState', JSON.stringify(gameState));
+        }
+
+        // Update UI
+        function updateUI() {
+            document.getElementById('coins').textContent = gameState.coins;
+            document.getElementById('gems').textContent = gameState.gems;
+            document.getElementById('collection-count').textContent = gameState.collection.length;
+            document.getElementById('level').textContent = gameState.level;
+        }
+
+        // Pull Gacha
+        async function pullGacha() {
+            if (gameState.coins < 100 && gameState.gems < 1) {
+                showToast('Tidak cukup koin atau gems!');
+                return;
+            }
+
+            // Deduct currency
+            if (gameState.gems >= 1) {
+                gameState.gems--;
+            } else {
+                gameState.coins -= 100;
+            }
+
+            // Animate button
+            const button = document.querySelector('.gacha-button');
+            button.disabled = true;
+            button.innerHTML = '<span class="loading"></span> Pulling...';
+
+            // Simulate gacha pull
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            // Determine rarity
+            const rand = Math.random();
+            let rarity = 'common';
+            if (rand < 0.05) rarity = 'legendary';
+            else if (rand < 0.15) rarity = 'epic';
+            else if (rand < 0.35) rarity = 'rare';
+
+            // Get random digimon of that rarity
+            const availableDigimon = digimonDatabase.filter(d => d.rarity === rarity);
+            const pulled = availableDigimon[Math.floor(Math.random() * availableDigimon.length)];
+
+            // Add to collection
+            const exists = gameState.collection.find(d => d.name === pulled.name);
+            if (!exists) {
+                gameState.collection.push({...pulled, id: Date.now()});
+                gameState.experience += 10;
+                
+                // Level up check
+                if (gameState.experience >= gameState.level * 50) {
+                    gameState.level++;
+                    gameState.experience = 0;
+                    showToast(`Level Up! Sekarang Level ${gameState.level}`);
+                }
+            }
+
+            // Show result
+            showResult(pulled, !exists);
+
+            // Reset button
+            button.disabled = false;
+            button.innerHTML = '<i class="fas fa-magic"></i> Pull Gacha!';
+
+            // Update UI and save
+            updateUI();
+            renderCollection();
+            saveGameState();
+        }
+
+        // Show Result Modal
+        function showResult(digimon, isNew) {
+            const modal = document.getElementById('result-modal');
+            document.getElementById('modal-digimon-img').src = digimon.image;
+            document.getElementById('modal-digimon-name').textContent = digimon.name;
+            document.getElementById('modal-digimon-desc').innerHTML = `
+                <strong>Rarity: ${digimon.rarity.toUpperCase()}</strong><br>
+                ${digimon.description}<br><br>
+                ${isNew ? '✨ Digimon baru ditambahkan ke koleksi!' : '💎 Duplikat! +50 bonus coins!'}
+            `;
+
+            if (!isNew) {
+                gameState.coins += 50;
+                updateUI();
+            }
+
+            modal.classList.add('active');
+        }
+
+        // Close Modal
+        function closeModal() {
+            document.getElementById('result-modal').classList.remove('active');
+        }
+
+        // Render Collection
+        function renderCollection() {
+            const grid = document.getElementById('collection-grid');
+            grid.innerHTML = '';
+
+            if (gameState.collection.length === 0) {
+                grid.innerHTML = '<p style="text-align: center; opacity: 0.5;">Belum ada Digimon di koleksi. Lakukan gacha sekarang!</p>';
+                return;
+            }
+
+            gameState.collection.forEach(digimon => {
+                const card = document.createElement('div');
+                card.className = 'digimon-card';
+                card.innerHTML = `
+                    <div class="digimon-rarity rarity-${digimon.rarity}">${digimon.rarity}</div>
+                    <img src="${digimon.image}" alt="${digimon.name}">
+                    <div class="digimon-name">${digimon.name}</div>
+                `;
+                card.onclick = () => showDigimonDetails(digimon);
+                grid.appendChild(card);
+            });
+        }
+
+        // Show Digimon Details
+        function showDigimonDetails(digimon) {
+            const modal = document.getElementById('result-modal');
+            document.getElementById('modal-digimon-img').src = digimon.image;
+            document.getElementById('modal-digimon-name').textContent = digimon.name;
+            document.getElementById('modal-digimon-desc').innerHTML = `
+                <strong>Rarity: ${digimon.rarity.toUpperCase()}</strong><br>
+                ${digimon.description}
+            `;
+            modal.classList.add('active');
+        }
+
+        // Show Section
+        function showSection(section) {
+            // Hide all sections
+            document.querySelectorAll('.gacha-section, .collection-section, .chat-section').forEach(s => {
+                s.style.display = 'none';
+            });
+
+            // Show selected section
+            switch(section) {
+                case 'gacha':
+                    document.querySelector('.gacha-section').style.display = 'block';
+                    break;
+                case 'collection':
+                    document.querySelector('.collection-section').style.display = 'block';
+                    break;
+                case 'chat':
+                    document.getElementById('chat-section').classList.add('active');
+                    break;
+                case 'profile':
+                    showToast('Fitur profil akan segera hadir!');
+                    document.querySelector('.gacha-section').style.display = 'block';
+                    break;
+            }
+
+            // Update nav active state
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.nav-item').classList.add('active');
+        }
+
+        // Send Chat Message
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            
+            if (!message) return;
+
+            // Add user message
+            const chatContainer = document.getElementById('chat-container');
+            const userMsg = document.createElement('div');
+            userMsg.className = 'chat-message user';
+            userMsg.innerHTML = `<div class="message-bubble">${message}</div>`;
+            chatContainer.appendChild(userMsg);
+
+            // Clear input
+            input.value = '';
+
+            // Add loading message
+            const loadingMsg = document.createElement('div');
+            loadingMsg.className = 'chat-message ai';
+            loadingMsg.innerHTML = `<div class="message-bubble"><span class="loading"></span> Mengetik...</div>`;
+            chatContainer.appendChild(loadingMsg);
+
+            // Get AI response
+            const response = await fetchGptOss(message);
+
+            // Remove loading and add AI response
+            loadingMsg.remove();
+            const aiMsg = document.createElement('div');
+            aiMsg.className = 'chat-message ai';
+            aiMsg.innerHTML = `<div class="message-bubble">${response}</div>`;
+            chatContainer.appendChild(aiMsg);
+
+            // Scroll to bottom
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Show Toast
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Handle Enter key in chat
+        document.getElementById('chat-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Daily Bonus
+        function claimDailyBonus() {
+            const lastClaim = localStorage.getItem('lastDailyBonus');
+            const now = new Date().toDateString();
+            
+            if (lastClaim !== now) {
+                gameState.coins += 200;
+                gameState.gems += 2;
+                localStorage.setItem('lastDailyBonus', now);
+                updateUI();
+                saveGameState();
+                showToast('Daily bonus claimed! +200 coins, +2 gems');
+            }
+        }
+
+        // Initialize on load
+        window.onload = () => {
+            initGame();
+            claimDailyBonus();
+        };
+
+        // Auto-save every 30 seconds
+        setInterval(saveGameState, 30000);
+    </script>
+</body>
+</html>
