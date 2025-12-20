@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pencarian Gambar</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #f5f7fa;
+            --text-color: #333;
+            --border-color: #e1e4e8;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+            --shadow-hover: 0 4px 16px rgba(0,0,0,0.15);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--text-color);
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100vh;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar.active {
+            transform: translateX(0);
+        }
+
+        .sidebar-header {
+            padding: 25px;
+            background: linear-gradient(135deg, var(--primary-color), #6ba3e5);
+            color: white;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+
+        .menu-item {
+            padding: 15px 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-size: 1rem;
+            color: var(--text-color);
+        }
+
+        .menu-item:hover {
+            background: var(--secondary-color);
+            padding-left: 30px;
+        }
+
+        .menu-item.active {
+            background: var(--secondary-color);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .menu-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            transition: margin-left 0.3s ease;
+        }
+
+        .main-container.shifted {
+            margin-left: 260px;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--primary-color);
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--primary-color), #6ba3e5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Search Box */
+        .search-container {
+            position: relative;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 18px 60px 18px 25px;
+            font-size: 1.1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 50px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, var(--primary-color), #6ba3e5);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: var(--shadow);
+        }
+
+        /* Quick Categories */
+        .categories {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .category-btn {
+            padding: 8px 20px;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .category-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        /* Image Grid */
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .image-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .image-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .image-card img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .image-card:hover img {
+            transform: scale(1.05);
+        }
+
+        .image-info {
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .image-title {
+            font-size: 0.95rem;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .image-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+        }
+
+        .action-btn:hover {
+            color: var(--primary-color);
+            transform: scale(1.2);
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .loading i {
+            font-size: 2rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        /* Bottom Navigation (Mobile) */
+        .bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 999;
+        }
+
+        .bottom-nav-items {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+        }
+
+        .bottom-nav-item {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #666;
+        }
+
+        .bottom-nav-item.active {
+            color: var(--primary-color);
+        }
+
+        .bottom-nav-item i {
+            font-size: 1.3rem;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .bottom-nav-item span {
+            font-size: 0.75rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                transform: translateX(-100%);
+            }
+
+            .main-container {
+                padding: 15px;
+                padding-bottom: 80px;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .bottom-nav {
+                display: block;
+            }
+
+            .image-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 15px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .search-box {
+                padding: 15px 50px 15px 20px;
+                font-size: 1rem;
+            }
+
+            .categories {
+                gap: 10px;
+            }
+
+            .category-btn {
+                padding: 6px 15px;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Modal for Image Preview */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+        }
+
+        .modal-content img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .modal-close:hover {
+            transform: rotate(90deg);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2><i class="fas fa-images"></i> ImageSearch</h2>
+        </div>
+        <nav class="sidebar-menu">
+            <button class="menu-item active" onclick="showSection('home')">
+                <i class="fas fa-home"></i>
+                <span>Beranda</span>
+            </button>
+            <button class="menu-item" onclick="showSection('trending')">
+                <i class="fas fa-fire"></i>
+                <span>Trending</span>
+            </button>
+            <button class="menu-item" onclick="showSection('collections')">
+                <i class="fas fa-bookmark"></i>
+                <span>Koleksi</span>
+            </button>
+            <button class="menu-item" onclick="showSection('about')">
+                <i class="fas fa-info-circle"></i>
+                <span>Tentang</span>
+            </button>
+        </nav>
+    </aside>
+
+    <!-- Main Container -->
+    <div class="main-container" id="mainContainer">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-top">
+                <button class="menu-toggle" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="logo">
+                    <i class="fas fa-search"></i>
+                    ImageSearch Pro
+                </div>
+            </div>
+            
+            <!-- Search Box -->
+            <div class="search-container">
+                <input type="text" class="search-box" id="searchInput" placeholder="Cari gambar..." onkeypress="handleKeyPress(event)">
+                <button class="search-btn" onclick="searchImages()">
+                    <i class="fas fa-search"></i> Cari
+                </button>
+            </div>
+
+            <!-- Quick Categories -->
+            <div class="categories">
+                <button class="category-btn" onclick="quickSearch('alam')">
+                    <i class="fas fa-mountain"></i> Alam
+                </button>
+                <button class="category-btn" onclick="quickSearch('hewan')">
+                    <i class="fas fa-paw"></i> Hewan
+                </button>
+                <button class="category-btn" onclick="quickSearch('teknologi')">
+                    <i class="fas fa-microchip"></i> Teknologi
+                </button>
+                <button class="category-btn" onclick="quickSearch('makanan')">
+                    <i class="fas fa-utensils"></i> Makanan
+                </button>
+                <button class="category-btn" onclick="quickSearch('arsitektur')">
+                    <i class="fas fa-building"></i> Arsitektur
+                </button>
+            </div>
+        </header>
+
+        <!-- Image Grid Container -->
+        <div id="imageContainer">
+            <!-- Initial empty state -->
+            <div class="empty-state">
+                <i class="fas fa-images"></i>
+                <h3>Mulai Pencarian Gambar</h3>
+                <p>Ketik kata kunci atau pilih kategori di atas</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation (Mobile) -->
+    <nav class="bottom-nav">
+        <div class="bottom-nav-items">
+            <button class="bottom-nav-item active" onclick="showSection('home')">
+                <i class="fas fa-home"></i>
+                <span>Beranda</span>
+            </button>
+            <button class="bottom-nav-item" onclick="showSection('trending')">
+                <i class="fas fa-fire"></i>
+                <span>Trending</span>
+            </button>
+            <button class="bottom-nav-item" onclick="showSection('collections')">
+                <i class="fas fa-bookmark"></i>
+                <span>Koleksi</span>
+            </button>
+            <button class="bottom-nav-item" onclick="showSection('profile')">
+                <i class="fas fa-user"></i>
+                <span>Profil</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Image Preview Modal -->
+    <div class="modal" id="imageModal">
+        <span class="modal-close" onclick="closeModal()">&times;</span>
+        <div class="modal-content">
+            <img id="modalImage" src="" alt="Preview">
+        </div>
+    </div>
+
+    <script>
+        // Image database
+        const imageDatabase = {
+            'alam': [
+                "https://i.ytimg.com/vi/59tGCFX08hw/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLBuANtQZgxoqQLIoFPUnvSZ1L2QWw",
+                "https://live.staticflickr.com/2913/14066066238_b318e3b0cf_b.jpg",
+                "https://i.ytimg.com/vi/59tGCFX08hw/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLBuANtQZgxoqQLIoFPUnvSZ1L2QWw",
+                "https://live.staticflickr.com/2913/14066066238_b318e3b0cf_b.jpg"
+            ],
+            'hewan': [
+                "https://img.freepik.com/premium-vector/set-pet-animals-including-dog-iguana-hamster-rabbit-vector-cartoon-illustration_338371-2625.jpg?semt=ais_hybrid&w=740&q=80",
+                "https://img.freepik.com/free-vector/set-wild-animals_1308-29055.jpg?semt=ais_hybrid&w=740&q=80",
+                "https://img.freepik.com/premium-vector/set-pet-animals-including-dog-iguana-hamster-rabbit-vector-cartoon-illustration_338371-2625.jpg?semt=ais_hybrid&w=740&q=80",
+                "https://img.freepik.com/free-vector/set-wild-animals_1308-29055.jpg?semt=ais_hybrid&w=740&q=80"
+            ],
+            'teknologi': [
+                "https://vicasion.oemahwebsite.com/wp-content/uploads/2023/11/teknologi-informasi.png",
+                "http://informatika.almaata.ac.id/wp-content/uploads/2023/10/Picture38.jpg",
+                "https://vicasion.oemahwebsite.com/wp-content/uploads/2023/11/teknologi-informasi.png",
+                "http://informatika.almaata.ac.id/wp-content/uploads/2023/10/Picture38.jpg"
+            ]
+        };
+
+        // Initialize
+        let currentImages = [];
+        let savedImages = JSON.parse(localStorage.getItem('savedImages')) || [];
+
+        // Toggle Sidebar
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContainer = document.getElementById('mainContainer');
+            sidebar.classList.toggle('active');
+            mainContainer.classList.toggle('shifted');
+        }
+
+        // Handle Enter key in search
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                searchImages();
+            }
+        }
+
+        // Search Images
+        async function searchImages() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            if (!query) return;
+
+            showLoading();
+
+            // Simulate API delay
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            // Check if query matches predefined categories
+            let images = [];
+            for (let category in imageDatabase) {
+                if (query.includes(category)) {
+                    images = imageDatabase[category];
+                    break;
+                }
+            }
+
+            // If no match, use random images from database
+            if (images.length === 0) {
+                const allImages = Object.values(imageDatabase).flat();
+                images = allImages.slice(0, 8);
+            }
+
+            currentImages = images.map((url, index) => ({
+                id: Date.now() + index,
+                url: url,
+                title: `${query} ${index + 1}`,
+                category: query
+            }));
+
+            displayImages(currentImages);
+        }
+
+        // Quick Search
+        function quickSearch(category) {
+            document.getElementById('searchInput').value = category;
+            searchImages();
+        }
+
+        // Display Images
+        function displayImages(images) {
+            const container = document.getElementById('imageContainer');
+            
+            if (images.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-search"></i>
+                        <h3>Tidak Ada Gambar Ditemukan</h3>
+                        <p>Coba kata kunci lain</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const gridHTML = images.map(img => `
+                <div class="image-card" onclick="openModal('${img.url}')">
+                    <img src="${img.url}" alt="${img.title}" loading="lazy">
+                    <div class="image-info">
+                        <span class="image-title">${img.title}</span>
+                        <div class="image-actions">
+                            <button class="action-btn" onclick="event.stopPropagation(); saveImage(${img.id})" title="Simpan">
+                                <i class="${savedImages.includes(img.id) ? 'fas' : 'far'} fa-bookmark"></i>
+                            </button>
+                            <button class="action-btn" onclick="event.stopPropagation(); downloadImage('${img.url}')" title="Unduh">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = `<div class="image-grid">${gridHTML}</div>`;
+        }
+
+        // Show Loading
+        function showLoading() {
+            const container = document.getElementById('imageContainer');
+            container.innerHTML = `
+                <div class="loading">
+                    <i class="fas fa-spinner"></i>
+                    <p>Mencari gambar...</p>
+                </div>
+            `;
+        }
+
+        // Open Modal
+        function openModal(imageUrl) {
+            const modal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            modalImage.src = imageUrl;
+            modal.classList.add('active');
+        }
+
+        // Close Modal
+        function closeModal() {
+            const modal = document.getElementById('imageModal');
+            modal.classList.remove('active');
+        }
+
+        // Save Image
+        function saveImage(imageId) {
+            const index = savedImages.indexOf(imageId);
+            if (index > -1) {
+                savedImages.splice(index, 1);
+            } else {
+                savedImages.push(imageId);
+            }
+            localStorage.setItem('savedImages', JSON.stringify(savedImages));
+            
+            // Refresh display to update bookmark icon
+            displayImages(currentImages);
+        }
+
+        // Download Image
+        function downloadImage(url) {
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'image.jpg';
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Show Section
+        function showSection(section) {
+            // Update active menu items
+            document.querySelectorAll('.menu-item, .bottom-nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            event.target.closest('.menu-item, .bottom-nav-item').classList.add('active');
+
+            const container = document.getElementById('imageContainer');
+            
+            switch(section) {
+                case 'home':
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-images"></i>
+                            <h3>Mulai Pencarian Gambar</h3>
+                            <p>Ketik kata kunci atau pilih kategori di atas</p>
+                        </div>
+                    `;
+                    break;
+                case 'trending':
+                    showLoading();
+                    setTimeout(() => {
+                        const trendingImages = Object.values(imageDatabase).flat().slice(0, 6);
+                        currentImages = trendingImages.map((url, index) => ({
+                            id: Date.now() + index,
+                            url: url,
+                            title: `Trending ${index + 1}`,
+                            category: 'trending'
+                        }));
+                        displayImages(currentImages);
+                    }, 500);
+                    break;
+                case 'collections':
+                    if (savedImages.length === 0) {
+                        container.innerHTML = `
+                            <div class="empty-state">
+                                <i class="fas fa-bookmark"></i>
+                                <h3>Belum Ada Koleksi</h3>
+                                <p>Simpan gambar favorit Anda</p>
+                            </div>
+                        `;
+                    } else {
+                        showLoading();
+                        setTimeout(() => {
+                            const savedImageData = currentImages.filter(img => savedImages.includes(img.id));
+                            displayImages(savedImageData);
+                        }, 500);
+                    }
+                    break;
+                case 'about':
+                case 'profile':
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-info-circle"></i>
+                            <h3>${section === 'about' ? 'Tentang' : 'Profil'}</h3>
+                            <p>ImageSearch Pro - Pencarian Gambar Modern</p>
+                        </div>
+                    `;
+                    break;
+            }
+
+            // Close sidebar on mobile after selection
+            if (window.innerWidth <= 768) {
+                toggleSidebar();
+            }
+        }
+
+        // Close modal on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Close modal on background click
+        document.getElementById('imageModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                closeModal();
+            }
+        });
+
+        // Load initial trending images
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                quickSearch('alam');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
