@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digimon Gacha Adventure</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .floating-digimon {
+            position: absolute;
+            font-size: 3rem;
+            animation: float 20s infinite ease-in-out;
+            opacity: 0.2;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-20px) rotate(5deg); }
+            50% { transform: translateY(10px) rotate(-5deg); }
+            75% { transform: translateY(-15px) rotate(3deg); }
+        }
+
+        /* Header */
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #764ba2;
+        }
+
+        .logo i {
+            font-size: 2rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .user-stats {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: bold;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem 80px;
+        }
+
+        /* Gacha Section */
+        .gacha-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            margin-bottom: 2rem;
+        }
+
+        .gacha-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .gacha-header h2 {
+            color: #764ba2;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .gacha-banner {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .gacha-banner img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .gacha-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .gacha-btn {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gacha-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .gacha-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-single {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-multi {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .gacha-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .gacha-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Collection Section */
+        .collection-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .collection-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .collection-header h2 {
+            color: #764ba2;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .collection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 1rem;
+        }
+
+        .digimon-card {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-radius: 15px;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .digimon-card:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .digimon-card.rare {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+
+        .digimon-card.epic {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        }
+
+        .digimon-card.legendary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(240, 147, 251, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(240, 147, 251, 0.8); }
+        }
+
+        .digimon-card img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+        }
+
+        .digimon-name {
+            font-weight: bold;
+            color: #333;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .digimon-rarity {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .digimon-count {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translate(-50%, -60%); opacity: 0; }
+            to { transform: translate(-50%, -50%); opacity: 1; }
+        }
+
+        .result-animation {
+            margin: 2rem 0;
+        }
+
+        .digimon-result {
+            display: inline-block;
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            color: white;
+            animation: zoomIn 0.5s ease;
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+
+        .digimon-result img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            border: 3px solid white;
+        }
+
+        .close-modal {
+            margin-top: 1rem;
+            padding: 0.8rem 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .close-modal:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.1);
+            z-index: 999;
+        }
+
+        .nav-items {
+            display: flex;
+            justify-content: space-around;
+            padding: 0.5rem 0;
+        }
+
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #666;
+        }
+
+        .nav-item:hover {
+            color: #764ba2;
+            background: rgba(118, 75, 162, 0.1);
+        }
+
+        .nav-item.active {
+            color: #764ba2;
+        }
+
+        .nav-item i {
+            font-size: 1.5rem;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-item span {
+            font-size: 0.8rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .user-stats {
+                width: 100%;
+                justify-content: space-around;
+            }
+
+            .collection-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 2000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            border-left: 4px solid #4caf50;
+        }
+
+        .notification.error {
+            border-left: 4px solid #f44336;
+        }
+
+        .notification.info {
+            border-left: 4px solid #2196f3;
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animation">
+        <div class="floating-digimon" style="top: 10%; left: 10%; animation-delay: 0s;">🐉</div>
+        <div class="floating-digimon" style="top: 20%; right: 15%; animation-delay: 2s;">🦊</div>
+        <div class="floating-digimon" style="bottom: 30%; left: 20%; animation-delay: 4s;">🦁</div>
+        <div class="floating-digimon" style="bottom: 10%; right: 10%; animation-delay: 6s;">🐺</div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-dragon"></i>
+                <span>Digimon Gacha Adventure</span>
+            </div>
+            <div class="user-stats">
+                <div class="stat-item">
+                    <i class="fas fa-coins"></i>
+                    <span id="coins">1000</span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-gem"></i>
+                    <span id="gems">50</span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-trophy"></i>
+                    <span id="level">Lv.1</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <!-- Gacha Section -->
+        <section class="gacha-section">
+            <div class="gacha-header">
+                <h2><i class="fas fa-dice"></i> Gacha Time!</h2>
+                <p>Collect all legendary Digimon!</p>
+            </div>
+            
+            <div class="gacha-banner">
+                <img src="https://i.ytimg.com/vi/DnI3STSTA5A/maxresdefault.jpg" alt="Gacha Banner">
+            </div>
+
+            <div class="gacha-buttons">
+                <button class="gacha-btn btn-single" onclick="doSinglePull()">
+                    <i class="fas fa-star"></i> Single Pull (100 Coins)
+                </button>
+                <button class="gacha-btn btn-multi" onclick="doMultiPull()">
+                    <i class="fas fa-star"></i> Multi Pull (500 Coins)
+                </button>
+            </div>
+
+            <div style="text-align: center; color: #666;">
+                <p><i class="fas fa-info-circle"></i> Rates: Common 60% | Rare 30% | Epic 8% | Legendary 2%</p>
+            </div>
+        </section>
+
+        <!-- Collection Section -->
+        <section class="collection-section">
+            <div class="collection-header">
+                <h2><i class="fas fa-book"></i> My Collection</h2>
+                <p id="collection-count">0 Digimon Collected</p>
+            </div>
+
+            <div class="collection-grid" id="collection-grid">
+                <!-- Collection will be populated here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal for Gacha Result -->
+    <div class="modal" id="gachaModal">
+        <div class="modal-content">
+            <h2 style="color: #764ba2; margin-bottom: 1rem;">
+                <i class="fas fa-gift"></i> Gacha Result!
+            </h2>
+            <div class="result-animation" id="resultContainer">
+                <!-- Results will be shown here -->
+            </div>
+            <button class="close-modal" onclick="closeModal()">
+                <i class="fas fa-check"></i> OK
+            </button>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <div class="nav-items">
+            <div class="nav-item active" onclick="switchTab('gacha')">
+                <i class="fas fa-dice"></i>
+                <span>Gacha</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('collection')">
+                <i class="fas fa-book"></i>
+                <span>Collection</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('shop')">
+                <i class="fas fa-store"></i>
+                <span>Shop</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('profile')">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Game Data
+        const digimonDatabase = [
+            { name: 'Agumon', rarity: 'common', image: 'https://i.redd.it/xy7nap93pfv71.jpg' },
+            { name: 'Gabumon', rarity: 'common', image: 'https://i.redd.it/xy7nap93pfv71.jpg' },
+            { name: 'Patamon', rarity: 'common', image: 'https://i.redd.it/xy7nap93pfv71.jpg' },
+            { name: 'Gatomon', rarity: 'common', image: 'https://i.redd.it/xy7nap93pfv71.jpg' },
+            { name: 'Tentomon', rarity: 'rare', image: 'https://upload.wikimedia.org/wikipedia/en/thumb/b/bc/Digimon_Adventure_Group.tiff/lossless-page1-1200px-Digimon_Adventure_Group.tiff.png' },
+            { name: 'Biyomon', rarity: 'rare', image: 'https://upload.wikimedia.org/wikipedia/en/thumb/b/bc/Digimon_Adventure_Group.tiff/lossless-page1-1200px-Digimon_Adventure_Group.tiff.png' },
+            { name: 'Palmon', rarity: 'rare', image: 'https://upload.wikimedia.org/wikipedia/en/thumb/b/bc/Digimon_Adventure_Group.tiff/lossless-page1-1200px-Digimon_Adventure_Group.tiff.png' },
+            { name: 'Gomamon', rarity: 'rare', image: 'https://upload.wikimedia.org/wikipedia/en/thumb/b/bc/Digimon_Adventure_Group.tiff/lossless-page1-1200px-Digimon_Adventure_Group.tiff.png' },
+            { name: 'WarGreymon', rarity: 'epic', image: 'https://i.redd.it/zap3cxdxiyk41.png' },
+            { name: 'MetalGarurumon', rarity: 'epic', image: 'https://i.redd.it/zap3cxdxiyk41.png' },
+            { name: 'Magnadramon', rarity: 'epic', image: 'https://i.redd.it/zap3cxdxiyk41.png' },
+            { name: 'Seraphimon', rarity: 'epic', image: 'https://i.redd.it/zap3cxdxiyk41.png' },
+            { name: 'Omnimon', rarity: 'legendary', image: 'https://static.wikia.nocookie.net/lunime/images/0/02/Animegachahome.png/revision/latest?cb=20190304203447' },
+            { name: 'Imperialdramon', rarity: 'legendary', image: 'https://static.wikia.nocookie.net/lunime/images/1/1b/AnimeGachaIcon.png/revision/latest?cb=20220512123302' }
+        ];
+
+        // Game State
+        let gameState = {
+            coins: 1000,
+            gems: 50,
+            level: 1,
+            experience: 0,
+            collection: {}
+        };
+
+        // Initialize Game
+        function initGame() {
+            loadGameState();
+            updateUI();
+            renderCollection();
+        }
+
+        // Load Game State from LocalStorage
+        function loadGameState() {
+            const saved = localStorage.getItem('digimonGachaState');
+            if (saved) {
+                gameState = JSON.parse(saved);
+            }
+        }
+
+        // Save Game State
+        function saveGameState() {
+            localStorage.setItem('digimonGachaState', JSON.stringify(gameState));
+        }
+
+        // Update UI
+        function updateUI() {
+            document.getElementById('coins').textContent = gameState.coins;
+            document.getElementById('gems').textContent = gameState.gems;
+            document.getElementById('level').textContent = `Lv.${gameState.level}`;
+            
+            const collectionCount = Object.keys(gameState.collection).length;
+            document.getElementById('collection-count').textContent = `${collectionCount} Digimon Collected`;
+        }
+
+        // Gacha Pull Logic
+        function performPull() {
+            const random = Math.random() * 100;
+            let rarity;
+            
+            if (random < 2) {
+                rarity = 'legendary';
+            } else if (random < 10) {
+                rarity = 'epic';
+            } else if (random < 40) {
+                rarity = 'rare';
+            } else {
+                rarity = 'common';
+            }
+            
+            const filteredDigimon = digimonDatabase.filter(d => d.rarity === rarity);
+            const selected = filteredDigimon[Math.floor(Math.random() * filteredDigimon.length)];
+            
+            return selected;
+        }
+
+        // Single Pull
+        function doSinglePull() {
+            if (gameState.coins < 100) {
+                showNotification('Not enough coins!', 'error');
+                return;
+            }
+            
+            gameState.coins -= 100;
+            const result = performPull();
+            
+            // Add to collection
+            if (!gameState.collection[result.name]) {
+                gameState.collection[result.name] = { ...result, count: 0 };
+            }
+            gameState.collection[result.name].count++;
+            
+            // Gain experience
+            gameState.experience += 10;
+            if (gameState.experience >= 100) {
+                gameState.level++;
+                gameState.experience = 0;
+                gameState.gems += 10;
+                showNotification(`Level Up! Now Level ${gameState.level}! +10 Gems`, 'success');
+            }
+            
+            saveGameState();
+            updateUI();
+            showGachaResult([result]);
+        }
+
+        // Multi Pull
+        function doMultiPull() {
+            if (gameState.coins < 500) {
+                showNotification('Not enough coins!', 'error');
+                return;
+            }
+            
+            gameState.coins -= 500;
+            const results = [];
+            
+            for (let i = 0; i < 5; i++) {
+                const result = performPull();
+                results.push(result);
+                
+                // Add to collection
+                if (!gameState.collection[result.name]) {
+                    gameState.collection[result.name] = { ...result, count: 0 };
+                }
+                gameState.collection[result.name].count++;
+            }
+            
+            // Bonus for multi pull
+            gameState.experience += 60;
+            if (gameState.experience >= 100) {
+                gameState.level++;
+                gameState.experience = gameState.experience - 100;
+                gameState.gems += 10;
+                showNotification(`Level Up! Now Level ${gameState.level}! +10 Gems`, 'success');
+            }
+            
+            saveGameState();
+            updateUI();
+            showGachaResult(results);
+        }
+
+        // Show Gacha Result Modal
+        function showGachaResult(results) {
+            const modal = document.getElementById('gachaModal');
+            const container = document.getElementById('resultContainer');
+            
+            container.innerHTML = '';
+            
+            results.forEach((digimon, index) => {
+                setTimeout(() => {
+                    const card = document.createElement('div');
+                    card.className = 'digimon-result';
+                    card.style.animationDelay = `${index * 0.1}s`;
+                    
+                    const rarityColor = {
+                        common: '#95a5a6',
+                        rare: '#3498db',
+                        epic: '#9b59b6',
+                        legendary: '#f39c12'
+                    };
+                    
+                    card.innerHTML = `
+                        <img src="${digimon.image}" alt="${digimon.name}">
+                        <h3>${digimon.name}</h3>
+                        <p style="color: ${rarityColor[digimon.rarity]}; text-transform: uppercase; font-weight: bold;">
+                            ${digimon.rarity}
+                        </p>
+                    `;
+                    
+                    container.appendChild(card);
+                }, index * 200);
+            });
+            
+            modal.style.display = 'block';
+            renderCollection();
+        }
+
+        // Close Modal
+        function closeModal() {
+            document.getElementById('gachaModal').style.display = 'none';
+        }
+
+        // Render Collection
+        function renderCollection() {
+            const grid = document.getElementById('collection-grid');
+            grid.innerHTML = '';
+            
+            const collectionArray = Object.values(gameState.collection);
+            
+            if (collectionArray.length === 0) {
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #999;">No Digimon collected yet. Start pulling!</p>';
+                return;
+            }
+            
+            collectionArray.forEach(digimon => {
+                const card = document.createElement('div');
+                card.className = `digimon-card ${digimon.rarity}`;
+                
+                card.innerHTML = `
+                    <div class="digimon-count">${digimon.count}</div>
+                    <img src="${digimon.image}" alt="${digimon.name}">
+                    <div class="digimon-name">${digimon.name}</div>
+                    <div class="digimon-rarity">${digimon.rarity}</div>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        // Switch Tab
+        function switchTab(tab) {
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => item.classList.remove('active'));
+            event.target.closest('.nav-item').classList.add('active');
+            
+            // Here you could implement different tab content
+            showNotification(`${tab.charAt(0).toUpperCase() + tab.slice(1)} tab selected`, 'info');
+        }
+
+        // Show Notification
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Daily Bonus
+        function claimDailyBonus() {
+            const lastClaim = localStorage.getItem('lastDailyBonus');
+            const today = new Date().toDateString();
+            
+            if (lastClaim === today) {
+                showNotification('Daily bonus already claimed!', 'error');
+                return;
+            }
+            
+            gameState.coins += 200;
+            gameState.gems += 5;
+            localStorage.setItem('lastDailyBonus', today);
+            saveGameState();
+            updateUI();
+            showNotification('Daily bonus claimed! +200 Coins, +5 Gems', 'success');
+        }
+
+        // Auto-claim daily bonus on load
+        window.addEventListener('load', () => {
+            initGame();
+            
+            // Check if it's a new day
+            const lastClaim = localStorage.getItem('lastDailyBonus');
+            const today = new Date().toDateString();
+            
+            if (lastClaim !== today) {
+                setTimeout(() => {
+                    showNotification('Daily bonus available! Check your profile.', 'info');
+                }, 2000);
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 's' || e.key === 'S') {
+                doSinglePull();
+            } else if (e.key === 'm' || e.key === 'M') {
+                doMultiPull();
+            } else if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Prevent closing modal when clicking outside
+        document.getElementById('gachaModal').addEventListener('click', (e) => {
+            if (e.target.id === 'gachaModal') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
