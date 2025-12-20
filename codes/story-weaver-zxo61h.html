@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Story Weaver</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --bg: #0f172a;
+            --surface: rgba(30, 41, 59, 0.7);
+            --surface-light: rgba(51, 65, 85, 0.7);
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border: rgba(71, 85, 105, 0.5);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphism Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80') center/cover;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        /* Sidebar untuk desktop */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: var(--surface);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-right: 1px solid var(--border);
+            padding: 2rem 1.5rem;
+            transform: translateX(0);
+            transition: transform 0.3s ease;
+            z-index: 100;
+            overflow-y: auto;
+        }
+
+        .sidebar.hidden {
+            transform: translateX(-100%);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 3rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: var(--surface-light);
+            color: var(--text);
+        }
+
+        .nav-link.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem;
+            transition: margin-left 0.3s ease;
+        }
+
+        .main-content.full {
+            margin-left: 0;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: var(--surface);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .menu-toggle:hover {
+            background: var(--surface-light);
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 3rem 0;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 1rem;
+            margin-bottom: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80') center/cover;
+            opacity: 0.1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Generator Form */
+        .generator-form {
+            background: var(--surface);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            color: var(--text);
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .genre-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .genre-tag {
+            padding: 0.5rem 1rem;
+            background: var(--surface-light);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid var(--border);
+            border-radius: 2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+        }
+
+        .genre-tag:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .genre-tag.selected {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .btn {
+            padding: 0.75rem 2rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: var(--surface-light);
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        /* Story Display */
+        .story-container {
+            background: var(--surface);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+            display: none;
+        }
+
+        .story-container.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .story-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .story-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .story-meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .story-content {
+            line-height: 1.8;
+            color: var(--text);
+            white-space: pre-wrap;
+        }
+
+        .story-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Loading */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* History Section */
+        .history-section {
+            margin-top: 3rem;
+        }
+
+        .history-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .history-card {
+            background: var(--surface);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .history-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            border-color: var(--primary);
+        }
+
+        .history-card-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .history-card-meta {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+
+        .history-card-preview {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Bottom Navigation (Mobile) */
+        .bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid var(--border);
+            padding: 0.5rem 0;
+            z-index: 100;
+        }
+
+        .bottom-nav-list {
+            display: flex;
+            justify-content: space-around;
+            list-style: none;
+        }
+
+        .bottom-nav-item {
+            flex: 1;
+        }
+
+        .bottom-nav-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.75rem;
+            transition: color 0.2s;
+        }
+
+        .bottom-nav-link i {
+            font-size: 1.25rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .bottom-nav-link.active {
+            color: var(--primary);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--surface);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.2);
+        }
+
+        .toast.error {
+            border-color: var(--error);
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .bottom-nav {
+                display: block;
+            }
+
+            .main-content {
+                padding-bottom: 5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="logo">
+            <i class="fa-solid fa-feather"></i>
+            <span>Story Weaver</span>
+        </div>
+        <nav>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" data-page="generator">
+                        <i class="fa-solid fa-magic"></i>
+                        <span>Generator</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-page="history">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        <span>Riwayat</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-page="templates">
+                        <i class="fa-solid fa-book"></i>
+                        <span>Template</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-page="settings">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Pengaturan</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <header class="header">
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <span style="color: var(--text-muted);">Mode:</span>
+                <select class="form-select" style="width: auto;" id="modeSelect">
+                    <option value="creative">Kreatif</option>
+                    <option value="adventure">Petualangan</option>
+                    <option value="romance">Romantis</option>
+                    <option value="mystery">Misteri</option>
+                    <option value="scifi">Sci-Fi</option>
+                    <option value="fantasy">Fantasi</option>
+                </select>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Story Weaver</h1>
+                <p>Buat cerita menakjubkan dengan kekuatan kecerdasan buatan</p>
+            </div>
+        </section>
+
+        <!-- Generator Form -->
+        <section class="generator-form" id="generatorForm">
+            <div class="form-group">
+                <label class="form-label">Judul Cerita</label>
+                <input type="text" class="form-input" id="storyTitle" placeholder="Masukkan judul cerita...">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Genre</label>
+                <div class="genre-tags">
+                    <span class="genre-tag" data-genre="aksi">Aksi</span>
+                    <span class="genre-tag" data-genre="petualangan">Petualangan</span>
+                    <span class="genre-tag" data-genre="komedi">Komedi</span>
+                    <span class="genre-tag" data-genre="drama">Drama</span>
+                    <span class="genre-tag" data-genre="fantasi">Fantasi</span>
+                    <span class="genre-tag" data-genre="horror">Horror</span>
+                    <span class="genre-tag" data-genre="misteri">Misteri</span>
+                    <span class="genre-tag" data-genre="romantis">Romantis</span>
+                    <span class="genre-tag" data-genre="scifi">Sci-Fi</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Karakter Utama</label>
+                <input type="text" class="form-input" id="mainCharacter" placeholder="Nama karakter utama...">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Latar Tempat</label>
+                <input type="text" class="form-input" id="setting" placeholder="Contoh: Kerajaan kuno, kota masa depan, dll...">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Ide Cerita</label>
+                <textarea class="form-textarea" id="storyIdea" placeholder="Deskripsikan ide dasar cerita yang ingin kamu buat..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Panjang Cerita</label>
+                <select class="form-select" id="storyLength">
+                    <option value="pendek">Pendek (300-500 kata)</option>
+                    <option value="sedang">Sedang (500-1000 kata)</option>
+                    <option value="panjang">Panjang (1000+ kata)</option>
+                </select>
+            </div>
+
+            <button class="btn" id="generateBtn">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <span>Generate Cerita</span>
+            </button>
+        </section>
+
+        <!-- Loading State -->
+        <div class="loading" id="loadingState">
+            <div class="spinner"></div>
+            <p>Sedang membuat cerita yang menakjubkan...</p>
+        </div>
+
+        <!-- Story Display -->
+        <section class="story-container" id="storyContainer">
+            <div class="story-header">
+                <h2 class="story-title" id="displayTitle">Judul Cerita</h2>
+                <button class="btn btn-secondary" onclick="copyStory()">
+                    <i class="fa-solid fa-copy"></i>
+                    Salin
+                </button>
+            </div>
+            <div class="story-meta">
+                <span><i class="fa-solid fa-tag"></i> <span id="displayGenre">Genre</span></span>
+                <span><i class="fa-solid fa-user"></i> <span id="displayCharacter">Karakter</span></span>
+                <span><i class="fa-solid fa-map-marker-alt"></i> <span id="displaySetting">Latar</span></span>
+                <span><i class="fa-solid fa-clock"></i> <span id="displayTime">Waktu</span></span>
+            </div>
+            <div class="story-content" id="storyContent">
+                Konten cerita akan muncul di sini...
+            </div>
+            <div class="story-actions">
+                <button class="btn btn-secondary" onclick="regenerateStory()">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                    Generate Ulang
+                </button>
+                <button class="btn btn-secondary" onclick="saveStory()">
+                    <i class="fa-solid fa-bookmark"></i>
+                    Simpan
+                </button>
+                <button class="btn" onclick="shareStory()">
+                    <i class="fa-solid fa-share"></i>
+                    Bagikan
+                </button>
+            </div>
+        </section>
+
+        <!-- History Section -->
+        <section class="history-section" id="historySection" style="display: none;">
+            <h2 style="margin-bottom: 1rem;">Riwayat Cerita</h2>
+            <div class="history-grid" id="historyGrid">
+                <!-- History cards will be inserted here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Bottom Navigation (Mobile) -->
+    <nav class="bottom-nav">
+        <ul class="bottom-nav-list">
+            <li class="bottom-nav-item">
+                <a href="#" class="bottom-nav-link active" data-page="generator">
+                    <i class="fa-solid fa-magic"></i>
+                    <span>Generator</span>
+                </a>
+            </li>
+            <li class="bottom-nav-item">
+                <a href="#" class="bottom-nav-link" data-page="history">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span>Riwayat</span>
+                </a>
+            </li>
+            <li class="bottom-nav-item">
+                <a href="#" class="bottom-nav-link" data-page="templates">
+                    <i class="fa-solid fa-book"></i>
+                    <span>Template</span>
+                </a>
+            </li>
+            <li class="bottom-nav-item">
+                <a href="#" class="bottom-nav-link" data-page="settings">
+                    <i class="fa-solid fa-gear"></i>
+                    <span>Pengaturan</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <i class="fa-solid fa-check-circle"></i>
+        <span id="toastMessage">Pesan notifikasi</span>
+    </div>
+
+    <script>
+        // Helper Function for AI
+        async function fetchGptOss(userMessage) {
+            const proxy = "https://cors-anywhere.herokuapp.com/";
+            const url = "https://chat.gradient.network/api/generate";
+            const messages = [
+                { role: "system", content: "Gunakan Bahasa Indonesia. Kamu adalah seorang penulis cerita profesional yang bisa membuat cerita menarik dengan berbagai genre." },
+                { role: "user", content: userMessage }
+            ];
+            
+            try {
+                const response = await fetch(proxy + url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Origin': 'https://chat.gradient.network',
+                        'Referer': 'https://chat.gradient.network/'
+                    },
+                    body: JSON.stringify({
+                        model: "GPT OSS 120B",
+                        clusterMode: "nvidia",
+                        messages: messages,
+                        enableThinking: true
+                    })
+                });
+
+                if (!response.ok) return "Maaf, terjadi kesalahan jaringan (Cek Proxy).";
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = "";
+                let final = "";
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split("\n");
+                    buffer = lines.pop();
+                    for (const line of lines) {
+                        const clean = line.trim().replace(/^data: /, '');
+                        if(!clean) continue;
+                        try {
+                            const obj = JSON.parse(clean);
+                            if (obj.type === 'reply' && obj.data?.content) {
+                                final += obj.data.content;
+                            }
+                        } catch(e){}
+                    }
+                }
+                return final;
+            } catch (e) { return "Error: " + e.message; }
+        }
+
+        // App State
+        let selectedGenres = [];
+        let storyHistory = JSON.parse(localStorage.getItem('storyHistory')) || [];
+        let currentStory = null;
+
+        // DOM Elements
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        const menuToggle = document.getElementById('menuToggle');
+        const generateBtn = document.getElementById('generateBtn');
+        const loadingState = document.getElementById('loadingState');
+        const storyContainer = document.getElementById('storyContainer');
+        const historySection = document.getElementById('historySection');
+        const generatorForm = document.getElementById('generatorForm');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            setupEventListeners();
+            loadHistory();
+        });
+
+        // Setup Event Listeners
+        function setupEventListeners() {
+            // Menu Toggle
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+            });
+
+            // Genre Tags
+            document.querySelectorAll('.genre-tag').forEach(tag => {
+                tag.addEventListener('click', () => {
+                    tag.classList.toggle('selected');
+                    const genre = tag.dataset.genre;
+                    if (selectedGenres.includes(genre)) {
+                        selectedGenres = selectedGenres.filter(g => g !== genre);
+                    } else {
+                        selectedGenres.push(genre);
+                    }
+                });
+            });
+
+            // Navigation
+            document.querySelectorAll('.nav-link, .bottom-nav-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const page = link.dataset.page;
+                    navigateToPage(page);
+                    
+                    // Update active states
+                    document.querySelectorAll('.nav-link, .bottom-nav-link').forEach(l => {
+                        l.classList.remove('active');
+                    });
+                    document.querySelectorAll(`[data-page="${page}"]`).forEach(l => {
+                        l.classList.add('active');
+                    });
+                });
+            });
+
+            // Generate Button
+            generateBtn.addEventListener('click', generateStory);
+        }
+
+        // Navigation
+        function navigateToPage(page) {
+            // Hide all sections
+            generatorForm.style.display = 'none';
+            document.querySelector('.hero').style.display = 'none';
+            storyContainer.style.display = 'none';
+            historySection.style.display = 'none';
+
+            if (page === 'generator') {
+                generatorForm.style.display = 'block';
+                document.querySelector('.hero').style.display = 'block';
+                
+                // Show story container if there's a current story
+                if (currentStory) {
+                    storyContainer.style.display = 'block';
+                    storyContainer.classList.add('active');
+                }
+            } else if (page === 'history') {
+                historySection.style.display = 'block';
+                loadHistory();
+            } else if (page === 'templates') {
+                showToast('Halaman template akan segera tersedia', 'info');
+                navigateToPage('generator');
+            } else if (page === 'settings') {
+                showToast('Halaman pengaturan akan segera tersedia', 'info');
+                navigateToPage('generator');
+            }
+
+            // Close sidebar on mobile
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('active');
+            }
+        }
+
+        // Generate Story
+        async function generateStory() {
+            const title = document.getElementById('storyTitle').value.trim();
+            const character = document.getElementById('mainCharacter').value.trim();
+            const setting = document.getElementById('setting').value.trim();
+            const idea = document.getElementById('storyIdea').value.trim();
+            const length = document.getElementById('storyLength').value;
+            const mode = document.getElementById('modeSelect').value;
+
+            if (!title || !idea) {
+                showToast('Mohon lengkapi judul dan ide cerita', 'error');
+                return;
+            }
+
+            // Show loading
+            loadingState.classList.add('active');
+            storyContainer.classList.remove('active');
+            generateBtn.disabled = true;
+
+            // Build prompt
+            let prompt = `Buat sebuah cerita dengan detail berikut:\n\n`;
+            prompt += `Judul: ${title}\n`;
+            prompt += `Ide: ${idea}\n`;
+            if (character) prompt += `Karakter Utama: ${character}\n`;
+            if (setting) prompt += `Latar: ${setting}\n`;
+            if (selectedGenres.length > 0) prompt += `Genre: ${selectedGenres.join(', ')}\n`;
+            prompt += `Mode: ${mode}\n`;
+            prompt += `Panjang: ${length}\n\n`;
+            prompt += `Buat cerita yang menarik, imajinatif, dan mengalir dengan baik. Gunakan bahasa Indonesia yang baik dan benar.`;
+
+            try {
+                const story = await fetchGptOss(prompt);
+                
+                // Update UI
+                currentStory = {
+                    title,
+                    content: story,
+                    genre: selectedGenres.join(', ') || 'Umum',
+                    character: character || 'Tidak disebutkan',
+                    setting: setting || 'Tidak disebutkan',
+                    date: new Date().toLocaleString('id-ID'),
+                    id: Date.now()
+                };
+
+                displayStory(currentStory);
+                loadingState.classList.remove('active');
+                storyContainer.classList.add('active');
+                storyContainer.style.display = 'block';
+                
+                // Auto-save to history
+                saveStory();
+                
+                showToast('Cerita berhasil dibuat dan disimpan!', 'success');
+            } catch (error) {
+                showToast('Gagal membuat cerita. Silakan coba lagi.', 'error');
+                console.error(error);
+            } finally {
+                generateBtn.disabled = false;
+                loadingState.classList.remove('active');
+            }
+        }
+
+        // Display Story
+        function displayStory(story) {
+            document.getElementById('displayTitle').textContent = story.title;
+            document.getElementById('displayGenre').textContent = story.genre;
+            document.getElementById('displayCharacter').textContent = story.character;
+            document.getElementById('displaySetting').textContent = story.setting;
+            document.getElementById('displayTime').textContent = story.date;
+            document.getElementById('storyContent').textContent = story.content;
+        }
+
+        // Regenerate Story
+        async function regenerateStory() {
+            if (!currentStory) return;
+            await generateStory();
+        }
+
+        // Save Story
+        function saveStory() {
+            if (!currentStory) {
+                showToast('Tidak ada cerita untuk disimpan', 'error');
+                return;
+            }
+
+            // Check if story already exists in history
+            const existingIndex = storyHistory.findIndex(s => s.id === currentStory.id);
+            
+            if (existingIndex !== -1) {
+                // Update existing story
+                storyHistory[existingIndex] = currentStory;
+            } else {
+                // Add new story to the beginning
+                storyHistory.unshift(currentStory);
+                
+                // Limit history to 20 items
+                if (storyHistory.length > 20) {
+                    storyHistory = storyHistory.slice(0, 20);
+                }
+            }
+            
+            localStorage.setItem('storyHistory', JSON.stringify(storyHistory));
+            return true; // Return success
+        }
+
+        // Copy Story
+        function copyStory() {
+            if (!currentStory) return;
+            
+            const text = `${currentStory.title}\n\n${currentStory.content}`;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Cerita berhasil disalin!', 'success');
+            }).catch(() => {
+                showToast('Gagal menyalin cerita', 'error');
+            });
+        }
+
+        // Share Story
+        function shareStory() {
+            if (!currentStory) return;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: currentStory.title,
+                    text: currentStory.content.substring(0, 200) + '...',
+                }).catch(() => {});
+            } else {
+                copyStory();
+            }
+        }
+
+        // Load History
+        function loadHistory() {
+            const historyGrid = document.getElementById('historyGrid');
+            
+            if (storyHistory.length === 0) {
+                historyGrid.innerHTML = '<p style="text-align: center; color: var(--text-muted);">Belum ada cerita yang disimpan</p>';
+                return;
+            }
+
+            historyGrid.innerHTML = storyHistory.map(story => `
+                <div class="history-card" onclick="loadStoryFromHistory(${story.id})">
+                    <div class="history-card-title">${story.title}</div>
+                    <div class="history-card-meta">
+                        <i class="fa-solid fa-tag"></i> ${story.genre} • 
+                        <i class="fa-solid fa-clock"></i> ${story.date}
+                    </div>
+                    <div class="history-card-preview">${story.content.substring(0, 150)}...</div>
+                </div>
+            `).join('');
+        }
+
+        // Load Story from History
+        function loadStoryFromHistory(id) {
+            const story = storyHistory.find(s => s.id === id);
+            if (story) {
+                currentStory = story;
+                displayStory(story);
+                storyContainer.classList.add('active');
+                storyContainer.style.display = 'block';
+                navigateToPage('generator');
+                showToast('Cerita berhasil dimuat', 'success');
+            }
+        }
+
+        // Toast Notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            const icon = toast.querySelector('i');
+            
+            // Reset classes
+            toast.className = 'toast';
+            
+            // Set icon and class based on type
+            if (type === 'success') {
+                icon.className = 'fa-solid fa-check-circle';
+                toast.classList.add('success');
+            } else if (type === 'error') {
+                icon.className = 'fa-solid fa-exclamation-circle';
+                toast.classList.add('error');
+            } else {
+                icon.className = 'fa-solid fa-info-circle';
+            }
+            
+            toastMessage.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Responsive handling
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
