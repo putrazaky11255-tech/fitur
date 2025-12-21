@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pencari Gambar</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #f5f7fa;
+            --text-color: #333;
+            --border-color: #e0e6ed;
+            --shadow: 0 2px 12px rgba(0,0,0,0.1);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--text-color);
+            padding-bottom: 70px;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+        }
+
+        /* Search Container */
+        .search-container {
+            padding: 30px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .search-box {
+            background: white;
+            border-radius: 50px;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .search-box:focus-within {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .search-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 15px 20px;
+            font-size: 16px;
+            background: transparent;
+        }
+
+        .search-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 50px;
+            padding: 15px 30px;
+            color: white;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .search-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .search-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Categories */
+        .categories {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .category-title {
+            color: white;
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .category-pills {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .category-pill {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .category-pill:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .category-pill.active {
+            background: white;
+            color: var(--primary-color);
+        }
+
+        /* Image Grid */
+        .image-grid {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .image-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+            aspect-ratio: 4/3;
+        }
+
+        .image-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .image-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .image-card:hover img {
+            transform: scale(1.1);
+        }
+
+        .image-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+            padding: 20px 15px 15px;
+            color: white;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .image-card:hover .image-overlay {
+            opacity: 1;
+        }
+
+        .image-title {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .image-meta {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+
+        .empty-title {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .empty-text {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-color);
+        }
+
+        .nav-item:hover {
+            color: var(--primary-color);
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+        }
+
+        .nav-item i {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .nav-item span {
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        /* Sidebar for Desktop */
+        .sidebar {
+            position: fixed;
+            left: -250px;
+            top: 0;
+            width: 250px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            transition: var(--transition);
+            z-index: 1001;
+            padding: 80px 20px 20px;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-color);
+        }
+
+        .sidebar-item:hover {
+            background: var(--secondary-color);
+            color: var(--primary-color);
+        }
+
+        .sidebar-item.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .sidebar-item i {
+            font-size: 18px;
+            width: 24px;
+        }
+
+        /* Menu Toggle */
+        .menu-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1002;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .menu-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        /* Responsive */
+        @media (min-width: 768px) {
+            .menu-toggle {
+                display: flex;
+            }
+
+            .bottom-nav {
+                display: none;
+            }
+
+            .sidebar {
+                display: block;
+            }
+
+            body {
+                padding-left: 250px;
+                padding-bottom: 0;
+            }
+
+            .sidebar.open {
+                left: -250px;
+            }
+
+            .sidebar:not(.open) {
+                left: 0;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .sidebar {
+                display: none;
+            }
+
+            .image-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 15px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .search-input {
+                padding: 12px 15px;
+                font-size: 14px;
+            }
+
+            .search-btn {
+                padding: 12px 20px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Menu Toggle for Desktop -->
+    <button class="menu-toggle" onclick="toggleSidebar()">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-item active" onclick="setActiveNav(this, 'home')">
+            <i class="fa-solid fa-home"></i>
+            <span>Beranda</span>
+        </div>
+        <div class="sidebar-item" onclick="setActiveNav(this, 'trending')">
+            <i class="fa-solid fa-fire"></i>
+            <span>Trending</span>
+        </div>
+        <div class="sidebar-item" onclick="setActiveNav(this, 'collections')">
+            <i class="fa-solid fa-folder"></i>
+            <span>Koleksi</span>
+        </div>
+        <div class="sidebar-item" onclick="setActiveNav(this, 'favorites')">
+            <i class="fa-solid fa-heart"></i>
+            <span>Favorit</span>
+        </div>
+        <div class="sidebar-item" onclick="setActiveNav(this, 'settings')">
+            <i class="fa-solid fa-cog"></i>
+            <span>Pengaturan</span>
+        </div>
+    </aside>
+
+    <!-- Header -->
+    <header class="header">
+        <h1><i class="fa-solid fa-images"></i> Pencari Gambar</h1>
+    </header>
+
+    <!-- Search Container -->
+    <div class="search-container">
+        <div class="search-box">
+            <input type="text" class="search-input" id="searchInput" placeholder="Cari gambar..." onkeypress="handleKeyPress(event)">
+            <button class="search-btn" onclick="searchImages()">
+                <i class="fa-solid fa-search"></i>
+                <span>Cari</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Categories -->
+    <div class="categories">
+        <div class="category-title">Kategori Populer</div>
+        <div class="category-pills">
+            <div class="category-pill" onclick="searchByCategory('nature')">Alam</div>
+            <div class="category-pill" onclick="searchByCategory('animals')">Hewan</div>
+            <div class="category-pill" onclick="searchByCategory('technology')">Teknologi</div>
+            <div class="category-pill" onclick="searchByCategory('food')">Makanan</div>
+            <div class="category-pill" onclick="searchByCategory('travel')">Wisata</div>
+            <div class="category-pill" onclick="searchByCategory('art')">Seni</div>
+        </div>
+    </div>
+
+    <!-- Image Grid Container -->
+    <div id="imageContainer">
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fa-solid fa-search"></i>
+            </div>
+            <div class="empty-title">Mulai Pencarian</div>
+            <div class="empty-text">Ketik kata kunci atau pilih kategori untuk menemukan gambar</div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="setActiveNav(this, 'home')">
+            <i class="fa-solid fa-home"></i>
+            <span>Beranda</span>
+        </div>
+        <div class="nav-item" onclick="setActiveNav(this, 'trending')">
+            <i class="fa-solid fa-fire"></i>
+            <span>Trending</span>
+        </div>
+        <div class="nav-item" onclick="setActiveNav(this, 'collections')">
+            <i class="fa-solid fa-folder"></i>
+            <span>Koleksi</span>
+        </div>
+        <div class="nav-item" onclick="setActiveNav(this, 'favorites')">
+            <i class="fa-solid fa-heart"></i>
+            <span>Favorit</span>
+        </div>
+    </nav>
+
+    <script>
+        // Real images data
+        const realImages = {
+            nature: [
+                "https://upload.wikimedia.org/wikipedia/commons/c/c8/Altja_j%C3%B5gi_Lahemaal.jpg",
+                "https://greggvanourek.com/wp-content/uploads/2023/08/Nature-path-by-water-trees-and-mountains-AdobeStock_291242770-scaled.jpeg",
+                "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800",
+                "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800",
+                "https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?w=800",
+                "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800"
+            ],
+            animals: [
+                "https://m.media-amazon.com/images/I/81zxZ+CdQHL._AC_UF894,1000_QL80_.jpg",
+                "https://media.wired.com/photos/593261cab8eb31692072f129/3:2/w_2560%2Cc_limit/85120553.jpg",
+                "https://images.unsplash.com/photo-1552728089-57bddecbbeb8?w=800",
+                "https://images.unsplash.com/photo-1518717758536-85ae33582fb5?w=800",
+                "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800",
+                "https://images.unsplash.com/photo-1537151628861-9ad289be2364?w=800"
+            ],
+            technology: [
+                "https://www.aiu.edu/wp-content/uploads/2024/07/shutterstock-business-technology-1024x710.jpg",
+                "https://globalfocusmagazine.com/wp-content/uploads/2020/02/Engaging_with_technology-scaled.jpg",
+                "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800",
+                "https://images.unsplash.com/photo-1550745165-9bc0b252726a?w=800",
+                "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800",
+                "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800"
+            ]
+        };
+
+        let currentQuery = '';
+        let isLoading = false;
+
+        // Handle Enter key in search input
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                searchImages();
+            }
+        }
+
+        // Search images from Unsplash API
+        async function searchImages() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) return;
+
+            currentQuery = query;
+            showLoading();
+
+            try {
+                // Use proxy for CORS
+                const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+                const unsplashUrl = `https://source.unsplash.com/featured/?${query}`;
+                
+                // Generate multiple random images by adding timestamp and random parameters
+                const images = [];
+                for (let i = 0; i < 12; i++) {
+                    const randomSeed = Math.random().toString(36).substring(7);
+                    const imageUrl = `${proxyUrl}${unsplashUrl}&sig=${randomSeed}`;
+                    images.push({
+                        url: imageUrl,
+                        title: `${query} - ${i + 1}`,
+                        author: 'Unsplash',
+                        category: query
+                    });
+                }
+
+                displayImages(images);
+            } catch (error) {
+                console.error('Error fetching images:', error);
+                showError('Gagal memuat gambar. Silakan coba lagi.');
+            }
+        }
+
+        // Search by category using real images
+        function searchByCategory(category) {
+            currentQuery = category;
+            showLoading();
+
+            // Update active category pill
+            document.querySelectorAll('.category-pill').forEach(pill => {
+                pill.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Get real images for category
+            const images = realImages[category] || generateUnsplashImages(category, 12);
+            
+            const imageObjects = images.map((url, index) => ({
+                url: url,
+                title: `${category.charAt(0).toUpperCase() + category.slice(1)} - ${index + 1}`,
+                author: 'Various',
+                category: category
+            }));
+
+            displayImages(imageObjects);
+        }
+
+        // Generate Unsplash images with proxy
+        function generateUnsplashImages(query, count) {
+            const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+            const images = [];
+            
+            for (let i = 0; i < count; i++) {
+                const randomSeed = Math.random().toString(36).substring(7);
+                const imageUrl = `${proxyUrl}https://source.unsplash.com/featured/800x600/?${query}&sig=${randomSeed}`;
+                images.push(imageUrl);
+            }
+            
+            return images;
+        }
+
+        // Display images in grid
+        function displayImages(images) {
+            const container = document.getElementById('imageContainer');
+            const grid = document.createElement('div');
+            grid.className = 'image-grid';
+
+            images.forEach(image => {
+                const card = document.createElement('div');
+                card.className = 'image-card';
+                card.onclick = () => openImage(image.url);
+                
+                card.innerHTML = `
+                    <img src="${image.url}" alt="${image.title}" loading="lazy">
+                    <div class="image-overlay">
+                        <div class="image-title">${image.title}</div>
+                        <div class="image-meta">
+                            <i class="fa-solid fa-user"></i> ${image.author}
+                        </div>
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            });
+
+            container.innerHTML = '';
+            container.appendChild(grid);
+        }
+
+        // Show loading state
+        function showLoading() {
+            const container = document.getElementById('imageContainer');
+            container.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p style="margin-top: 20px;">Mencari gambar...</p>
+                </div>
+            `;
+        }
+
+        // Show error state
+        function showError(message) {
+            const container = document.getElementById('imageContainer');
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fa-solid fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="empty-title">Terjadi Kesalahan</div>
+                    <div class="empty-text">${message}</div>
+                </div>
+            `;
+        }
+
+        // Open image in new tab
+        function openImage(url) {
+            window.open(url, '_blank');
+        }
+
+        // Toggle sidebar (desktop)
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        // Set active navigation item
+        function setActiveNav(element, section) {
+            // Update sidebar
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Update bottom nav
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Set active for clicked element
+            element.classList.add('active');
+            
+            // Show empty state for non-home sections
+            if (section !== 'home') {
+                const container = document.getElementById('imageContainer');
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fa-solid fa-folder-open"></i>
+                        </div>
+                        <div class="empty-title">${section.charAt(0).toUpperCase() + section.slice(1)}</div>
+                        <div class="empty-text">Fitur ini akan segera hadir</div>
+                    </div>
+                `;
+            } else {
+                // Reset to empty state
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fa-solid fa-search"></i>
+                        </div>
+                        <div class="empty-title">Mulai Pencarian</div>
+                        <div class="empty-text">Ketik kata kunci atau pilih kategori untuk menemukan gambar</div>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add some initial trending images
+            const trendingQueries = ['sunset', 'ocean', 'mountain', 'city'];
+            const randomQuery = trendingQueries[Math.floor(Math.random() * trendingQueries.length)];
+            
+            // Auto-load trending images after 1 second
+            setTimeout(() => {
+                document.getElementById('searchInput').value = randomQuery;
+                searchImages();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
