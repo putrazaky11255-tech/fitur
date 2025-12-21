@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jenis-Jenis Titan - Attack on Titan</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #1a1a1a;
+            --secondary-color: #e74c3c;
+            --accent-color: #3498db;
+            --text-light: #ecf0f1;
+            --text-dark: #2c3e50;
+            --bg-gradient: linear-gradient(135deg, #1a1a1a 0%, #2c3e50 100%);
+            --card-bg: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-light);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--primary-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-out;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .titan-loader {
+            width: 80px;
+            height: 80px;
+            border: 3px solid var(--card-bg);
+            border-top: 3px solid var(--secondary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 10px var(--secondary-color); }
+            to { text-shadow: 0 0 20px var(--secondary-color), 0 0 30px var(--secondary-color); }
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-light);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-links a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--secondary-color);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        .nav-links a:hover::before {
+            left: 0;
+        }
+
+        .nav-links a:hover {
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero {
+            margin-top: 80px;
+            padding: 4rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, var(--secondary-color) 0%, transparent 70%);
+            opacity: 0.1;
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+            animation: slideInDown 1s ease-out;
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+            animation: fadeIn 1.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Section Styles */
+        .section {
+            margin-bottom: 4rem;
+            opacity: 0;
+            animation: fadeInUp 1s ease-out forwards;
+        }
+
+        .section:nth-child(1) { animation-delay: 0.2s; }
+        .section:nth-child(2) { animation-delay: 0.4s; }
+        .section:nth-child(3) { animation-delay: 0.6s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-title {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: var(--secondary-color);
+            animation: expandWidth 1s ease-out;
+        }
+
+        @keyframes expandWidth {
+            from { width: 0; }
+            to { width: 100px; }
+        }
+
+        /* Grid Layout */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        /* Card Styles */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent, rgba(231, 76, 60, 0.1));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(231, 76, 60, 0.3);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover .card-image {
+            transform: scale(1.1);
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent-color);
+        }
+
+        .card-description {
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .card-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 100%;
+            background: var(--secondary-color);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin: 2rem 0;
+            opacity: 0;
+            animation: slideIn 0.5s ease-out forwards;
+        }
+
+        .timeline-item:nth-child(odd) {
+            padding-right: 50%;
+            text-align: right;
+            animation-name: slideInLeft;
+        }
+
+        .timeline-item:nth-child(even) {
+            padding-left: 50%;
+            animation-name: slideInRight;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: var(--secondary-color);
+            border-radius: 50%;
+            border: 3px solid var(--primary-color);
+            box-shadow: 0 0 20px rgba(231, 76, 60, 0.5);
+        }
+
+        .timeline-content {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .timeline-content:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(231, 76, 60, 0.3);
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(26, 26, 26, 0.95);
+            padding: 2rem;
+            text-align: center;
+            margin-top: 4rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links a {
+            color: var(--text-light);
+            text-decoration: none;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--secondary-color);
+            opacity: 1;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .timeline::before {
+                left: 20px;
+            }
+
+            .timeline-item {
+                padding-left: 50px !important;
+                padding-right: 0 !important;
+                text-align: left !important;
+            }
+
+            .timeline-dot {
+                left: 20px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: var(--secondary-color);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(231, 76, 60, 0.5);
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+
+        .fab:hover {
+            transform: scale(1.1) rotate(90deg);
+            background: var(--accent-color);
+        }
+
+        .fab::before {
+            content: '↑';
+            font-size: 1.5rem;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="titan-loader"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">AOT Titans</div>
+            <ul class="nav-links">
+                <li><a href="#home">Beranda</a></li>
+                <li><a href="#types">Jenis Titan</a></li>
+                <li><a href="#gallery">Galeri</a></li>
+                <li><a href="#timeline">Timeline</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <h1>Jenis-Jenis Titan</h1>
+        <p>Eksplorasi semua Titan dalam dunia Attack on Titan</p>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Titan Types Section -->
+        <section class="section" id="types">
+            <h2 class="section-title">Tipe-Tipe Titan</h2>
+            <div class="grid" id="titanTypesGrid">
+                <!-- Cards will be dynamically inserted here -->
+            </div>
+        </section>
+
+        <!-- Gallery Section -->
+        <section class="section" id="gallery">
+            <h2 class="section-title">Galeri Titan</h2>
+            <div class="grid" id="galleryGrid">
+                <!-- Gallery items will be dynamically inserted here -->
+            </div>
+        </section>
+
+        <!-- Timeline Section -->
+        <section class="section" id="timeline">
+            <h2 class="section-title">Timeline Kemunculan Titan</h2>
+            <div class="timeline" id="timelineContainer">
+                <!-- Timeline items will be dynamically inserted here -->
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="#home">Beranda</a>
+                <a href="#types">Jenis Titan</a>
+                <a href="#gallery">Galeri</a>
+                <a href="#timeline">Timeline</a>
+            </div>
+            <p>&copy; 2024 AOT Titans. Dibuat dengan ❤️ oleh Opus AI Coder</p>
+        </div>
+    </footer>
+
+    <!-- Floating Action Button -->
+    <div class="fab" onclick="scrollToTop()"></div>
+
+    <script>
+        // Titan Types Data
+        const titanTypes = [
+            {
+                name: "Attack Titan",
+                description: "Titan dengan kemampuan melihat masa depan dan kebebasan untuk bertarung. Dikendalikan oleh Eren Yeager.",
+                image: "https://i.redd.it/5s83gv162t3b1.jpg",
+                height: "15m",
+                strength: "9/10",
+                speed: "8/10"
+            },
+            {
+                name: "Colossal Titan",
+                description: "Titan terbesar dengan tinggi 60 meter. Memiliki kemampuan menguapkan tubuhnya untuk menghasilkan ledakan.",
+                image: "https://i.ytimg.com/vi/QfKrKqPGQZQ/maxresdefault.jpg",
+                height: "60m",
+                strength: "7/10",
+                speed: "3/10"
+            },
+            {
+                name: "Armored Titan",
+                description: "Titan dengan pelindung armor keras di seluruh tubuhnya. Sangat tangguh dalam pertahanan.",
+                image: "https://i.ytimg.com/vi/dzk48Fix8Ls/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLC2WAE6pzd5-fysG5zAK80qb2HMow",
+                height: "15m",
+                strength: "10/10",
+                speed: "6/10"
+            },
+            {
+                name: "Female Titan",
+                description: "Titan dengan kemampuan memanggil Titan murni dan memiliki kecepatan serta kekuatan seimbang.",
+                image: "https://greghornart.com/cdn/shop/products/Attack.On.Titan.Mikasa_1024x1024.jpg?v=1524306035",
+                height: "14m",
+                strength: "8/10",
+                speed: "9/10"
+            },
+            {
+                name: "Beast Titan",
+                description: "Titan dengan bentuk mirip hewan, memiliki kemampuan mengendalikan Titan murni dan melempar objek dengan presisi tinggi.",
+                image: "https://m.media-amazon.com/images/I/61t9ie31jgL._AC_UF894,1000_QL80_.jpg",
+                height: "17m",
+                strength: "8/10",
+                speed: "7/10"
+            },
+            {
+                name: "Jaw Titan",
+                description: "Titan tercepat dengan rahang yang sangat kuat dan cakar tajam. Sangat lincah dalam pertarungan jarak dekat.",
+                image: "https://static.wikia.nocookie.net/villains/images/0/03/Wall_Titans_Rumbling_AoT_Anime.png/revision/latest/scale-to-width/360?cb=20250105113708",
+                height: "5m",
+                strength: "7/10",
+                speed: "11/10"
+            }
+        ];
+
+        // Gallery Data
+        const galleryImages = [
+            {
+                title: "Wall Titans",
+                description: "Ratusan Titan yang membentuk dinding pertahanan",
+                image: "https://static.wikia.nocookie.net/villains/images/0/03/Wall_Titans_Rumbling_AoT_Anime.png/revision/latest/scale-to-width/360?cb=20250105113708"
+            },
+            {
+                title: "Eren's Titan Form",
+                description: "Transformasi Eren Yeager menjadi Attack Titan",
+                image: "https://i.ytimg.com/vi/dzk48Fix8Ls/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLC2WAE6pzd5-fysG5zAK80qb2HMow"
+            },
+            {
+                title: "Colossal Titan Appearance",
+                description: "Kemunculan pertama Colossal Titan di Shiganshina",
+                image: "https://i.ytimg.com/vi/QfKrKqPGQZQ/maxresdefault.jpg"
+            },
+            {
+                title: "Armored Titan vs Survey Corps",
+                description: "Pertarungan sengit antara Armored Titan dan Pasukan Pengintai",
+                image: "https://i.redd.it/5s83gv162t3b1.jpg"
+            }
+        ];
+
+        // Timeline Data
+        const timelineEvents = [
+            {
+                year: "845",
+                event: "Fall of Shiganshina",
+                description: "Colossal dan Armored Titan menghancurkan tembok luar, memulai serangan Titan pertama."
+            },
+            {
+                year: "850",
+                event: "Battle of Trost District",
+                description: "Eren Yeager pertama kali bertransformasi menjadi Attack Titan untuk menyelamatkan teman-temannya."
+            },
+            {
+                year: "851",
+                event: "57th Expedition Beyond the Walls",
+                description: "Female Titan muncul dan menyerang Pasukan Pengintai."
+            },
+            {
+                year: "854",
+                event: "The Rumbling Begins",
+                description: "Eren mengaktifkan Rumbling, membebaskan Wall Titans untuk menghancurkan dunia."
+            }
+        ];
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Hide loading screen after content loads
+            setTimeout(() => {
+                document.getElementById('loadingScreen').classList.add('hidden');
+            }, 1500);
+
+            // Render Titan Types
+            renderTitanTypes();
+            
+            // Render Gallery
+            renderGallery();
+            
+            // Render Timeline
+            renderTimeline();
+
+            // Smooth scrolling for navigation links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+
+            // Add scroll animations
+            window.addEventListener('scroll', handleScroll);
+        });
+
+        // Render Titan Types
+        function renderTitanTypes() {
+            const grid = document.getElementById('titanTypesGrid');
+            
+            titanTypes.forEach((titan, index) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.animationDelay = `${index * 0.1}s`;
+                
+                card.innerHTML = `
+                    <img src="${titan.image}" alt="${titan.name}" class="card-image">
+                    <div class="card-content">
+                        <h3 class="card-title">${titan.name}</h3>
+                        <p class="card-description">${titan.description}</p>
+                        <div class="card-stats">
+                            <div class="stat">
+                                <div class="stat-value">${titan.height}</div>
+                                <div class="stat-label">Tinggi</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">${titan.strength}</div>
+                                <div class="stat-label">Kekuatan</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">${titan.speed}</div>
+                                <div class="stat-label">Kecepatan</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        // Render Gallery
+        function renderGallery() {
+            const grid = document.getElementById('galleryGrid');
+            
+            galleryImages.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.animationDelay = `${index * 0.15}s`;
+                
+                card.innerHTML = `
+                    <img src="${item.image}" alt="${item.title}" class="card-image">
+                    <div class="card-content">
+                        <h3 class="card-title">${item.title}</h3>
+                        <p class="card-description">${item.description}</p>
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        // Render Timeline
+        function renderTimeline() {
+            const container = document.getElementById('timelineContainer');
+            
+            timelineEvents.forEach((event, index) => {
+                const item = document.createElement('div');
+                item.className = 'timeline-item';
+                item.style.animationDelay = `${index * 0.2}s`;
+                
+                item.innerHTML = `
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <h3 style="color: var(--secondary-color); margin-bottom: 0.5rem;">${event.year}</h3>
+                        <h4 style="margin-bottom: 0.5rem;">${event.event}</h4>
+                        <p style="opacity: 0.9;">${event.description}</p>
+                    </div>
+                `;
+                
+                container.appendChild(item);
+            });
+        }
+
+        // Scroll to top function
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // Handle scroll animations
+        function handleScroll() {
+            const sections = document.querySelectorAll('.section');
+            const scrollPosition = window.scrollY + window.innerHeight * 0.8;
+            
+            sections.forEach(section => {
+                if (section.offsetTop < scrollPosition) {
+                    section.style.opacity = '1';
+                }
+            });
+        }
+
+        // Fetch additional data from API (using proxy)
+        fetch('https://cors-anywhere.herokuapp.com/https://attackontitanapi.onrender.com/api/titans')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Titan API Data:', data);
+                // You can use this data to enhance the content
+            })
+            .catch(error => {
+                console.log('API Error:', error);
+                // Continue with static data if API fails
+            });
+    </script>
+</body>
+</html>
