@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LirikFinder - Temukan Lirik Lagu Favoritmu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #8b5cf6;
+            --accent-color: #ec4899;
+            --bg-dark: #f8f9fa;
+            --bg-light: #ffffff;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --error-color: #ef4444;
+            --success-color: #10b981;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+        }
+
+        body.dark-mode {
+            --bg-dark: #0f172a;
+            --bg-light: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --glass-bg: rgba(30, 41, 59, 0.5);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-light) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        .music-note {
+            position: absolute;
+            font-size: 2rem;
+            animation: float 20s infinite linear;
+            color: var(--primary-color);
+        }
+
+        @keyframes float {
+            from {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            to {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .theme-toggle i {
+            font-size: 24px;
+            color: var(--primary-color);
+        }
+
+        /* Header */
+        header {
+            padding: 2rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 3s ease infinite;
+            margin-bottom: 0.5rem;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% {
+                filter: hue-rotate(0deg);
+            }
+            50% {
+                filter: hue-rotate(30deg);
+            }
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        /* Search Section */
+        .search-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow);
+            animation: slideIn 0.6s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            background: var(--glass-bg);
+            border: 2px solid rgba(99, 102, 241, 0.2);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: var(--glass-bg);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+        }
+
+        .search-btn {
+            width: 100%;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.3);
+        }
+
+        .search-btn:active {
+            transform: translateY(0);
+        }
+
+        .search-btn.loading {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .search-btn.loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 2px solid white;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* History Section */
+        .history-section {
+            margin: 2rem 0;
+        }
+
+        .history-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        .clear-history {
+            background: transparent;
+            border: 1px solid var(--error-color);
+            color: var(--error-color);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .clear-history:hover {
+            background: var(--error-color);
+            color: white;
+        }
+
+        .history-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .history-item {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .history-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.2);
+            border-color: var(--primary-color);
+        }
+
+        .history-item i {
+            color: var(--primary-color);
+        }
+
+        .history-item .song-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .history-item .song-title {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .history-item .artist-name {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* Results Section */
+        .results-section {
+            margin: 2rem 0;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .results-section.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .music-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .music-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.2);
+        }
+
+        .music-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .album-art {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            margin-right: 1.5rem;
+            object-fit: cover;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .song-info h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.3rem;
+            color: var(--text-primary);
+        }
+
+        .song-info p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .audio-player {
+            width: 100%;
+            margin-top: 1rem;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        /* Error Message */
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--error-color);
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            25% {
+                transform: translateX(-10px);
+            }
+            75% {
+                transform: translateX(10px);
+            }
+        }
+
+        /* Popular Searches */
+        .popular-section {
+            margin: 3rem 0;
+        }
+
+        .popular-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+        }
+
+        .popular-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .popular-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .popular-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent, rgba(99, 102, 241, 0.1));
+            transform: translateX(-100%);
+            transition: transform 0.5s ease;
+        }
+
+        .popular-card:hover::before {
+            transform: translateX(0);
+        }
+
+        .popular-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.2);
+            border-color: var(--primary-color);
+        }
+
+        .popular-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .popular-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .popular-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            margin-top: 4rem;
+            border-top: 1px solid var(--glass-border);
+            color: var(--text-secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .search-section {
+                padding: 1.5rem;
+            }
+
+            .music-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .album-art {
+                margin-right: 0;
+                margin-bottom: 1rem;
+            }
+
+            .history-list {
+                flex-direction: column;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.5s ease;
+        }
+
+        /* Font Awesome Icons */
+        .fa {
+            display: inline-block;
+            font: normal normal normal 14px/1 FontAwesome;
+            font-size: inherit;
+            text-rendering: auto;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .fa-moon:before {
+            content: "🌙";
+        }
+
+        .fa-sun:before {
+            content: "☀️";
+        }
+
+        .fa-clock:before {
+            content: "🕐";
+        }
+
+        .fa-music:before {
+            content: "🎵";
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animation">
+        <span class="music-note" style="left: 10%; animation-delay: 0s;">♪</span>
+        <span class="music-note" style="left: 30%; animation-delay: 3s;">♫</span>
+        <span class="music-note" style="left: 50%; animation-delay: 6s;">♬</span>
+        <span class="music-note" style="left: 70%; animation-delay: 9s;">♪</span>
+        <span class="music-note" style="left: 90%; animation-delay: 12s;">♫</span>
+    </div>
+
+    <!-- Theme Toggle -->
+    <div class="theme-toggle" onclick="toggleTheme()">
+        <i id="theme-icon" class="fa fa-sun"></i>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <h1>LirikFinder</h1>
+        <p class="subtitle">Temukan musik favoritmu dengan mudah</p>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Search Section -->
+        <section class="search-section">
+            <div class="input-group">
+                <label for="title">Judul Lagu</label>
+                <input type="text" id="title" placeholder="Contoh: Blinding Lights">
+            </div>
+            <button class="search-btn" onclick="searchMusic()">
+                <span class="btn-text">Cari Musik</span>
+            </button>
+        </section>
+
+        <!-- History Section -->
+        <section id="history-section" class="history-section" style="display: none;">
+            <div class="history-title">
+                <h2><i class="fa fa-clock"></i> Riwayat Pencarian</h2>
+                <button class="clear-history" onclick="clearHistory()">Hapus Riwayat</button>
+            </div>
+            <div id="history-list" class="history-list">
+                <!-- History items will be inserted here -->
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section id="results" class="results-section">
+            <!-- Results will be inserted here -->
+        </section>
+
+        <!-- Popular Searches -->
+        <section class="popular-section">
+            <h2 class="popular-title">Pencarian Populer</h2>
+            <div class="popular-grid">
+                <div class="popular-card" onclick="quickSearch('Blinding Lights')">
+                    <img src="https://picsum.photos/seed/blindinglights/300/150.jpg" alt="Blinding Lights">
+                    <h3>Blinding Lights</h3>
+                </div>
+                <div class="popular-card" onclick="quickSearch('Yellow')">
+                    <img src="https://picsum.photos/seed/yellow/300/150.jpg" alt="Yellow">
+                    <h3>Yellow</h3>
+                </div>
+                <div class="popular-card" onclick="quickSearch('Perfect')">
+                    <img src="https://picsum.photos/seed/perfect/300/150.jpg" alt="Perfect">
+                    <h3>Perfect</h3>
+                </div>
+                <div class="popular-card" onclick="quickSearch('Believer')">
+                    <img src="https://picsum.photos/seed/believer/300/150.jpg" alt="Believer">
+                    <h3>Believer</h3>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 LirikFinder. Dibuat dengan ❤️ untuk para pecinta musik</p>
+    </footer>
+
+    <script>
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load theme preference
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('theme-icon').className = 'fa fa-moon';
+            }
+
+            // Load search history
+            loadHistory();
+
+            // Add enter key support
+            document.getElementById('title').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchMusic();
+                }
+            });
+        });
+
+        // Toggle theme
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('theme-icon');
+            
+            if (body.classList.contains('dark-mode')) {
+                body.classList.remove('dark-mode');
+                themeIcon.className = 'fa fa-sun';
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.classList.add('dark-mode');
+                themeIcon.className = 'fa fa-moon';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Load search history
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem('musicHistory')) || [];
+            const historySection = document.getElementById('history-section');
+            const historyList = document.getElementById('history-list');
+            
+            if (history.length > 0) {
+                historySection.style.display = 'block';
+                historyList.innerHTML = '';
+                
+                // Show only the last 5 items
+                const recentHistory = history.slice(-5).reverse();
+                
+                recentHistory.forEach(item => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'history-item';
+                    historyItem.innerHTML = `
+                        <i class="fa fa-music"></i>
+                        <div class="song-info">
+                            <span class="song-title">${item.title}</span>
+                        </div>
+                    `;
+                    historyItem.onclick = () => quickSearch(item.title);
+                    historyList.appendChild(historyItem);
+                });
+            } else {
+                historySection.style.display = 'none';
+            }
+        }
+
+        // Add to search history
+        function addToHistory(title) {
+            let history = JSON.parse(localStorage.getItem('musicHistory')) || [];
+            
+            // Check if this song is already in history
+            const existingIndex = history.findIndex(item => 
+                item.title.toLowerCase() === title.toLowerCase()
+            );
+            
+            // Remove existing entry if found
+            if (existingIndex !== -1) {
+                history.splice(existingIndex, 1);
+            }
+            
+            // Add new entry at the beginning
+            history.unshift({ title });
+            
+            // Keep only the last 20 entries
+            if (history.length > 20) {
+                history = history.slice(0, 20);
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('musicHistory', JSON.stringify(history));
+            
+            // Reload history display
+            loadHistory();
+        }
+
+        // Clear search history
+        function clearHistory() {
+            if (confirm('Apakah Anda yakin ingin menghapus semua riwayat pencarian?')) {
+                localStorage.removeItem('musicHistory');
+                loadHistory();
+                showNotification('Riwayat pencarian telah dihapus', 'success');
+            }
+        }
+
+        // Quick search function
+        function quickSearch(title) {
+            document.getElementById('title').value = title;
+            searchMusic();
+        }
+
+        // Main search function
+        async function searchMusic() {
+            const title = document.getElementById('title').value.trim();
+            const resultsSection = document.getElementById('results');
+            const searchBtn = document.querySelector('.search-btn');
+            
+            // Validation
+            if (!title) {
+                showNotification('Silakan masukkan judul lagu!', 'error');
+                return;
+            }
+
+            // Add to history
+            addToHistory(title);
+
+            // Show loading state
+            searchBtn.classList.add('loading');
+            searchBtn.querySelector('.btn-text').textContent = 'Mencari...';
+
+            try {
+                // Using CORS proxy as required
+                const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+                const apiUrl = `https://api.deezer.com/search?q=${encodeURIComponent(title)}`;
+                
+                const response = await fetch(proxyUrl + apiUrl);
+                const data = await response.json();
+
+                if (data.data && data.data.length > 0) {
+                    displayMusicResults(data.data);
+                } else {
+                    showError('Musik tidak ditemukan. Coba cek ejaan atau cari lagu lain!');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Terjadi kesalahan. Silakan coba lagi nanti.');
+            } finally {
+                // Hide loading state
+                searchBtn.classList.remove('loading');
+                searchBtn.querySelector('.btn-text').textContent = 'Cari Musik';
+            }
+        }
+
+        // Display music results
+        function displayMusicResults(tracks) {
+            const resultsSection = document.getElementById('results');
+            
+            let html = '';
+            tracks.forEach(track => {
+                html += `
+                    <div class="music-card fade-in">
+                        <div class="music-header">
+                            <img src="${track.album.cover_medium}" alt="${track.title}" class="album-art">
+                            <div class="song-info">
+                                <h2>${track.title}</h2>
+                                <p>${track.artist.name}</p>
+                            </div>
+                        </div>
+                        <audio controls class="audio-player" src="${track.preview}"></audio>
+                    </div>
+                `;
+            });
+            
+            resultsSection.innerHTML = html;
+            resultsSection.classList.add('show');
+            
+            // Scroll to results
+            resultsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Show error message
+        function showError(message) {
+            const resultsSection = document.getElementById('results');
+            resultsSection.innerHTML = `
+                <div class="error-message fade-in">
+                    <p>${message}</p>
+                </div>
+            `;
+            resultsSection.classList.add('show');
+        }
+
+        // Show notification (alternative to alert)
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type} fade-in`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'error' ? 'var(--error-color)' : 'var(--success-color)'};
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 12px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                z-index: 1000;
+                animation: slideInRight 0.3s ease;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.animation = 'fadeOut 0.3s ease';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Add CSS animation for notifications
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            @keyframes fadeOut {
+                from {
+                    opacity: 1;
+                }
+                to {
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
