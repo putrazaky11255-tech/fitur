@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mars 3D Explorer</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+        :root {
+            --bg-color: #0a0a0a;
+            --primary-color: #d14a3a;
+            --secondary-color: #f4a261;
+            --text-color: #e8e8e8;
+            --accent-color: #264653;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(209, 74, 58, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(38, 70, 83, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(244, 162, 97, 0.1) 0%, transparent 50%);
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1rem 2rem;
+            background: rgba(10, 10, 10, 0.7);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(209, 74, 58, 0.3);
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--primary-color);
+            text-shadow: 0 0 10px rgba(209, 74, 58, 0.7);
+            letter-spacing: 2px;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            position: relative;
+            padding-bottom: 5px;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://solarsystem.nasa.gov/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBczhRIiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--79c1038e925ffe9d42353af8ada714d18055c59c/mars_th.jpg?disposition=inline') center/cover no-repeat;
+            filter: brightness(0.5);
+            z-index: -1;
+        }
+
+        .hero-content {
+            z-index: 1;
+            max-width: 800px;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            text-shadow: 0 0 20px rgba(209, 74, 58, 0.8);
+            animation: pulse 2s infinite alternate;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: var(--secondary-color);
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(209, 74, 58, 0.4);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(209, 74, 58, 0.6);
+        }
+
+        /* 3D Mars Section */
+        .mars-3d-section {
+            padding: 5rem 2rem;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: var(--primary-color);
+            text-align: center;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: var(--secondary-color);
+        }
+
+        .mars-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 2rem 0;
+            perspective: 1000px;
+        }
+
+        .mars-3d {
+            width: 300px;
+            height: 300px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotate 20s infinite linear;
+        }
+
+        .mars-face {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: url('https://media.sketchfab.com/models/7cf3b31ca60f45cc8e52f7fa863ad09a/thumbnails/ec7c54af6d2f4f339232f4de2ddb3a66/67364490e20446c19e870a9e36ea969b.jpeg') center/cover no-repeat;
+            border: 2px solid rgba(209, 74, 58, 0.3);
+            box-shadow: 0 0 20px rgba(209, 74, 58, 0.5);
+        }
+
+        .mars-face:nth-child(1) { transform: rotateY(0deg) translateZ(150px); }
+        .mars-face:nth-child(2) { transform: rotateY(90deg) translateZ(150px); }
+        .mars-face:nth-child(3) { transform: rotateY(180deg) translateZ(150px); }
+        .mars-face:nth-child(4) { transform: rotateY(-90deg) translateZ(150px); }
+        .mars-face:nth-child(5) { transform: rotateX(90deg) translateZ(150px); }
+        .mars-face:nth-child(6) { transform: rotateX(-90deg) translateZ(150px); }
+
+        /* Info Section */
+        .info-section {
+            padding: 5rem 2rem;
+            background: rgba(38, 70, 83, 0.1);
+        }
+
+        .info-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .info-card {
+            background: rgba(38, 70, 83, 0.2);
+            border-radius: 10px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(209, 74, 58, 0.2);
+        }
+
+        .info-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(209, 74, 58, 0.3);
+            border-color: var(--primary-color);
+        }
+
+        .info-card h3 {
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .info-card p {
+            line-height: 1.6;
+        }
+
+        /* Gallery Section */
+        .gallery-section {
+            padding: 5rem 2rem;
+        }
+
+        .gallery-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            height: 200px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.1);
+        }
+
+        .gallery-item .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(209, 74, 58, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .gallery-item:hover .overlay {
+            opacity: 1;
+        }
+
+        .gallery-item .overlay-text {
+            color: white;
+            font-weight: 700;
+            text-align: center;
+            padding: 0 1rem;
+        }
+
+        /* Contact Section */
+        .contact-section {
+            padding: 5rem 2rem;
+            background: rgba(38, 70, 83, 0.1);
+            text-align: center;
+        }
+
+        .contact-form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--secondary-color);
+            font-weight: 700;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(38, 70, 83, 0.2);
+            border: 1px solid rgba(209, 74, 58, 0.3);
+            border-radius: 5px;
+            color: var(--text-color);
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px rgba(209, 74, 58, 0.3);
+        }
+
+        .submit-button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(209, 74, 58, 0.4);
+        }
+
+        .submit-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(209, 74, 58, 0.6);
+        }
+
+        /* Footer */
+        .footer {
+            padding: 2rem;
+            text-align: center;
+            background: rgba(10, 10, 10, 0.7);
+            border-top: 1px solid rgba(209, 74, 58, 0.3);
+        }
+
+        .footer p {
+            margin-bottom: 1rem;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            list-style: none;
+        }
+
+        .social-links a {
+            color: var(--text-color);
+            font-size: 1.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .social-links a:hover {
+            color: var(--primary-color);
+        }
+
+        /* Animations */
+        @keyframes rotate {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
+        }
+
+        @keyframes pulse {
+            from { text-shadow: 0 0 10px rgba(209, 74, 58, 0.7); }
+            to { text-shadow: 0 0 20px rgba(209, 74, 58, 0.9), 0 0 30px rgba(209, 74, 58, 0.7); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            .mars-3d {
+                width: 200px;
+                height: 200px;
+            }
+            
+            .mars-face {
+                width: 200px;
+                height: 200px;
+            }
+            
+            .mars-face:nth-child(1) { transform: rotateY(0deg) translateZ(100px); }
+            .mars-face:nth-child(2) { transform: rotateY(90deg) translateZ(100px); }
+            .mars-face:nth-child(3) { transform: rotateY(180deg) translateZ(100px); }
+            .mars-face:nth-child(4) { transform: rotateY(-90deg) translateZ(100px); }
+            .mars-face:nth-child(5) { transform: rotateX(90deg) translateZ(100px); }
+            .mars-face:nth-child(6) { transform: rotateX(-90deg) translateZ(100px); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">MARS 3D</div>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="#home">Beranda</a></li>
+                <li><a href="#mars-3d">Mars 3D</a></li>
+                <li><a href="#info">Informasi</a></li>
+                <li><a href="#gallery">Galeri</a></li>
+                <li><a href="#contact">Kontak</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+            <h1>JELAJAHI MARS</h1>
+            <p>Planet Merah yang memikat imajinasi manusia selama berabad-abad</p>
+            <a href="#mars-3d" class="cta-button">Mulai Eksplorasi</a>
+        </div>
+    </section>
+
+    <!-- 3D Mars Section -->
+    <section id="mars-3d" class="mars-3d-section">
+        <h2 class="section-title">Model 3D Mars</h2>
+        <div class="mars-container">
+            <div class="mars-3d">
+                <div class="mars-face"></div>
+                <div class="mars-face"></div>
+                <div class="mars-face"></div>
+                <div class="mars-face"></div>
+                <div class="mars-face"></div>
+                <div class="mars-face"></div>
+            </div>
+        </div>
+        <p>Model 3D interaktif planet Mars yang dapat Anda putar dan zoom</p>
+    </section>
+
+    <!-- Info Section -->
+    <section id="info" class="info-section">
+        <h2 class="section-title">Tentang Mars</h2>
+        <div class="info-container">
+            <div class="info-card">
+                <h3>Iklim</h3>
+                <p>Mars memiliki iklim yang sangat ekstrem dengan suhu rata-rata -80°F (-62°C). Planet ini mengalami musim dingin yang sangat dingin dan musim panas yang relatif hangat di khatulistiwa.</p>
+            </div>
+            <div class="info-card">
+                <h3>Geografi</h3>
+                <p>Mars memiliki fitur geografis yang menakjubkan termasuk Olympus Mons, gunung berapi terbesar di tata surya, dan Valles Marineris, sistem ngarai terbesar di tata surya.</p>
+            </div>
+            <div class="info-card">
+                <h3>Eksplorasi</h3>
+                <p>Beberapa misi telah dikirim ke Mars termasuk rover seperti Curiosity dan Perseverance yang terus mengirimkan data berharga tentang planet merah ini.</p>
+            </div>
+            <div class="info-card">
+                <h3>Potensi Kehidupan</h3>
+                <p>Ilmuwan terus mencari tanda-tanda kehidupan masa lalu atau saat ini di Mars, dengan fokus pada area di mana air mungkin pernah ada.</p>
+            </div>
+            <div class="info-card">
+                <h3>Bulan</h3>
+                <p>Mars memiliki dua bulan kecil, Phobos dan Deimos, yang diyakini sebagai asteroid yang ditangkap oleh gravitasi Mars.</p>
+            </div>
+            <div class="info-card">
+                <h3>Misi Masa Depan</h3>
+                <p>NASA dan badan antariksa lainnya merencanakan misi berawak ke Mars dalam beberapa dekade mendatang, dengan tujuan jangka panjang untuk menjadikan Mars koloni manusia kedua.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section id="gallery" class="gallery-section">
+        <h2 class="section-title">Galeri Mars</h2>
+        <div class="gallery-container">
+            <div class="gallery-item">
+                <img src="https://science.nasa.gov/wp-content/uploads/2017/11/pia17944.jpg" alt="Permukaan Mars">
+                <div class="overlay">
+                    <div class="overlay-text">Permukaan Mars</div>
+                </div>
+            </div>
+            <div class="gallery-item">
+                <img src="https://www.universetoday.com/article_images/mars_rocks.jpg" alt="Batu-batu di Mars">
+                <div class="overlay">
+                    <div class="overlay-text">Batu-batu di Mars</div>
+                </div>
+            </div>
+            <div class="gallery-item">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/d/d8/NASA_Mars_Rover.jpg" alt="Mars Rover">
+                <div class="overlay">
+                    <div class="overlay-text">Mars Rover</div>
+                </div>
+            </div>
+            <div class="gallery-item">
+                <img src="https://cdn.britannica.com/93/93293-050-92D12F74/Artist-conception-Mars-Exploration-Rover.jpg" alt="Eksplorasi Mars">
+                <div class="overlay">
+                    <div class="overlay-text">Eksplorasi Mars</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact-section">
+        <h2 class="section-title">Hubungi Kami</h2>
+        <div class="contact-form">
+            <form id="contactForm">
+                <div class="form-group">
+                    <label for="name">Nama</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="message">Pesan</label>
+                    <textarea id="message" name="message" rows="5" required></textarea>
+                </div>
+                <button type="submit" class="submit-button">Kirim Pesan</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2023 Mars 3D Explorer. All rights reserved.</p>
+        <ul class="social-links">
+            <li><a href="#">Facebook</a></li>
+            <li><a href="#">Twitter</a></li>
+            <li><a href="#">Instagram</a></li>
+            <li><a href="#">YouTube</a></li>
+        </ul>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Form submission handler
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const message = document.getElementById('message').value;
+            
+            // Here you would normally send the data to a server
+            // For this demo, we'll just show an alert
+            alert(`Terima kasih, ${name}! Pesan Anda telah dikirim.`);
+            
+            // Reset the form
+            this.reset();
+        });
+
+        // Add animation to elements when they come into view
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = 1;
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe all info cards and gallery items
+        document.querySelectorAll('.info-card, .gallery-item').forEach(el => {
+            el.style.opacity = 0;
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
