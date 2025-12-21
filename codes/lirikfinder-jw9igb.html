@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LirikKu - Pencari Lirik Lagu</title>
+    
+    <!-- Font Awesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- Gaya Umum & Reset --- */
+        :root {
+            --primary-color: #1DB954; /* Hijau Spotify */
+            --secondary-color: #191414; /* Hitam Spotify */
+            --background-color: #121212;
+            --surface-color: #282828;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B3B3B3;
+            --sidebar-width: 250px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* --- Sidebar Navigasi --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--secondary-color);
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-menu {
+            list-style: none;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            margin-bottom: 1rem;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background-color: var(--surface-color);
+            color: var(--text-primary);
+        }
+
+        /* --- Konten Utama --- */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 2rem;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, var(--primary-color), #1ed760);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        /* --- Area Pencarian --- */
+        .search-container {
+            background-color: var(--surface-color);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            background-color: var(--background-color);
+            border: 1px solid #404040;
+            border-radius: 50px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .search-btn {
+            padding: 1rem 2rem;
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .search-btn:hover {
+            background-color: #1ed760;
+        }
+
+        .search-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* --- Area Hasil & Lirik --- */
+        #result-container {
+            display: none;
+        }
+
+        #result-container.show {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .lyrics-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #404040;
+        }
+
+        .album-art {
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            object-fit: cover;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .song-info h2 {
+            font-size: 1.8rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .song-info p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        #lyrics-display {
+            background-color: var(--surface-color);
+            padding: 2rem;
+            border-radius: 12px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+
+        .loading, .error-message {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+        }
+
+        /* --- Navigasi Bawah (Mobile) --- */
+        .bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--secondary-color);
+            padding: 0.75rem 0;
+            z-index: 1000;
+            border-top: 1px solid #404040;
+        }
+
+        .bottom-nav-list {
+            list-style: none;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .bottom-nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.5rem;
+        }
+        
+        .bottom-nav-link i {
+            font-size: 1.5rem;
+        }
+
+        .bottom-nav-link.active {
+            color: var(--primary-color);
+        }
+
+        /* --- Hamburger Menu (Mobile) --- */
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1001;
+            background: var(--primary-color);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            color: var(--secondary-color);
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* --- Responsive Design --- */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 4rem 1rem 5rem 1rem; /* Tambahkan padding bawah untuk navigasi bawah */
+            }
+
+            .menu-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .bottom-nav {
+                display: block;
+            }
+
+            .lyrics-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .album-art {
+                width: 150px;
+                height: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Navigasi -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <i class="fa-solid fa-music"></i>
+            <span>LirikKu</span>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="#" class="nav-link active">
+                    <i class="fa-solid fa-search"></i>
+                    <span>Cari Lirik</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <i class="fa-solid fa-heart"></i>
+                    <span>Favorit</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span>Riwayat</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <i class="fa-solid fa-gear"></i>
+                    <span>Pengaturan</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Tombol Menu untuk Mobile -->
+    <button class="menu-toggle" id="menu-toggle">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- Konten Utama -->
+    <main class="main-content">
+        <div class="container">
+            <h1>LirikKu</h1>
+            <p class="subtitle">Temukan lirik lagu favorit Anda dengan mudah dan cepat.</p>
+
+            <!-- Area Pencarian -->
+            <div class="search-container">
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" id="artist-input" placeholder="Nama Artis">
+                    </div>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-microphone-lines"></i>
+                        <input type="text" id="title-input" placeholder="Judul Lagu">
+                    </div>
+                    <button class="search-btn" id="search-btn">
+                        <i class="fa-solid fa-search"></i>
+                        Cari Lirik
+                    </button>
+                </div>
+            </div>
+
+            <!-- Area Hasil Pencarian -->
+            <div id="result-container">
+                <!-- Konten akan diisi oleh JavaScript -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Navigasi Bawah (Mobile) -->
+    <nav class="bottom-nav">
+        <ul class="bottom-nav-list">
+            <li><a href="#" class="bottom-nav-link active"><i class="fa-solid fa-search"></i><span>Cari</span></a></li>
+            <li><a href="#" class="bottom-nav-link"><i class="fa-solid fa-heart"></i><span>Favorit</span></a></li>
+            <li><a href="#" class="bottom-nav-link"><i class="fa-solid fa-clock-rotate-left"></i><span>Riwayat</span></a></li>
+            <li><a href="#" class="bottom-nav-link"><i class="fa-solid fa-gear"></i><span>Setelan</span></a></li>
+        </ul>
+    </nav>
+
+    <script>
+        // --- Elemen DOM ---
+        const artistInput = document.getElementById('artist-input');
+        const titleInput = document.getElementById('title-input');
+        const searchBtn = document.getElementById('search-btn');
+        const resultContainer = document.getElementById('result-container');
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.getElementById('sidebar');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const bottomNavLinks = document.querySelectorAll('.bottom-nav-link');
+
+        // --- Event Listener ---
+        searchBtn.addEventListener('click', searchLyrics);
+        
+        // Cari lirik saat tombol Enter ditekan di input
+        [artistInput, titleInput].forEach(input => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    searchLyrics();
+                }
+            });
+        });
+
+        // Toggle sidebar untuk mobile
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+
+        // Tutup sidebar saat link di-klik (mobile)
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.remove('active');
+                }
+            });
+        });
+        
+        // Fungsi untuk menandai link navigasi yang aktif
+        function setActiveLink() {
+            navLinks.forEach(link => link.classList.remove('active'));
+            bottomNavLinks.forEach(link => link.classList.remove('active'));
+            // Tandai link 'Cari' sebagai aktif secara default
+            navLinks[0].classList.add('active');
+            bottomNavLinks[0].classList.add('active');
+        }
+        setActiveLink();
+
+        // --- Logika Pencarian Lirik ---
+        async function searchLyrics() {
+            const artist = artistInput.value.trim();
+            const title = titleInput.value.trim();
+
+            if (!artist || !title) {
+                resultContainer.innerHTML = `<p class="error-message">Silakan masukkan nama artis dan judul lagu.</p>`;
+                resultContainer.classList.add('show');
+                return;
+            }
+
+            // Tampilkan loading
+            resultContainer.innerHTML = `<p class="loading"><i class="fa-solid fa-spinner fa-spin"></i> Mencari lirik...</p>`;
+            resultContainer.classList.add('show');
+
+            // Daftar gambar placeholder untuk cover album
+            const placeholderImages = [
+                "https://www.chosic.com/wp-content/uploads/2022/02/Find-song-by-lyrics.jpg",
+                "https://m.media-amazon.com/images/I/61XLXzGq6aL._AC_UF1000,1000_QL80_.jpg",
+                "https://cdn.trendhunterstatic.com/thumbs/553/lyrics-search.jpeg",
+                "https://www.toughtones.com/wp-content/uploads/2019/08/lyrics-.jpg"
+            ];
+            const randomImage = placeholderImages[Math.floor(Math.random() * placeholderImages.length)];
+
+            // API URL dengan Proxy
+            const apiUrl = `https://api.lyrics.ovh/v1/${encodeURIComponent(artist)}/${encodeURIComponent(title)}`;
+            const proxyUrl = `https://cors-anywhere.herokuapp.com/${apiUrl}`;
+
+            try {
+                const response = await fetch(proxyUrl);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+
+                if (data.lyrics) {
+                    // Tampilkan lirik jika ditemukan
+                    resultContainer.innerHTML = `
+                        <div class="lyrics-header">
+                            <img src="${randomImage}" alt="Album Art" class="album-art">
+                            <div class="song-info">
+                                <h2>${title}</h2>
+                                <p>${artist}</p>
+                            </div>
+                        </div>
+                        <div id="lyrics-display">${data.lyrics}</div>
+                    `;
+                } else {
+                    // Tampilkan pesan jika lirik tidak ditemukan
+                    resultContainer.innerHTML = `
+                        <div class="lyrics-header">
+                            <img src="${randomImage}" alt="Album Art" class="album-art">
+                            <div class="song-info">
+                                <h2>${title}</h2>
+                                <p>${artist}</p>
+                            </div>
+                        </div>
+                        <p class="error-message">Maaf, lirik untuk lagu ini tidak ditemukan. Coba lagu lain.</p>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error fetching lyrics:', error);
+                // Tampilkan pesan error
+                resultContainer.innerHTML = `
+                    <p class="error-message">
+                        <i class="fa-solid fa-triangle-exclamation"></i> 
+                        Terjadi kesalahan saat mengambil data. Periksa koneksi internet Anda atau coba lagi nanti.
+                    </p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
