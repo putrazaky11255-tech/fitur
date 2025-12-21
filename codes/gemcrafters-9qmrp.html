@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luxuria - Berlian, Emas & Perak</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #d4af37;
+            --secondary-color: #1a1a1a;
+            --accent-color: #ffffff;
+            --text-light: #666;
+            --bg-light: #f8f8f8;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-hover: 0 8px 15px rgba(0,0,0,0.2);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+            color: var(--secondary-color);
+            min-height: 100vh;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            position: fixed;
+            left: -280px;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(180deg, var(--secondary-color) 0%, #2a2a2a 100%);
+            transition: left 0.3s ease;
+            z-index: 1000;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .sidebar-header {
+            padding: 30px 20px;
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .sidebar-header h2 {
+            font-size: 24px;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+
+        .sidebar-menu a {
+            display: block;
+            padding: 15px 25px;
+            color: var(--accent-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-menu a:hover {
+            background: rgba(255,255,255,0.05);
+            border-left-color: var(--primary-color);
+            padding-left: 30px;
+        }
+
+        .sidebar-menu i {
+            margin-right: 10px;
+            width: 20px;
+        }
+
+        .menu-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .menu-toggle:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-hover);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 80px 20px 80px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, var(--secondary-color) 0%, #3a3a3a 100%);
+            color: white;
+            border-radius: 15px;
+            margin-bottom: 50px;
+            box-shadow: var(--shadow-hover);
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 300;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, var(--primary-color), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 18px;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Category Tabs */
+        .category-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 12px 30px;
+            background: white;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            cursor: pointer;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .tab-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .tab-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Product Grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            background: var(--bg-light);
+        }
+
+        .product-info {
+            padding: 20px;
+        }
+
+        .product-category {
+            display: inline-block;
+            padding: 5px 12px;
+            background: var(--bg-light);
+            color: var(--primary-color);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .product-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--secondary-color);
+        }
+
+        .product-price {
+            font-size: 24px;
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .product-description {
+            color: var(--text-light);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .add-to-cart {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--primary-color), #c4a030);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .add-to-cart:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 10px rgba(212, 175, 55, 0.3);
+        }
+
+        /* Cart Sidebar */
+        .cart-sidebar {
+            position: fixed;
+            right: -400px;
+            top: 0;
+            width: 400px;
+            height: 100vh;
+            background: white;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+            transition: right 0.3s ease;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cart-sidebar.active {
+            right: 0;
+        }
+
+        .cart-header {
+            padding: 20px;
+            background: var(--secondary-color);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .cart-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .cart-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .cart-item-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .cart-item-price {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .cart-footer {
+            padding: 20px;
+            background: var(--bg-light);
+            border-top: 2px solid #ddd;
+        }
+
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--primary-color), #c4a030);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checkout-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 10px rgba(212, 175, 55, 0.3);
+        }
+
+        .cart-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 998;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cart-toggle:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .cart-count {
+            background: white;
+            color: var(--primary-color);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        /* Loading Spinner */
+        .loading {
+            text-align: center;
+            padding: 50px;
+        }
+
+        .spinner {
+            border: 3px solid var(--bg-light);
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Mobile Bottom Navigation */
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 997;
+        }
+
+        .mobile-nav-items {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+        }
+
+        .mobile-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 5px 15px;
+            color: var(--text-light);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .mobile-nav-item.active {
+            color: var(--primary-color);
+        }
+
+        .mobile-nav-item i {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .mobile-nav-item span {
+            font-size: 11px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 15px;
+            }
+
+            .cart-sidebar {
+                width: 100%;
+                right: -100%;
+            }
+
+            .mobile-nav {
+                display: block;
+            }
+
+            .main-content {
+                padding-bottom: 100px;
+            }
+
+            .menu-toggle {
+                top: 15px;
+                left: 15px;
+                padding: 10px 12px;
+            }
+
+            .cart-toggle {
+                top: 15px;
+                right: 15px;
+                padding: 10px 15px;
+            }
+        }
+
+        /* Notification Toast */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--secondary-color);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            box-shadow: var(--shadow-hover);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 2000;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-light);
+        }
+
+        .empty-cart i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>LUXURIA</h2>
+        </div>
+        <div class="sidebar-menu">
+            <a href="#" onclick="filterCategory('all')"><i class="fas fa-gem"></i> Semua Produk</a>
+            <a href="#" onclick="filterCategory('berlian')"><i class="fas fa-diamond"></i> Berlian</a>
+            <a href="#" onclick="filterCategory('emas')"><i class="fas fa-coins"></i> Emas</a>
+            <a href="#" onclick="filterCategory('perak')"><i class="fas fa-ring"></i> Perak</a>
+            <a href="#" onclick="showAbout()"><i class="fas fa-info-circle"></i> Tentang Kami</a>
+            <a href="#" onclick="showContact()"><i class="fas fa-phone"></i> Kontak</a>
+        </div>
+    </nav>
+
+    <!-- Menu Toggle Button -->
+    <button class="menu-toggle" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Cart Toggle Button -->
+    <button class="cart-toggle" onclick="toggleCart()">
+        <i class="fas fa-shopping-cart"></i>
+        <span class="cart-count" id="cartCount">0</span>
+    </button>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Hero Section -->
+        <section class="hero">
+            <h1>LUXURIA</h1>
+            <p>Koleksi Eksklusif Berlian, Emas & Perak Berkualitas Tinggi</p>
+        </section>
+
+        <!-- Category Tabs -->
+        <div class="category-tabs">
+            <button class="tab-btn active" onclick="filterCategory('all')">Semua</button>
+            <button class="tab-btn" onclick="filterCategory('berlian')">Berlian</button>
+            <button class="tab-btn" onclick="filterCategory('emas')">Emas</button>
+            <button class="tab-btn" onclick="filterCategory('perak')">Perak</button>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="products-grid" id="productsGrid">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 20px;">Memuat produk...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Cart Sidebar -->
+    <aside class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h3>Keranjang Belanja</h3>
+            <button onclick="toggleCart()" style="background: none; border: none; color: white; cursor: pointer; font-size: 20px;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="cart-items" id="cartItems">
+            <div class="empty-cart">
+                <i class="fas fa-shopping-cart"></i>
+                <p>Keranjang belanja kosong</p>
+            </div>
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Total:</span>
+                <span id="cartTotal">Rp 0</span>
+            </div>
+            <button class="checkout-btn" onclick="checkout()">Checkout</button>
+        </div>
+    </aside>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-nav">
+        <div class="mobile-nav-items">
+            <a href="#" class="mobile-nav-item active" onclick="filterCategory('all')">
+                <i class="fas fa-home"></i>
+                <span>Beranda</span>
+            </a>
+            <a href="#" class="mobile-nav-item" onclick="filterCategory('berlian')">
+                <i class="fas fa-diamond"></i>
+                <span>Berlian</span>
+            </a>
+            <a href="#" class="mobile-nav-item" onclick="filterCategory('emas')">
+                <i class="fas fa-coins"></i>
+                <span>Emas</span>
+            </a>
+            <a href="#" class="mobile-nav-item" onclick="filterCategory('perak')">
+                <i class="fas fa-ring"></i>
+                <span>Perak</span>
+            </a>
+            <a href="#" class="mobile-nav-item" onclick="toggleCart()">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Keranjang</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Product Data
+        const products = {
+            berlian: [
+                { id: 1, title: "Berlian Royal Blue", price: 50000000, description: "Berlian biru langka dengan potongan sempurna", image: "https://www.passionjewelry.co.id/uploads/mengetahui-kualitas-perhiasan-berlian-melalui-4cimage-2017-03-13-181116.jpg" },
+                { id: 2, title: "Berlian Pink Princess", price: 75000000, description: "Berlian pink eksklusif untuk kolektor", image: "http://vue.id/cdn/shop/articles/10_Berlian_Termahal_2024_Ada_yang_Berasal_dari_Luar_Angkasa.jpg?v=1746184558" },
+                { id: 3, title: "Berlian White Diamond", price: 35000000, description: "Berlian putih berkualitas VVS", image: "https://www.passionjewelry.co.id/uploads/mengetahui-kualitas-perhiasan-berlian-melalui-4cimage-2017-03-13-181116.jpg" },
+                { id: 4, title: "Berlian Black Diamond", price: 45000000, description: "Berlian hitam misterius dan elegan", image: "http://vue.id/cdn/shop/articles/10_Berlian_Termahal_2024_Ada_yang_Berasal_dari_Luar_Angkasa.jpg?v=1746184558" }
+            ],
+            emas: [
+                { id: 5, title: "Emas Batangan 24K", price: 15000000, description: "Emas murni 24 karat untuk investasi", image: "https://awsimages.detik.net.id/community/media/visual/2025/08/21/emas-batangan-1755764100168_169.jpeg?w=1200" },
+                { id: 6, title: "Kalung Emas 22K", price: 8500000, description: "Kalung emas dengan desain modern", image: "https://www.treasury.id/wp-content/uploads/2024/07/10-1.png" },
+                { id: 7, title: "Gelang Emas 18K", price: 12000000, description: "Gelang emas dengan detail rumit", image: "https://awsimages.detik.net.id/community/media/visual/2025/08/21/emas-batangan-1755764100168_169.jpeg?w=1200" },
+                { id: 8, title: "Cincin Emas 22K", price: 6500000, description: "Cincin emas klasik timeless", image: "https://www.treasury.id/wp-content/uploads/2024/07/10-1.png" }
+            ],
+            perak: [
+                { id: 9, title: "Perak Sterling 925", price: 2500000, description: "Perak murni 925 untuk aksesori elegan", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Flag_of_Perak.svg/2560px-Flag_of_Perak.svg.png" },
+                { id: 10, title: "Set Perhiasan Perak", price: 3500000, description: "Set lengkap perhiasan perak berkualitas", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Districts_in_Perak.svg/960px-Districts_in_Perak.svg.png" },
+                { id: 11, title: "Anting Perak Premium", price: 1500000, description: "Anting perak dengan batu permata", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Flag_of_Perak.svg/2560px-Flag_of_Perak.svg.png" },
+                { id: 12, title: "Liontin Perak Artisan", price: 2000000, description: "Liontin perak buatan tangan", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Districts_in_Perak.svg/960px-Districts_in_Perak.svg.png" }
+            ]
+        };
+
+        // Additional products from FakeStoreAPI
+        let apiProducts = [];
+        let cart = [];
+        let currentCategory = 'all';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAPIProducts();
+            loadCartFromStorage();
+            updateCartUI();
+        });
+
+        // Load products from FakeStoreAPI with proxy
+        function loadAPIProducts() {
+            const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+            const apiUrl = 'https://fakestoreapi.com/products/category/jewelery';
+            
+            fetch(proxyUrl + apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    apiProducts = data.map(product => ({
+                        id: product.id + 100,
+                        title: product.title,
+                        price: Math.round(product.price * 150000), // Convert to IDR
+                        description: product.description,
+                        image: product.image,
+                        category: 'berlian' // Categorize as diamond for simplicity
+                    }));
+                    displayProducts();
+                })
+                .catch(error => {
+                    console.error('Error loading API products:', error);
+                    displayProducts(); // Display local products even if API fails
+                });
+        }
+
+        // Display products
+        function displayProducts() {
+            const grid = document.getElementById('productsGrid');
+            let productsToShow = [];
+
+            if (currentCategory === 'all') {
+                productsToShow = [
+                    ...products.berlian,
+                    ...products.emas,
+                    ...products.perak,
+                    ...apiProducts
+                ];
+            } else if (currentCategory === 'berlian') {
+                productsToShow = [...products.berlian, ...apiProducts];
+            } else {
+                productsToShow = products[currentCategory] || [];
+            }
+
+            grid.innerHTML = productsToShow.map(product => `
+                <div class="product-card" onclick="addToCart(${product.id}, '${product.title}', ${product.price}, '${product.image}')">
+                    <img src="${product.image}" alt="${product.title}" class="product-image" onerror="this.src='https://picsum.photos/seed/${product.id}/300/250'">
+                    <div class="product-info">
+                        <span class="product-category">${getCategoryName(product.category || currentCategory)}</span>
+                        <h3 class="product-title">${product.title}</h3>
+                        <p class="product-price">Rp ${formatPrice(product.price)}</p>
+                        <p class="product-description">${product.description}</p>
+                        <button class="add-to-cart" onclick="event.stopPropagation(); addToCart(${product.id}, '${product.title}', ${product.price}, '${product.image}')">
+                            <i class="fas fa-shopping-cart"></i> Tambah ke Keranjang
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Get category name in Indonesian
+        function getCategoryName(category) {
+            const names = {
+                'berlian': 'Berlian',
+                'emas': 'Emas',
+                'perak': 'Perak',
+                'jewelery': 'Perhiasan'
+            };
+            return names[category] || 'Perhiasan';
+        }
+
+        // Format price
+        function formatPrice(price) {
+            return price.toLocaleString('id-ID');
+        }
+
+        // Filter products by category
+        function filterCategory(category) {
+            currentCategory = category;
+            
+            // Update active tab
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update mobile nav
+            document.querySelectorAll('.mobile-nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            if (event.target.closest('.mobile-nav-item')) {
+                event.target.closest('.mobile-nav-item').classList.add('active');
+            }
+            
+            displayProducts();
+            
+            // Close sidebar on mobile
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('active');
+            }
+        }
+
+        // Toggle sidebar
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        // Toggle cart
+        function toggleCart() {
+            document.getElementById('cartSidebar').classList.toggle('active');
+        }
+
+        // Add to cart
+        function addToCart(id, title, price, image) {
+            const existingItem = cart.find(item => item.id === id);
+            
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                cart.push({ id, title, price, image, quantity: 1 });
+            }
+            
+            saveCartToStorage();
+            updateCartUI();
+            showToast(`${title} ditambahkan ke keranjang`);
+        }
+
+        // Update cart UI
+        function updateCartUI() {
+            const cartItems = document.getElementById('cartItems');
+            const cartCount = document.getElementById('cartCount');
+            const cartTotal = document.getElementById('cartTotal');
+            
+            if (cart.length === 0) {
+                cartItems.innerHTML = `
+                    <div class="empty-cart">
+                        <i class="fas fa-shopping-cart"></i>
+                        <p>Keranjang belanja kosong</p>
+                    </div>
+                `;
+                cartCount.textContent = '0';
+                cartTotal.textContent = 'Rp 0';
+                return;
+            }
+            
+            cartItems.innerHTML = cart.map(item => `
+                <div class="cart-item">
+                    <img src="${item.image}" alt="${item.title}" onerror="this.src='https://picsum.photos/seed/${item.id}/80/80'">
+                    <div class="cart-item-info">
+                        <div class="cart-item-title">${item.title}</div>
+                        <div class="cart-item-price">Rp ${formatPrice(item.price)}</div>
+                        <div style="margin-top: 10px;">
+                            <button onclick="updateQuantity(${item.id}, -1)" style="background: #f0f0f0; border: none; padding: 5px 10px; cursor: pointer;">-</button>
+                            <span style="margin: 0 10px;">${item.quantity}</span>
+                            <button onclick="updateQuantity(${item.id}, 1)" style="background: #f0f0f0; border: none; padding: 5px 10px; cursor: pointer;">+</button>
+                            <button onclick="removeFromCart(${item.id})" style="background: #ff4444; color: white; border: none; padding: 5px 10px; margin-left: 10px; cursor: pointer;">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            
+            cartCount.textContent = totalItems;
+            cartTotal.textContent = `Rp ${formatPrice(totalPrice)}`;
+        }
+
+        // Update quantity
+        function updateQuantity(id, change) {
+            const item = cart.find(item => item.id === id);
+            if (item) {
+                item.quantity += change;
+                if (item.quantity <= 0) {
+                    removeFromCart(id);
+                } else {
+                    saveCartToStorage();
+                    updateCartUI();
+                }
+            }
+        }
+
+        // Remove from cart
+        function removeFromCart(id) {
+            cart = cart.filter(item => item.id !== id);
+            saveCartToStorage();
+            updateCartUI();
+            showToast('Produk dihapus dari keranjang');
+        }
+
+        // Save cart to localStorage
+        function saveCartToStorage() {
+            localStorage.setItem('luxuriaCart', JSON.stringify(cart));
+        }
+
+        // Load cart from localStorage
+        function loadCartFromStorage() {
+            const savedCart = localStorage.getItem('luxuriaCart');
+            if (savedCart) {
+                cart = JSON.parse(savedCart);
+            }
+        }
+
+        // Checkout
+        function checkout() {
+            if (cart.length === 0) {
+                showToast('Keranjang belanja kosong');
+                return;
+            }
+            
+            const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            showToast(`Checkout berhasil! Total: Rp ${formatPrice(totalPrice)}`);
+            
+            // Clear cart after checkout
+            cart = [];
+            saveCartToStorage();
+            updateCartUI();
+            
+            // Close cart sidebar
+            setTimeout(() => {
+                document.getElementById('cartSidebar').classList.remove('active');
+            }, 1500);
+        }
+
+        // Show toast notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Show about
+        function showAbout() {
+            showToast('Luxuria - Toko perhiasan premium sejak 2020');
+        }
+
+        // Show contact
+        function showContact() {
+            showToast('Hubungi kami: WA +62 812-3456-7890');
+        }
+
+        // Close sidebars when clicking outside
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const cartSidebar = document.getElementById('cartSidebar');
+            const menuToggle = document.querySelector('.menu-toggle');
+            const cartToggle = document.querySelector('.cart-toggle');
+            
+            if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                sidebar.classList.remove('active');
+            }
+            
+            if (!cartSidebar.contains(event.target) && !cartToggle.contains(event.target)) {
+                cartSidebar.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
