@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Dewa-Dewa Yunani - Mitologi Kuno</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #e74c3c;
+            --accent-color: #f39c12;
+            --text-light: #ecf0f1;
+            --text-dark: #34495e;
+            --bg-light: #ffffff;
+            --bg-dark: #1a1a1a;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animasi Background */
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        body {
+            background-size: 200% 200%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        /* Navigation */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(44, 62, 80, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--text-light);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: fadeInDown 1s ease;
+        }
+
+        .logo::before {
+            content: "⚡";
+            font-size: 2rem;
+            animation: rotate 3s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--text-light);
+            text-decoration: none;
+            position: relative;
+            padding: 0.5rem 1rem;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: var(--accent-color);
+            transition: var(--transition);
+            transform: translateX(-50%);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero {
+            margin-top: 80px;
+            padding: 4rem 5%;
+            text-align: center;
+            color: var(--text-light);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            animation: fadeInUp 1s ease;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            animation: fadeInUp 1s ease 0.2s both;
+            opacity: 0.9;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Main Content */
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 5%;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 3rem;
+            margin-bottom: 3rem;
+            box-shadow: var(--shadow);
+            animation: slideIn 0.8s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .section h2 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+            position: relative;
+            padding-bottom: 1rem;
+            display: inline-block;
+        }
+
+        .section h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: var(--secondary-color);
+            border-radius: 2px;
+        }
+
+        /* Gods Grid */
+        .gods-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .god-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .god-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .god-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .god-card:hover img {
+            transform: scale(1.1);
+        }
+
+        .god-info {
+            padding: 1.5rem;
+            color: var(--text-light);
+        }
+
+        .god-info h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .god-info .role {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .god-info .symbol {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Stories Section */
+        .stories-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .story-card {
+            background: var(--bg-light);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: var(--transition);
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .story-card:hover {
+            transform: translateX(10px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .story-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .story-card p {
+            color: var(--text-dark);
+            line-height: 1.8;
+            opacity: 0.9;
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top-color: var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(44, 62, 80, 0.95);
+            color: var(--text-light);
+            text-align: center;
+            padding: 2rem 5%;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .footer-content p {
+            opacity: 0.8;
+            margin-bottom: 1rem;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .social-links a {
+            color: var(--text-light);
+            font-size: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .social-links a:hover {
+            color: var(--accent-color);
+            transform: translateY(-5px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1.1rem;
+            }
+
+            .section {
+                padding: 2rem 1.5rem;
+            }
+
+            .gods-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stories-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Modal for God Details */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            position: relative;
+            background: var(--bg-light);
+            margin: 5% auto;
+            padding: 2rem;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 20px;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--text-dark);
+            transition: var(--transition);
+        }
+
+        .close-modal:hover {
+            color: var(--secondary-color);
+            transform: rotate(90deg);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="#" class="logo">Mitologi Yunani</a>
+            <ul class="nav-links">
+                <li><a href="#home">Beranda</a></li>
+                <li><a href="#gods">Dewa-Dewi</a></li>
+                <li><a href="#stories">Cerita</a></li>
+                <li><a href="#about">Tentang</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero" id="home">
+        <h1>Selamat Datang di Dunia Mitologi Yunani</h1>
+        <p>Jelajahi kisah epik tentang para dewa, pahlawan, dan makhluk mitologis yang telah menginspirasi peradaban selama berabad-abad</p>
+    </section>
+
+    <main>
+        <section class="section" id="gods">
+            <h2>Dewa-Dewi Olympus</h2>
+            <div class="loading" id="godsLoading">
+                <div class="loading-spinner"></div>
+            </div>
+            <div class="gods-grid" id="godsGrid"></div>
+        </section>
+
+        <section class="section" id="stories">
+            <h2>Cerita Mitologi</h2>
+            <div class="loading" id="storiesLoading">
+                <div class="loading-spinner"></div>
+            </div>
+            <div class="stories-container" id="storiesContainer"></div>
+        </section>
+
+        <section class="section" id="about">
+            <h2>Tentang Mitologi Yunani</h2>
+            <p style="font-size: 1.1rem; line-height: 1.8; color: var(--text-dark);">
+                Mitologi Yunani adalah kumpulan mitos dan legenda dari Yunani Kuno yang menceritakan tentang para dewa, pahlawan, 
+                dan asal usul dunia. Mitos-mitos ini menjadi bagian penting dari kehidupan sehari-hari orang Yunani kuno dan 
+                telah mempengaruhi seni, sastra, dan budaya Barat hingga saat ini.
+            </p>
+            <p style="margin-top: 1.5rem; font-size: 1.1rem; line-height: 1.8; color: var(--text-dark);">
+                Para dewa Olympus yang dipimpin oleh Zeus memerintah dari atas gunung Olympus, sementara para pahlawan seperti 
+                Herakles dan Perseus menjalani petualangan epik melawan monster dan menghadapi takdir yang telah ditentukan.
+            </p>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2024 Mitologi Yunani. Dibuat dengan ❤️ untuk pecinta sejarah dan mitologi.</p>
+            <div class="social-links">
+                <a href="#">📧</a>
+                <a href="#">📘</a>
+                <a href="#">🐦</a>
+                <a href="#">📷</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal for God Details -->
+    <div id="godModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        // Proxy URL
+        const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+        
+        // API URLs
+        const godsApiUrl = 'https://mythic-api.herokuapp.com/gods';
+        const storiesApiUrl = 'https://mythic-api.herokuapp.com/stories';
+        
+        // Image arrays
+        const godImages = [
+            "https://cdn.grid.id/crop/0x0:0x0/x/photo/2024/08/13/12-dewa-olympus-yang-jadi-dewa-d-20240813082746.jpg",
+            "https://cdn.grid.id/crop/0x0:0x0/x/photo/2023/07/17/4jpg-20230717085613.jpg"
+        ];
+        
+        const storyImages = [
+            "https://upload.wikimedia.org/wikipedia/commons/7/70/Jacopo_Zucchi_-_The_Assembly_of_the_Gods.jpg",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Pompeii_-_Casa_dei_Dioscuri_-_Perseus_and_Andromeda.jpg/250px-Pompeii_-_Casa_dei_Dioscuri_-_Perseus_and_Andromeda.jpg"
+        ];
+
+        // Fetch Gods Data
+        async function fetchGods() {
+            try {
+                const response = await fetch(proxyUrl + godsApiUrl);
+                const gods = await response.json();
+                displayGods(gods);
+            } catch (error) {
+                console.error('Error fetching gods:', error);
+                // Fallback data if API fails
+                const fallbackGods = [
+                    {
+                        name: "Zeus",
+                        role: "Raja Para Dewa",
+                        symbol: "Petir",
+                        description: "Zeus adalah penguasa Olympus dan dewa langit, petir, dan keadilan."
+                    },
+                    {
+                        name: "Hera",
+                        role: "Ratu Para Dewi",
+                        symbol: "Merak",
+                        description: "Hera adalah dewi pernikahan dan keluarga, istri Zeus."
+                    },
+                    {
+                        name: "Poseidon",
+                        role: "Dewa Laut",
+                        symbol: "Trisula",
+                        description: "Poseidon mengendalikan lautan, gempa bumi, dan kuda."
+                    }
+                ];
+                displayGods(fallbackGods);
+            } finally {
+                document.getElementById('godsLoading').style.display = 'none';
+            }
+        }
+
+        // Display Gods
+        function displayGods(gods) {
+            const godsGrid = document.getElementById('godsGrid');
+            godsGrid.innerHTML = '';
+            
+            gods.forEach((god, index) => {
+                const card = document.createElement('div');
+                card.className = 'god-card';
+                card.innerHTML = `
+                    <img src="${godImages[index % godImages.length]}" alt="${god.name}">
+                    <div class="god-info">
+                        <h3>${god.name}</h3>
+                        <div class="role">${god.role || 'Dewa Olympus'}</div>
+                        <div class="symbol">🏛️ ${god.symbol || 'Simbol Tidak Diketahui'}</div>
+                    </div>
+                `;
+                card.onclick = () => showGodDetails(god);
+                godsGrid.appendChild(card);
+            });
+        }
+
+        // Show God Details in Modal
+        function showGodDetails(god) {
+            const modal = document.getElementById('godModal');
+            const modalBody = document.getElementById('modalBody');
+            
+            modalBody.innerHTML = `
+                <h2 style="color: var(--primary-color); margin-bottom: 1rem;">${god.name}</h2>
+                <p style="color: var(--secondary-color); font-size: 1.1rem; margin-bottom: 1rem;">${god.role || 'Dewa Olympus'}</p>
+                <p style="margin-bottom: 1rem;"><strong>Simbol:</strong> ${god.symbol || 'Tidak Diketahui'}</p>
+                <p style="line-height: 1.8;">${god.description || 'Tidak ada deskripsi tersedia untuk dewa ini.'}</p>
+            `;
+            
+            modal.style.display = 'block';
+        }
+
+        // Fetch Stories Data
+        async function fetchStories() {
+            try {
+                const response = await fetch(proxyUrl + storiesApiUrl);
+                const stories = await response.json();
+                displayStories(stories);
+            } catch (error) {
+                console.error('Error fetching stories:', error);
+                // Fallback stories
+                const fallbackStories = [
+                    {
+                        title: "Perang Trojan",
+                        content: "Perang Trojan adalah perang legendaris antara bangsa Yunani dan Troya, yang dipicu oleh penculikan Helen oleh Paris."
+                    },
+                    {
+                        title: "Labirin Minotaur",
+                        content: "Theseus berhasil mengalahkan Minotaur di dalam labirin yang rumit dengan bantuan benang dari Ariadne."
+                    },
+                    {
+                        title: "12 Tugas Herakles",
+                        content: "Herakles harus menyelesaikan 12 tugas yang mustahil sebagai penebus dosa setelah membunuh keluarganya."
+                    }
+                ];
+                displayStories(fallbackStories);
+            } finally {
+                document.getElementById('storiesLoading').style.display = 'none';
+            }
+        }
+
+        // Display Stories
+        function displayStories(stories) {
+            const storiesContainer = document.getElementById('storiesContainer');
+            storiesContainer.innerHTML = '';
+            
+            stories.forEach((story, index) => {
+                const card = document.createElement('div');
+                card.className = 'story-card';
+                card.innerHTML = `
+                    <h3>${story.title || `Cerita ${index + 1}`}</h3>
+                    <p>${story.content || story.description || 'Tidak ada konten tersedia.'}</p>
+                `;
+                storiesContainer.appendChild(card);
+            });
+        }
+
+        // Modal Close
+        document.querySelector('.close-modal').onclick = function() {
+            document.getElementById('godModal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('godModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Smooth Scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchGods();
+            fetchStories();
+            
+            // Add scroll effect to header
+            window.addEventListener('scroll', () => {
+                const header = document.querySelector('header');
+                if (window.scrollY > 100) {
+                    header.style.background = 'rgba(44, 62, 80, 0.98)';
+                } else {
+                    header.style.background = 'rgba(44, 62, 80, 0.95)';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
