@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ModeKu - Toko Baju Online Modern</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #e74c3c;
+            --accent-color: #f39c12;
+            --text-dark: #333;
+            --text-light: #777;
+            --bg-light: #f8f9fa;
+            --white: #ffffff;
+            --shadow: 0 2px 10px rgba(0,0,0,0.1);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background-color: var(--bg-light);
+            overflow-x: hidden;
+        }
+
+        /* Header & Navigation */
+        header {
+            background: var(--white);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: var(--transition);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .logo:hover {
+            color: var(--secondary-color);
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            position: relative;
+            transition: var(--transition);
+            padding: 0.5rem 0;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--secondary-color);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-links a:hover {
+            color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .cart-icon {
+            position: relative;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .cart-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--secondary-color);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            animation: bounce 0.5s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, rgba(44, 62, 80, 0.9), rgba(231, 76, 60, 0.9)),
+                        url('https://modernshowroom.com/wp-content/uploads/2023/03/baju-clothing-women-modern-showroom-2-1404x1493.png');
+            background-size: cover;
+            background-position: center;
+            height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                left: -100%;
+            }
+            100% {
+                left: 100%;
+            }
+        }
+
+        .hero-content {
+            z-index: 1;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 1rem 2.5rem;
+            background: var(--accent-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(243, 156, 18, 0.4);
+            background: #e67e22;
+        }
+
+        /* Categories Section */
+        .categories {
+            padding: 5rem 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: var(--primary-color);
+            position: relative;
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: var(--secondary-color);
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .category-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            cursor: pointer;
+            animation: slideUp 0.6s ease-out backwards;
+        }
+
+        .category-card:nth-child(1) { animation-delay: 0.1s; }
+        .category-card:nth-child(2) { animation-delay: 0.2s; }
+        .category-card:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .category-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .category-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .category-card:hover .category-image {
+            transform: scale(1.1);
+        }
+
+        .category-info {
+            padding: 1.5rem;
+        }
+
+        .category-info h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .category-info p {
+            color: var(--text-light);
+        }
+
+        /* Products Section */
+        .products {
+            padding: 5rem 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .filter-bar {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.7rem 1.5rem;
+            background: white;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: var(--primary-color);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            animation: fadeInScale 0.6s ease-out backwards;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 350px;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .product-card:hover .product-image {
+            transform: scale(1.05);
+        }
+
+        .product-info {
+            padding: 1.5rem;
+        }
+
+        .product-title {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+            height: 50px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .product-price {
+            font-size: 1.5rem;
+            color: var(--secondary-color);
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stars {
+            color: var(--accent-color);
+        }
+
+        .add-to-cart {
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: var(--transition);
+        }
+
+        .add-to-cart:hover {
+            background: var(--secondary-color);
+            transform: scale(1.02);
+        }
+
+        /* About Section */
+        .about {
+            padding: 5rem 5%;
+            background: white;
+        }
+
+        .about-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .about-text h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .about-text p {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--bg-light);
+            border-radius: 10px;
+            transition: var(--transition);
+        }
+
+        .feature:hover {
+            transform: translateX(5px);
+            box-shadow: var(--shadow);
+        }
+
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--secondary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        /* Contact Section */
+        .contact {
+            padding: 5rem 5%;
+            background: var(--bg-light);
+        }
+
+        .contact-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .contact-form {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .submit-btn:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--primary-color);
+            color: white;
+            padding: 3rem 5%;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .social-links a {
+            color: white;
+            font-size: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .social-links a:hover {
+            color: var(--accent-color);
+            transform: translateY(-5px);
+        }
+
+        .credit {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            opacity: 0.8;
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--bg-light);
+            border-top: 5px solid var(--secondary-color);
+            border-radius: 50%;
+            margin: 0 auto;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .about-content {
+                grid-template-columns: 1fr;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+
+            .category-grid,
+            .product-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            transition: bottom 0.3s ease;
+            z-index: 2000;
+        }
+
+        .toast.show {
+            bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <a href="#home" class="logo">ModeKu</a>
+            <ul class="nav-links">
+                <li><a href="#home">Beranda</a></li>
+                <li><a href="#categories">Kategori</a></li>
+                <li><a href="#products">Produk</a></li>
+                <li><a href="#about">Tentang</a></li>
+                <li><a href="#contact">Kontak</a></li>
+            </ul>
+            <div class="cart-icon" onclick="showToast('Keranjang belanja akan segera hadir!')">
+                <svg width="30" height="30" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .49.598l-1 5a.5.5 0 0 1-.465.401l-9.397.472L4.415 11H13a.5.5 0 0 1 0 1H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l.84 4.479 9.144-.459L13.89 4H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                </svg>
+                <span class="cart-count">0</span>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1>Gaya Modern Untuk Anda</h1>
+            <p>Temukan koleksi fashion terbaru dengan desain minimalis dan berkualitas tinggi</p>
+            <a href="#products" class="cta-button">Belanja Sekarang</a>
+        </div>
+    </section>
+
+    <!-- Categories Section -->
+    <section id="categories" class="categories">
+        <h2 class="section-title">Kategori Produk</h2>
+        <div class="category-grid">
+            <div class="category-card" onclick="filterProducts('women\'s clothing')">
+                <img src="https://s.alicdn.com/@sc04/kf/H0eb8463edac142e78b3c3c5af3613530Q/Wholesale-Muslim-Dress-Fashion-Floral-Print-Eid-Abaya-Rok-Satin-in-Dubai-Baju-Kurung-Raya-Modern-Sulam-Lace-Designs.jpg" alt="Baju Fashion" class="category-image">
+                <div class="category-info">
+                    <h3>Baju Fashion</h3>
+                    <p>Koleksi terkini dengan desain trendi</p>
+                </div>
+            </div>
+            <div class="category-card" onclick="filterProducts('men\'s clothing')">
+                <img src="https://storage.googleapis.com/finansialku_media/wordpress_media/2023/11/ff963f73-dress-a-line.webp" alt="Model Baju" class="category-image">
+                <div class="category-info">
+                    <h3>Model Baju</h3>
+                    <p>Berbagai pilihan model untuk setiap occasion</p>
+                </div>
+            </div>
+            <div class="category-card" onclick="filterProducts('all')">
+                <img src="https://lookaside.fbsbx.com/lookaside/crawler/media/?media_id=100038214055783" alt="Koleksi Pakaian" class="category-image">
+                <div class="category-info">
+                    <h3>Koleksi Pakaian</h3>
+                    <p>Semua koleksi dalam satu tempat</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section id="products" class="products">
+        <h2 class="section-title">Produk Kami</h2>
+        <div class="filter-bar">
+            <button class="filter-btn active" onclick="filterProducts('all')">Semua</button>
+            <button class="filter-btn" onclick="filterProducts('women\'s clothing')">Wanita</button>
+            <button class="filter-btn" onclick="filterProducts('men\'s clothing')">Pria</button>
+        </div>
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Memuat produk...</p>
+        </div>
+        <div class="product-grid" id="productGrid"></div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="about-content">
+            <div class="about-text">
+                <h2>Tentang ModeKu</h2>
+                <p>ModeKu adalah toko fashion online yang menyediakan koleksi pakaian modern dengan desain minimalis dan berkualitas tinggi. Kami berkomitmen untuk memberikan pengalaman berbelanja yang menyenangkan dan produk terbaik untuk pelanggan kami.</p>
+                <p>Dengan mengikuti tren fashion terkini, kami selalu menghadirkan koleksi yang up-to-date dan sesuai dengan kebutuhan fashion Anda.</p>
+                <div class="features">
+                    <div class="feature">
+                        <div class="feature-icon">✓</div>
+                        <div>
+                            <h4>Kualitas Terjamin</h4>
+                            <p>Produk berkualitas premium</p>
+                        </div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🚚</div>
+                        <div>
+                            <h4>Pengiriman Cepat</h4>
+                            <p>Gratis ongkir untuk pembelian tertentu</p>
+                        </div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">💳</div>
+                        <div>
+                            <h4>Pembayaran Aman</h4>
+                            <p>Berbagai metode pembayaran</p>
+                        </div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">↩️</div>
+                        <div>
+                            <h4>Easy Return</h4>
+                            <p>Pengembalian mudah dan cepat</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <img src="https://i.cdn.newsbytesapp.com/ind/images/l61820240531130811.jpeg" alt="About Us" style="width: 100%; border-radius: 15px; box-shadow: var(--shadow);">
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="contact-content">
+            <h2 class="section-title">Hubungi Kami</h2>
+            <form class="contact-form" onsubmit="handleSubmit(event)">
+                <div class="form-group">
+                    <label for="name">Nama Lengkap</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="message">Pesan</label>
+                    <textarea id="message" name="message" rows="5" required></textarea>
+                </div>
+                <button type="submit" class="submit-btn">Kirim Pesan</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <h3>ModeKu</h3>
+            <p>Gaya Modern Untuk Anda</p>
+            <div class="social-links">
+                <a href="#" onclick="showToast('Facebook akan segera hadir!')">📘</a>
+                <a href="#" onclick="showToast('Instagram akan segera hadir!')">📷</a>
+                <a href="#" onclick="showToast('Twitter akan segera hadir!')">🐦</a>
+                <a href="#" onclick="showToast('WhatsApp akan segera hadir!')">💬</a>
+            </div>
+            <div class="credit">
+                <p>&copy; 2024 ModeKu. All rights reserved. | Designed with ❤️ by Opus AI Coder</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Global variables
+        let cartCount = 0;
+        let allProducts = [];
+        let currentFilter = 'all';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchProducts();
+            setupSmoothScroll();
+            setupAnimations();
+        });
+
+        // Fetch products from API
+        async function fetchProducts() {
+            const loading = document.getElementById('loading');
+            const productGrid = document.getElementById('productGrid');
+            
+            loading.classList.add('active');
+            productGrid.innerHTML = '';
+
+            try {
+                // Using proxy as required
+                const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+                const apiUrl = 'https://fakestoreapi.com/products';
+                
+                const response = await fetch(proxyUrl + apiUrl);
+                const products = await response.json();
+                
+                allProducts = products;
+                displayProducts(products);
+                
+                loading.classList.remove('active');
+            } catch (error) {
+                console.error('Error fetching products:', error);
+                // Fallback with dummy products if API fails
+                const dummyProducts = generateDummyProducts();
+                allProducts = dummyProducts;
+                displayProducts(dummyProducts);
+                loading.classList.remove('active');
+            }
+        }
+
+        // Generate dummy products as fallback
+        function generateDummyProducts() {
+            const dummyImages = [
+                'https://s.alicdn.com/@sc04/kf/H0eb8463edac142e78b3c3c5af3613530Q/Wholesale-Muslim-Dress-Fashion-Floral-Print-Eid-Abaya-Rok-Satin-in-Dubai-Baju-Kurung-Raya-Modern-Sulam-Lace-Designs.jpg',
+                'https://modernshowroom.com/wp-content/uploads/2023/03/baju-clothing-women-modern-showroom-2-1404x1493.png',
+                'https://storage.googleapis.com/finansialku_media/wordpress_media/2023/11/ff963f73-dress-a-line.webp',
+                'https://lookaside.instagram.com/seo/google_widget/crawler/?media_id=3611385631790222245'
+            ];
+
+            return Array.from({length: 8}, (_, i) => ({
+                id: i + 1,
+                title: `Fashion Item ${i + 1}`,
+                price: Math.floor(Math.random() * 100) + 50,
+                image: dummyImages[i % dummyImages.length],
+                category: i % 2 === 0 ? "women's clothing" : "men's clothing",
+                rating: {
+                    rate: (Math.random() * 2 + 3).toFixed(1),
+                    count: Math.floor(Math.random() * 100) + 10
+                }
+            }));
+        }
+
+        // Display products
+        function displayProducts(products) {
+            const productGrid = document.getElementById('productGrid');
+            productGrid.innerHTML = '';
+
+            products.forEach((product, index) => {
+                const productCard = createProductCard(product, index);
+                productGrid.appendChild(productCard);
+            });
+        }
+
+        // Create product card
+        function createProductCard(product, index) {
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            card.style.animationDelay = `${index * 0.1}s`;
+            
+            const stars = '★'.repeat(Math.floor(product.rating.rate)) + 
+                         '☆'.repeat(5 - Math.floor(product.rating.rate));
+
+            card.innerHTML = `
+                <img src="${product.image}" alt="${product.title}" class="product-image">
+                <div class="product-info">
+                    <h3 class="product-title">${product.title}</h3>
+                    <div class="product-price">$${product.price}</div>
+                    <div class="product-rating">
+                        <span class="stars">${stars}</span>
+                        <span>(${product.rating.count})</span>
+                    </div>
+                    <button class="add-to-cart" onclick="addToCart(${product.id})">
+                        Tambah ke Keranjang
+                    </button>
+                </div>
+            `;
+
+            return card;
+        }
+
+        // Filter products
+        function filterProducts(category) {
+            currentFilter = category;
+            
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Filter and display products
+            let filteredProducts = allProducts;
+            if (category !== 'all') {
+                filteredProducts = allProducts.filter(p => p.category === category);
+            }
+            
+            displayProducts(filteredProducts);
+        }
+
+        // Add to cart
+        function addToCart(productId) {
+            cartCount++;
+            document.querySelector('.cart-count').textContent = cartCount;
+            
+            // Animate cart icon
+            const cartIcon = document.querySelector('.cart-icon');
+            cartIcon.style.animation = 'bounce 0.5s ease';
+            setTimeout(() => {
+                cartIcon.style.animation = '';
+            }, 500);
+
+            const product = allProducts.find(p => p.id === productId);
+            showToast(`${product.title} ditambahkan ke keranjang!`);
+        }
+
+        // Handle form submission
+        function handleSubmit(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData);
+            
+            console.log('Form submitted:', data);
+            showToast('Pesan Anda telah terkirim! Kami akan segera menghubungi Anda.');
+            
+            // Reset form
+            event.target.reset();
+        }
+
+        // Show toast notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Setup smooth scrolling
+        function setupSmoothScroll() {
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+        }
+
+        // Setup scroll animations
+        function setupAnimations() {
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            // Observe elements
+            document.querySelectorAll('.category-card, .product-card, .feature').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(el);
+            });
+        }
+
+        // Add parallax effect to hero
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const hero = document.querySelector('.hero');
+            if (hero) {
+                hero.style.transform = `translateY(${scrolled * 0.5}px)`;
+            }
+        });
+    </script>
+</body>
+</html>
