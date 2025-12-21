@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opus AI Chat</title>
+    <style>
+        /* --- Global Styles & Variables --- */
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #343a40;
+            --background-color: #f4f7f6;
+            --text-color: #333;
+            --user-bg-color: #007bff;
+            --ai-bg-color: #e9ecef;
+            --user-text-color: #ffffff;
+            --ai-text-color: #333;
+            --border-color: #ddd;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- Main Chat Container --- */
+        .chat-container {
+            width: 100%;
+            max-width: 800px;
+            height: 90vh;
+            background-color: #fff;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- Header --- */
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .chat-header img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+        }
+
+        .chat-header h1 {
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+
+        /* --- Chat Box --- */
+        .chat-box {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .chat-box::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-box::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .chat-box::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+
+        .chat-box::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* --- Messages --- */
+        .message {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            animation: fadeIn 0.4s ease-in;
+            max-width: 80%;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message.ai {
+            align-self: flex-start;
+        }
+
+        .message-content {
+            padding: 12px 18px;
+            border-radius: 20px;
+            line-height: 1.5;
+            word-wrap: break-word;
+            position: relative;
+            transition: transform var(--transition-speed);
+        }
+
+        .message-content:hover {
+            transform: scale(1.02);
+        }
+
+        .message.user .message-content {
+            background-color: var(--user-bg-color);
+            color: var(--user-text-color);
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.ai .message-content {
+            background-color: var(--ai-bg-color);
+            color: var(--ai-text-color);
+            border-bottom-left-radius: 5px;
+        }
+
+        .message img {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            align-self: flex-end;
+        }
+
+        /* --- Typing Indicator --- */
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 5px;
+            padding: 15px;
+        }
+
+        .typing-indicator.active {
+            display: flex;
+        }
+
+        .typing-indicator span {
+            width: 10px;
+            height: 10px;
+            background-color: #aaa;
+            border-radius: 50%;
+            display: inline-block;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-indicator span:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+
+        @keyframes typing {
+            0%, 80%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* --- Input Area --- */
+        .chat-input-area {
+            display: flex;
+            padding: 20px;
+            background-color: #fff;
+            border-top: 1px solid var(--border-color);
+            gap: 10px;
+        }
+
+        #user-input {
+            flex-grow: 1;
+            border: 1px solid var(--border-color);
+            border-radius: 25px;
+            padding: 12px 20px;
+            font-size: 1em;
+            transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+        }
+
+        #user-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+
+        #send-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #send-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        #send-button:active {
+            transform: scale(0.95);
+        }
+
+        /* --- Welcome Screen --- */
+        .welcome-screen {
+            text-align: center;
+            padding: 40px;
+            animation: fadeIn 1s ease-in;
+        }
+
+        .welcome-screen img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .welcome-screen h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .welcome-screen p {
+            color: #777;
+        }
+
+        /* --- Responsive Design --- */
+        @media (max-width: 600px) {
+            .chat-container {
+                height: 100vh;
+                border-radius: 0;
+                max-width: 100%;
+            }
+
+            .message {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <img src="https://www.icertis.com/globalassets/1.-sections/contracting-basics/conversational-ai/conversational-ai-learn-article-header-inset.jpeg" alt="AI Logo">
+            <h1>Opus AI Chat</h1>
+        </div>
+
+        <div class="chat-box" id="chat-box">
+            <div class="welcome-screen" id="welcome-screen">
+                <img src="https://framerusercontent.com/images/g0YTRh7uRHpbWQgSZz62bO050.png?width=1378&height=880" alt="AI Assistant">
+                <h2>Halo! Saya Opus AI</h2>
+                <p>Apa yang bisa saya bantu hari ini?</p>
+            </div>
+            <div class="typing-indicator" id="typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+
+        <div class="chat-input-area">
+            <input type="text" id="user-input" placeholder="Ketik pesan Anda di sini..." autocomplete="off">
+            <button id="send-button">➤</button>
+        </div>
+    </div>
+
+    <script>
+        // --- Helper Function for AI API ---
+        async function fetchGptOss(userMessage) {
+            const proxy = "https://cors-anywhere.herokuapp.com/";
+            const url = "https://chat.gradient.network/api/generate";
+            const messages = [
+                { role: "system", content: "Gunakan Bahasa Indonesia." },
+                { role: "user", content: userMessage }
+            ];
+            try {
+                const response = await fetch(proxy + url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Origin': 'https://chat.gradient.network',
+                        'Referer': 'https://chat.gradient.network/'
+                    },
+                    body: JSON.stringify({
+                        model: "GPT OSS 120B",
+                        clusterMode: "nvidia",
+                        messages: messages,
+                        enableThinking: true
+                    })
+                });
+                if (!response.ok) return "Error Jaringan.";
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = "";
+                let final = "";
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split("\n");
+                    buffer = lines.pop();
+                    for (const line of lines) {
+                        const clean = line.trim().replace(/^data: /, '');
+                        if(!clean) continue;
+                        try {
+                            const obj = JSON.parse(clean);
+                            if (obj.type === 'reply' && obj.data?.content) {
+                                final += obj.data.content;
+                            }
+                        } catch(e){}
+                    }
+                }
+                return final;
+            } catch (e) { return "Error: " + e.message; }
+        }
+
+        // --- DOM Elements ---
+        const chatBox = document.getElementById('chat-box');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const typingIndicator = document.getElementById('typing-indicator');
+
+        // --- Event Listeners ---
+        sendButton.addEventListener('click', handleSendMessage);
+        userInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                handleSendMessage();
+            }
+        });
+
+        // --- Functions ---
+        function handleSendMessage() {
+            const message = userInput.value.trim();
+            if (message === '') return;
+
+            // Hide welcome screen on first interaction
+            if (welcomeScreen) {
+                welcomeScreen.style.display = 'none';
+            }
+
+            // Display user message
+            displayMessage(message, 'user');
+            userInput.value = '';
+
+            // Show typing indicator and fetch AI response
+            showTypingIndicator();
+            fetchGptOss(message).then(aiResponse => {
+                hideTypingIndicator();
+                displayMessage(aiResponse, 'ai');
+            });
+        }
+
+        function displayMessage(text, sender) {
+            const messageWrapper = document.createElement('div');
+            messageWrapper.classList.add('message', sender);
+
+            const messageContent = document.createElement('div');
+            messageContent.classList.add('message-content');
+            messageContent.textContent = text;
+
+            const avatar = document.createElement('img');
+            if (sender === 'user') {
+                avatar.src = 'https://www.function1.com/sites/default/files/field/image/Digital-Conversation.png';
+                avatar.alt = 'User Avatar';
+            } else {
+                avatar.src = 'https://www.investopedia.com/thmb/Y2--B3tbMfFdhEPQ062BPyjU7y0=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/virtualassistant_definition_final_0915-89ea5f326ee047a7951ab350097af944.jpg';
+                avatar.alt = 'AI Avatar';
+            }
+
+            messageWrapper.appendChild(avatar);
+            messageWrapper.appendChild(messageContent);
+            chatBox.appendChild(messageWrapper);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            typingIndicator.classList.add('active');
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            typingIndicator.classList.remove('active');
+        }
+    </script>
+</body>
+</html>
