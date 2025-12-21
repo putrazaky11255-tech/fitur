@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bola Pantul Poligon</title>
+    <style>
+        /* --- General Setup & Glassmorphism --- */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .container {
+            position: relative;
+            width: 90vw;
+            height: 90vh;
+            max-width: 900px;
+            max-height: 900px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        /* --- UI Panel (Glassmorphism) --- */
+        .ui-panel {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 15px 30px;
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            z-index: 10;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        .stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #fff;
+        }
+
+        .stat-label {
+            font-size: 0.8em;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+
+        /* --- Canvas --- */
+        canvas {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* --- Footer Credit --- */
+        .footer {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.8em;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="ui-panel">
+            <div class="stat">
+                <span class="stat-label">Sisi</span>
+                <span class="stat-value" id="sides-display">3</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Kecepatan</span>
+                <span class="stat-value" id="speed-display">2.00</span>
+            </div>
+        </div>
+        <canvas id="gameCanvas"></canvas>
+        <div class="footer">
+            Dibuat dengan &hearts; oleh Opus AI Coder
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const sidesDisplay = document.getElementById('sides-display');
+        const speedDisplay = document.getElementById('speed-display');
+
+        // --- Canvas Setup ---
+        function resizeCanvas() {
+            const container = document.querySelector('.container');
+            canvas.width = container.clientWidth * 0.9;
+            canvas.height = container.clientHeight * 0.8;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // --- Game State ---
+        let polygonSides = 3;
+        let polygonRadius = Math.min(canvas.width, canvas.height) * 0.4;
+        let polygonCenter = { x: canvas.width / 2, y: canvas.height / 2 };
+
+        let ball = {
+            x: polygonCenter.x,
+            y: polygonCenter.y,
+            radius: 10,
+            vx: 2, // Velocity x
+            vy: 2, // Velocity y
+            color: '#ffffff'
+        };
+
+        // --- Helper Functions ---
+        function getPolygonVertices(sides, radius, center) {
+            const vertices = [];
+            const angleStep = (Math.PI * 2) / sides;
+            for (let i = 0; i < sides; i++) {
+                const angle = angleStep * i - Math.PI / 2; // Start from top
+                vertices.push({
+                    x: center.x + radius * Math.cos(angle),
+                    y: center.y + radius * Math.sin(angle)
+                });
+            }
+            return vertices;
+        }
+
+        function drawPolygon(vertices) {
+            ctx.beginPath();
+            ctx.moveTo(vertices[0].x, vertices[0].y);
+            for (let i = 1; i < vertices.length; i++) {
+                ctx.lineTo(vertices[i].x, vertices[i].y);
+            }
+            ctx.closePath();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fillStyle = ball.color;
+            ctx.fill();
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = ball.color;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+
+        function updateUI() {
+            sidesDisplay.textContent = polygonSides;
+            const speed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
+            speedDisplay.textContent = speed.toFixed(2);
+        }
+
+        // --- Physics and Collision Logic ---
+        function checkCollision(vertices) {
+            for (let i = 0; i < vertices.length; i++) {
+                const v1 = vertices[i];
+                const v2 = vertices[(i + 1) % vertices.length];
+
+                // Vector from v1 to v2 (the line segment)
+                const lineVec = { x: v2.x - v1.x, y: v2.y - v1.y };
+                const lineLength = Math.sqrt(lineVec.x * lineVec.x + lineVec.y * lineVec.y);
+                const lineUnitVec = { x: lineVec.x / lineLength, y: lineVec.y / lineLength };
+
+                // Vector from v1 to ball center
+                const ballVec = { x: ball.x - v1.x, y: ball.y - v1.y };
+
+                // Project ball vector onto line vector
+                let t = (ballVec.x * lineUnitVec.x + ballVec.y * lineUnitVec.y) / lineLength;
+                t = Math.max(0, Math.min(1, t)); // Clamp t to [0, 1] to stay on the segment
+
+                // Find the closest point on the line segment
+                const closestPoint = {
+                    x: v1.x + t * lineVec.x,
+                    y: v1.y + t * lineVec.y
+                };
+
+                // Vector from closest point to ball center
+                const distVec = { x: ball.x - closestPoint.x, y: ball.y - closestPoint.y };
+                const distance = Math.sqrt(distVec.x * distVec.x + distVec.y * distVec.y);
+
+                if (distance < ball.radius) {
+                    // Collision detected!
+                    // Normal vector (perpendicular to the line)
+                    const normal = { x: -lineUnitVec.y, y: lineUnitVec.x };
+                    
+                    // Make sure normal points away from the polygon center
+                    const toCenter = { x: polygonCenter.x - closestPoint.x, y: polygonCenter.y - closestPoint.y };
+                    if (normal.x * toCenter.x + normal.y * toCenter.y > 0) {
+                        normal.x = -normal.x;
+                        normal.y = -normal.y;
+                    }
+
+                    // Reflect velocity vector
+                    const dotProduct = ball.vx * normal.x + ball.vy * normal.y;
+                    ball.vx -= 2 * dotProduct * normal.x;
+                    ball.vy -= 2 * dotProduct * normal.y;
+
+                    // Increase speed
+                    const speedIncrease = 1.05;
+                    ball.vx *= speedIncrease;
+                    ball.vy *= speedIncrease;
+
+                    // Move ball out of collision
+                    const overlap = ball.radius - distance;
+                    ball.x += normal.x * overlap;
+                    ball.y += normal.y * overlap;
+                    
+                    // Increase polygon sides
+                    polygonSides++;
+                    
+                    // Update UI
+                    updateUI();
+                    
+                    return; // Only handle one collision per frame
+                }
+            }
+        }
+
+        // --- Main Game Loop ---
+        function gameLoop() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Update ball position
+            ball.x += ball.vx;
+            ball.y += ball.vy;
+
+            // Get current polygon vertices
+            const vertices = getPolygonVertices(polygonSides, polygonRadius, polygonCenter);
+
+            // Check for collisions
+            checkCollision(vertices);
+
+            // Draw everything
+            drawPolygon(vertices);
+            drawBall();
+
+            // Continue the loop
+            requestAnimationFrame(gameLoop);
+        }
+
+        // --- Start the game ---
+        updateUI();
+        gameLoop();
+    </script>
+</body>
+</html>
