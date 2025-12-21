@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XOX vs Bot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            text-align: center;
+            color: #764ba2;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .mode-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            transform: scale(1.05);
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(103, 126, 234, 0.1);
+            border-radius: 15px;
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .score-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #764ba2;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 20px auto;
+            max-width: 350px;
+            aspect-ratio: 1;
+        }
+
+        .cell {
+            background: white;
+            border: 3px solid #e0e0e0;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cell:hover:not(.taken) {
+            background: #f5f5f5;
+            transform: scale(1.05);
+            border-color: #764ba2;
+        }
+
+        .cell.taken {
+            cursor: not-allowed;
+        }
+
+        .cell.x {
+            color: #667eea;
+            animation: popIn 0.3s ease;
+        }
+
+        .cell.o {
+            color: #f5576c;
+            animation: popIn 0.3s ease;
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0) rotate(180deg);
+            }
+            50% {
+                transform: scale(1.2) rotate(90deg);
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+            }
+        }
+
+        .cell.winner {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white !important;
+            animation: pulse 0.5s ease infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .status {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.2em;
+            color: #666;
+            min-height: 30px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-reset:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-over-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .game-over-modal.show {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            animation: bounceIn 0.5s ease;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-content h2 {
+            color: #764ba2;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .modal-content p {
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            color: #666;
+        }
+
+        .thinking {
+            display: inline-block;
+            animation: thinking 1s ease infinite;
+        }
+
+        @keyframes thinking {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        footer {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>XOX vs Bot</h1>
+        
+        <div class="mode-selector">
+            <button class="mode-btn active" data-mode="easy">Gampang</button>
+            <button class="mode-btn" data-mode="normal">Normal</button>
+            <button class="mode-btn" data-mode="hard">Sulit</button>
+        </div>
+
+        <div class="score-board">
+            <div class="score-item">
+                <div class="score-label">Kamu (X)</div>
+                <div class="score-value" id="playerScore">0</div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">Seri</div>
+                <div class="score-value" id="drawScore">0</div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">Bot (O)</div>
+                <div class="score-value" id="botScore">0</div>
+            </div>
+        </div>
+
+        <div class="status" id="status">Giliran kamu</div>
+
+        <div class="board" id="board">
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-reset" id="resetBtn">Reset Game</button>
+        </div>
+    </div>
+
+    <div class="game-over-modal" id="gameOverModal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Game Over!</h2>
+            <p id="modalMessage"></p>
+            <button class="btn btn-reset" onclick="resetGame()">Main Lagi</button>
+        </div>
+    </div>
+
+    <footer>Created with ❤️ by Opus AI</footer>
+
+    <script>
+        const board = document.getElementById('board');
+        const cells = document.querySelectorAll('.cell');
+        const statusElement = document.getElementById('status');
+        const resetBtn = document.getElementById('resetBtn');
+        const modeBtns = document.querySelectorAll('.mode-btn');
+        const gameOverModal = document.getElementById('gameOverModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+        
+        const playerScoreElement = document.getElementById('playerScore');
+        const botScoreElement = document.getElementById('botScore');
+        const drawScoreElement = document.getElementById('drawScore');
+
+        let gameState = ['', '', '', '', '', '', '', '', ''];
+        let currentPlayer = 'X';
+        let gameActive = true;
+        let currentMode = 'easy';
+        let scores = {
+            player: 0,
+            bot: 0,
+            draw: 0
+        };
+
+        const winningConditions = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6]
+        ];
+
+        // Mode selection
+        modeBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                modeBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentMode = btn.dataset.mode;
+                resetGame();
+            });
+        });
+
+        // Cell click handler
+        cells.forEach(cell => {
+            cell.addEventListener('click', handleCellClick);
+        });
+
+        function handleCellClick(event) {
+            const cell = event.target;
+            const index = parseInt(cell.dataset.index);
+
+            if (gameState[index] !== '' || !gameActive || currentPlayer !== 'X') {
+                return;
+            }
+
+            makeMove(index, 'X');
+            
+            if (gameActive) {
+                currentPlayer = 'O';
+                statusElement.innerHTML = 'Bot berpikir<span class="thinking">...</span>';
+                setTimeout(botMove, 500);
+            }
+        }
+
+        function makeMove(index, player) {
+            gameState[index] = player;
+            const cell = cells[index];
+            cell.textContent = player;
+            cell.classList.add('taken', player.toLowerCase());
+            
+            checkResult();
+        }
+
+        function botMove() {
+            if (!gameActive) return;
+
+            let move;
+            
+            switch(currentMode) {
+                case 'easy':
+                    move = getRandomMove();
+                    break;
+                case 'normal':
+                    move = Math.random() < 0.5 ? getBestMove() : getRandomMove();
+                    break;
+                case 'hard':
+                    move = getBestMove();
+                    break;
+            }
+
+            if (move !== -1) {
+                makeMove(move, 'O');
+            }
+
+            if (gameActive) {
+                currentPlayer = 'X';
+                statusElement.textContent = 'Giliran kamu';
+            }
+        }
+
+        function getRandomMove() {
+            const availableMoves = gameState.map((cell, index) => 
+                cell === '' ? index : null
+            ).filter(val => val !== null);
+            
+            return availableMoves.length > 0 
+                ? availableMoves[Math.floor(Math.random() * availableMoves.length)]
+                : -1;
+        }
+
+        function getBestMove() {
+            // Minimax algorithm for unbeatable bot
+            let bestScore = -Infinity;
+            let bestMove = -1;
+
+            for (let i = 0; i < 9; i++) {
+                if (gameState[i] === '') {
+                    gameState[i] = 'O';
+                    let score = minimax(gameState, 0, false);
+                    gameState[i] = '';
+                    
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMove = i;
+                    }
+                }
+            }
+
+            return bestMove;
+        }
+
+        function minimax(state, depth, isMaximizing) {
+            const result = checkWinner(state);
+            
+            if (result === 'O') return 10 - depth;
+            if (result === 'X') return depth - 10;
+            if (result === 'draw') return 0;
+
+            if (isMaximizing) {
+                let bestScore = -Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (state[i] === '') {
+                        state[i] = 'O';
+                        let score = minimax(state, depth + 1, false);
+                        state[i] = '';
+                        bestScore = Math.max(score, bestScore);
+                    }
+                }
+                return bestScore;
+            } else {
+                let bestScore = Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (state[i] === '') {
+                        state[i] = 'X';
+                        let score = minimax(state, depth + 1, true);
+                        state[i] = '';
+                        bestScore = Math.min(score, bestScore);
+                    }
+                }
+                return bestScore;
+            }
+        }
+
+        function checkWinner(state) {
+            for (let condition of winningConditions) {
+                const [a, b, c] = condition;
+                if (state[a] && state[a] === state[b] && state[a] === state[c]) {
+                    return state[a];
+                }
+            }
+            
+            if (state.every(cell => cell !== '')) {
+                return 'draw';
+            }
+            
+            return null;
+        }
+
+        function checkResult() {
+            const winner = checkWinner(gameState);
+            
+            if (winner) {
+                gameActive = false;
+                
+                if (winner === 'X') {
+                    scores.player++;
+                    playerScoreElement.textContent = scores.player;
+                    showGameOver('Kamu Menang! 🎉', 'Luar biasa!');
+                } else if (winner === 'O') {
+                    scores.bot++;
+                    botScoreElement.textContent = scores.bot;
+                    showGameOver('Bot Menang! 🤖', 'Coba lagi ya!');
+                } else {
+                    scores.draw++;
+                    drawScoreElement.textContent = scores.draw;
+                    showGameOver('Seri! 🤝', 'Permainan yang seimbang!');
+                }
+            }
+        }
+
+        function showGameOver(title, message) {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            gameOverModal.classList.add('show');
+        }
+
+        function resetGame() {
+            gameState = ['', '', '', '', '', '', '', '', ''];
+            currentPlayer = 'X';
+            gameActive = true;
+            statusElement.textContent = 'Giliran kamu';
+            
+            cells.forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('taken', 'x', 'o', 'winner');
+            });
+            
+            gameOverModal.classList.remove('show');
+        }
+
+        resetBtn.addEventListener('click', resetGame);
+
+        // Close modal when clicking outside
+        gameOverModal.addEventListener('click', (e) => {
+            if (e.target === gameOverModal) {
+                resetGame();
+            }
+        });
+    </script>
+</body>
+</html>
