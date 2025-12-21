@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gambar Finder</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #f5f7fa;
+            --text-color: #333;
+            --border-color: #e0e6ed;
+            --shadow: 0 2px 12px rgba(0,0,0,0.1);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--text-color);
+            padding-bottom: 70px;
+        }
+
+        /* Glassmorphism Container */
+        .glass-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+            padding: 20px;
+            margin: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+        }
+
+        /* Search Container */
+        .search-container {
+            padding: 30px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .search-box {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .search-box:focus-within {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .search-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 15px 20px;
+            font-size: 16px;
+            background: transparent;
+            color: white;
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .search-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 50px;
+            padding: 15px 30px;
+            color: white;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .search-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .search-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Categories */
+        .categories {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .category-title {
+            color: white;
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .category-pills {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .category-pill {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .category-pill:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .category-pill.active {
+            background: white;
+            color: var(--primary-color);
+        }
+
+        /* Content Grid */
+        .content-grid {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .content-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            cursor: pointer;
+            padding: 20px;
+        }
+
+        .content-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: white;
+        }
+
+        .card-body {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 15px;
+        }
+
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+
+        .empty-title {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .empty-text {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            color: white;
+        }
+
+        .nav-item:hover {
+            color: var(--primary-color);
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+        }
+
+        .nav-item i {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .nav-item span {
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        /* Sidebar for Desktop */
+        .sidebar {
+            position: fixed;
+            left: -250px;
+            top: 0;
+            width: 250px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            transition: var(--transition);
+            z-index: 1001;
+            padding: 80px 20px 20px;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            color: white;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--primary-color);
+        }
+
+        .sidebar-item.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .sidebar-item i {
+            font-size: 18px;
+            width: 24px;
+        }
+
+        /* Menu Toggle */
+        .menu-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1002;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            color: white;
+        }
+
+        .menu-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        /* Responsive */
+        @media (min-width: 768px) {
+            .menu-toggle {
+                display: flex;
+            }
+
+            .bottom-nav {
+                display: none;
+            }
+
+            .sidebar {
+                display: block;
+            }
+
+            body {
+                padding-left: 250px;
+                padding-bottom: 0;
+            }
+
+            .sidebar.open {
+                left: -250px;
+            }
+
+            .sidebar:not(.open) {
+                left: 0;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .sidebar {
+                display: none;
+            }
+
+            .content-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 15px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .search-input {
+                padding: 12px 15px;
+                font-size: 14px;
+            }
+
+            .search-btn {
+                padding: 12px 20px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Menu Toggle for Desktop -->
+    <button class="menu-toggle" onclick="toggleSidebar()">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-item active" onclick="setActiveNav(this, 'home')">
+            <i class="fa-solid fa-home"></i>
+            <span>Beranda</span>
+        </div>
+        <div class="sidebar-item" onclick="setActiveNav(this, 'posts')">
+            <i class="fa-solid fa-file-alt"></i>
+            <span>Postingan</span>
+        </div>
+        <div class="sidebar-item" onclick="setActiveNav(this, 'users')">
+            <i class="fa-solid fa-users"></i>
+            <span>Pengguna</span>
+        </div>
+        <div class="sidebar-item" onclick="setActiveNav(this, 'comments')">
+            <i class="fa-solid fa-comments"></i>
+            <span>Komentar</span>
+        </div>
+        <div class="sidebar-item" onclick="setActiveNav(this, 'albums')">
+            <i class="fa-solid fa-images"></i>
+            <span>Album</span>
+        </div>
+    </aside>
+
+    <!-- Header -->
+    <header class="header">
+        <h1><i class="fa-solid fa-images"></i> Gambar Finder</h1>
+    </header>
+
+    <!-- Search Container -->
+    <div class="search-container">
+        <div class="search-box">
+            <input type="text" class="search-input" id="searchInput" placeholder="Cari konten..." onkeypress="handleKeyPress(event)">
+            <button class="search-btn" onclick="searchContent()">
+                <i class="fa-solid fa-search"></i>
+                <span>Cari</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Categories -->
+    <div class="categories">
+        <div class="category-title">Kategori Populer</div>
+        <div class="category-pills">
+            <div class="category-pill" onclick="searchByCategory('posts')">Postingan</div>
+            <div class="category-pill" onclick="searchByCategory('users')">Pengguna</div>
+            <div class="category-pill" onclick="searchByCategory('comments')">Komentar</div>
+            <div class="category-pill" onclick="searchByCategory('albums')">Album</div>
+            <div class="category-pill" onclick="searchByCategory('photos')">Foto</div>
+        </div>
+    </div>
+
+    <!-- Content Grid Container -->
+    <div id="contentContainer">
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fa-solid fa-search"></i>
+            </div>
+            <div class="empty-title">Mulai Pencarian</div>
+            <div class="empty-text">Ketik kata kunci atau pilih kategori untuk menemukan konten</div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="setActiveNav(this, 'home')">
+            <i class="fa-solid fa-home"></i>
+            <span>Beranda</span>
+        </div>
+        <div class="nav-item" onclick="setActiveNav(this, 'posts')">
+            <i class="fa-solid fa-file-alt"></i>
+            <span>Postingan</span>
+        </div>
+        <div class="nav-item" onclick="setActiveNav(this, 'users')">
+            <i class="fa-solid fa-users"></i>
+            <span>Pengguna</span>
+        </div>
+        <div class="nav-item" onclick="setActiveNav(this, 'comments')">
+            <i class="fa-solid fa-comments"></i>
+            <span>Komentar</span>
+        </div>
+    </nav>
+
+    <script>
+        let currentQuery = '';
+        let isLoading = false;
+
+        // Handle Enter key in search input
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                searchContent();
+            }
+        }
+
+        // Search content from JSONPlaceholder API
+        async function searchContent() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) return;
+
+            currentQuery = query;
+            showLoading();
+
+            try {
+                // Use proxy for CORS
+                const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+                const apiUrl = `https://jsonplaceholder.typicode.com/${query}`;
+                
+                const response = await fetch(`${proxyUrl}${apiUrl}`);
+                const data = await response.json();
+                
+                displayContent(data, query);
+            } catch (error) {
+                console.error('Error fetching content:', error);
+                showError('Gagal memuat konten. Silakan coba lagi.');
+            }
+        }
+
+        // Search by category
+        function searchByCategory(category) {
+            currentQuery = category;
+            showLoading();
+
+            // Update active category pill
+            document.querySelectorAll('.category-pill').forEach(pill => {
+                pill.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Fetch data from JSONPlaceholder API
+            fetchCategoryData(category);
+        }
+
+        // Fetch category data from API
+        async function fetchCategoryData(category) {
+            try {
+                // Use proxy for CORS
+                const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+                const apiUrl = `https://jsonplaceholder.typicode.com/${category}`;
+                
+                const response = await fetch(`${proxyUrl}${apiUrl}`);
+                const data = await response.json();
+                
+                displayContent(data, category);
+            } catch (error) {
+                console.error('Error fetching category data:', error);
+                showError('Gagal memuat data kategori. Silakan coba lagi.');
+            }
+        }
+
+        // Display content in grid
+        function displayContent(data, type) {
+            const container = document.getElementById('contentContainer');
+            const grid = document.createElement('div');
+            grid.className = 'content-grid';
+
+            if (!Array.isArray(data)) {
+                data = [data];
+            }
+
+            data.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'content-card';
+                
+                let title, body, meta1, meta2;
+                
+                switch(type) {
+                    case 'posts':
+                        title = item.title;
+                        body = item.body;
+                        meta1 = `User ID: ${item.userId}`;
+                        meta2 = `Post ID: ${item.id}`;
+                        break;
+                    case 'users':
+                        title = item.name;
+                        body = item.email;
+                        meta1 = `Username: ${item.username}`;
+                        meta2 = `Company: ${item.company.name}`;
+                        break;
+                    case 'comments':
+                        title = item.name;
+                        body = item.body;
+                        meta1 = `Email: ${item.email}`;
+                        meta2 = `Post ID: ${item.postId}`;
+                        break;
+                    case 'albums':
+                        title = item.title;
+                        body = `Album dengan ${Math.floor(Math.random() * 50) + 10} foto`;
+                        meta1 = `User ID: ${item.userId}`;
+                        meta2 = `Album ID: ${item.id}`;
+                        break;
+                    case 'photos':
+                        title = item.title;
+                        body = `Foto dengan resolusi ${Math.floor(Math.random() * 2000) + 1000}x${Math.floor(Math.random() * 2000) + 1000}`;
+                        meta1 = `Album ID: ${item.albumId}`;
+                        meta2 = `Photo ID: ${item.id}`;
+                        break;
+                    default:
+                        title = item.title || item.name || 'Tanpa judul';
+                        body = item.body || item.email || 'Tidak ada deskripsi';
+                        meta1 = `ID: ${item.id}`;
+                        meta2 = `Type: ${type}`;
+                }
+                
+                card.innerHTML = `
+                    <div class="card-title">${title}</div>
+                    <div class="card-body">${body}</div>
+                    <div class="card-meta">
+                        <span>${meta1}</span>
+                        <span>${meta2}</span>
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            });
+
+            container.innerHTML = '';
+            container.appendChild(grid);
+        }
+
+        // Show loading state
+        function showLoading() {
+            const container = document.getElementById('contentContainer');
+            container.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p style="margin-top: 20px;">Mencari konten...</p>
+                </div>
+            `;
+        }
+
+        // Show error state
+        function showError(message) {
+            const container = document.getElementById('contentContainer');
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fa-solid fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="empty-title">Terjadi Kesalahan</div>
+                    <div class="empty-text">${message}</div>
+                </div>
+            `;
+        }
+
+        // Toggle sidebar (desktop)
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        // Set active navigation item
+        function setActiveNav(element, section) {
+            // Update sidebar
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Update bottom nav
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Set active for clicked element
+            element.classList.add('active');
+            
+            // Show content for the section
+            if (section === 'home') {
+                // Reset to empty state
+                const container = document.getElementById('contentContainer');
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fa-solid fa-search"></i>
+                        </div>
+                        <div class="empty-title">Mulai Pencarian</div>
+                        <div class="empty-text">Ketik kata kunci atau pilih kategori untuk menemukan konten</div>
+                    </div>
+                `;
+            } else {
+                // Fetch data for the section
+                fetchCategoryData(section);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-load posts after 1 second
+            setTimeout(() => {
+                fetchCategoryData('posts');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
