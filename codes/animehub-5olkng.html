@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnimeKu - Streaming Anime</title>
+    <style>
+        /* --- GLOBAL STYLES & VARIABLES --- */
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --bg-card: #212121;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --accent-color: #e50914;
+            --accent-hover: #f40612;
+            --border-color: #333333;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            /* Space for bottom nav */
+            padding-bottom: 70px;
+        }
+
+        /* --- APP CONTAINER --- */
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+            padding-bottom: 20px;
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* --- PAGE SECTIONS (Hidden by default) --- */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* --- HOME PAGE --- */
+        .hero-banner {
+            position: relative;
+            width: 100%;
+            height: 50vh;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.1) 100%), url('https://blacknerdproblems.com/wp-content/uploads/2023/01/anime-character-watching-tv-computer.jpg') no-repeat center center/cover;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 30px;
+            overflow: hidden;
+            animation: slideInFromTop 0.8s ease-out;
+        }
+
+        @keyframes slideInFromTop {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .hero-banner h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
+            margin-bottom: 10px;
+        }
+
+        .hero-banner p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.7);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-left: 10px;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .anime-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 20px;
+        }
+
+        .anime-card {
+            background-color: var(--bg-card);
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+            animation: fadeInUp 0.5s ease-out backwards;
+        }
+
+        .anime-card:nth-child(n) {
+            animation-delay: calc(0.05s * var(--i));
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .anime-card:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow);
+        }
+
+        .anime-card img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .anime-card-info {
+            padding: 10px;
+        }
+
+        .anime-card-title {
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .anime-card-meta {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+
+        /* --- SEARCH PAGE --- */
+        .search-bar {
+            display: flex;
+            width: 100%;
+            padding: 12px 20px;
+            font-size: 1rem;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            color: var(--text-primary);
+            margin-bottom: 30px;
+            transition: border-color var(--transition-speed);
+        }
+
+        .search-bar:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        /* --- DETAIL PAGE --- */
+        .detail-container {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .detail-poster {
+            flex: 1;
+            min-width: 250px;
+            max-width: 350px;
+        }
+
+        .detail-poster img {
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .detail-info {
+            flex: 2;
+            min-width: 280px;
+        }
+
+        .detail-info h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .detail-meta {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .detail-meta span {
+            background-color: var(--bg-secondary);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .detail-description {
+            line-height: 1.6;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+        }
+
+        .episode-list {
+            margin-top: 20px;
+        }
+
+        .episode-list h2 {
+            margin-bottom: 15px;
+        }
+
+        .episode-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .episode-card {
+            background-color: var(--bg-card);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color var(--transition-speed), transform var(--transition-speed);
+        }
+
+        .episode-card:hover {
+            background-color: var(--bg-secondary);
+            transform: translateY(-5px);
+        }
+
+        /* --- WATCH PAGE --- */
+        .watch-container {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+            background-color: #000;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .watch-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .watch-info {
+            margin-top: 20px;
+        }
+
+        .watch-info h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        /* --- BOTTOM NAVIGATION --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--bg-secondary);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 10px 0;
+            z-index: 1000;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .nav-item {
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.75rem;
+            transition: color var(--transition-speed);
+            cursor: pointer;
+        }
+
+        .nav-item.active {
+            color: var(--accent-color);
+        }
+
+        .nav-item svg {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 4px;
+        }
+
+        /* --- LOADING & ERROR STATES --- */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+        }
+
+        .error {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: #ff4d4d;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Home Page -->
+        <div id="home-page" class="page active">
+            <div class="content">
+                <div class="hero-banner">
+                    <h1>AnimeKu</h1>
+                    <p>Streaming anime favoritmu kapan saja, di mana saja.</p>
+                </div>
+                <h2 class="section-title">Sedang Populer</h2>
+                <div id="popular-anime-list" class="anime-grid">
+                    <div class="loading">Memuat data anime...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Page -->
+        <div id="search-page" class="page">
+            <div class="content">
+                <h2 class="section-title">Cari Anime</h2>
+                <input type="text" id="search-input" class="search-bar" placeholder="Ketik judul anime...">
+                <div id="search-results-list" class="anime-grid"></div>
+            </div>
+        </div>
+
+        <!-- Detail Page -->
+        <div id="detail-page" class="page">
+            <div class="content">
+                <div id="detail-content" class="loading">Memuat detail anime...</div>
+            </div>
+        </div>
+
+        <!-- Watch Page -->
+        <div id="watch-page" class="page">
+            <div class="content">
+                <div id="watch-content" class="loading">Memuat video...</div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a class="nav-item active" data-page="home-page">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                <span>Beranda</span>
+            </a>
+            <a class="nav-item" data-page="search-page">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                <span>Cari</span>
+            </a>
+        </nav>
+    </div>
+
+    <script>
+        // --- DOM ELEMENTS ---
+        const pages = document.querySelectorAll('.page');
+        const navItems = document.querySelectorAll('.nav-item');
+        const popularAnimeList = document.getElementById('popular-anime-list');
+        const searchInput = document.getElementById('search-input');
+        const searchResultsList = document.getElementById('search-results-list');
+        const detailContent = document.getElementById('detail-content');
+        const watchContent = document.getElementById('watch-content');
+
+        // --- API CONFIGURATION ---
+        const API_PROXY = 'https://cors-anywhere.herokuapp.com/';
+        const API_BASE = 'https://api.anify.tv/';
+
+        // --- STATE MANAGEMENT ---
+        let currentAnimeDetail = null;
+        let currentEpisodes = [];
+
+        // --- NAVIGATION ---
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const targetPageId = item.dataset.page;
+                showPage(targetPageId);
+
+                navItems.forEach(nav => nav.classList.remove('active'));
+                item.classList.add('active');
+            });
+        });
+
+        function showPage(pageId) {
+            pages.forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        // --- API FETCHING ---
+        async function fetchFromAPI(endpoint) {
+            try {
+                const response = await fetch(API_PROXY + API_BASE + endpoint);
+                if (!response.ok) {
+                    throw new Error(`Network response was not ok: ${response.statusText}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error("Fetch Error:", error);
+                return null;
+            }
+        }
+
+        // --- RENDERING FUNCTIONS ---
+        function renderAnimeList(animes, container) {
+            if (!animes || animes.length === 0) {
+                container.innerHTML = '<div class="error">Tidak ada anime yang ditemukan.</div>';
+                return;
+            }
+            container.innerHTML = '';
+            animes.forEach((anime, index) => {
+                const card = document.createElement('div');
+                card.className = 'anime-card';
+                card.style.setProperty('--i', index);
+                card.innerHTML = `
+                    <img src="${anime.image || 'https://static01.nyt.com/images/2025/08/14/12visualUploader-8432-cover/12visualUploader-8432-cover-mediumSquareAt3X.jpg'}" alt="${anime.title.userPreferred || anime.title.romaji || 'N/A'}">
+                    <div class="anime-card-info">
+                        <div class="anime-card-title">${anime.title.userPreferred || anime.title.romaji || 'N/A'}</div>
+                        <div class="anime-card-meta">${anime.status || 'N/A'} • ${anime.releaseDate || 'N/A'}</div>
+                    </div>
+                `;
+                card.addEventListener('click', () => {
+                    showAnimeDetail(anime.id);
+                });
+                container.appendChild(card);
+            });
+        }
+
+        function renderAnimeDetail(anime) {
+            if (!anime) {
+                detailContent.innerHTML = '<div class="error">Gagal memuat detail anime.</div>';
+                return;
+            }
+            currentAnimeDetail = anime;
+            detailContent.innerHTML = `
+                <div class="detail-container">
+                    <div class="detail-poster">
+                        <img src="${anime.image || 'https://static01.nyt.com/images/2025/08/14/12visualUploader-8432-cover/12visualUploader-8432-cover-mediumSquareAt3X.jpg'}" alt="${anime.title.userPreferred}">
+                    </div>
+                    <div class="detail-info">
+                        <h1>${anime.title.userPreferred || anime.title.romaji}</h1>
+                        <div class="detail-meta">
+                            <span>Tipe: ${anime.type || 'N/A'}</span>
+                            <span>Episode: ${anime.totalEpisodes || 'N/A'}</span>
+                            <span>Status: ${anime.status || 'N/A'}</span>
+                            <span>Musim: ${anime.season || 'N/A'} ${anime.seasonYear || ''}</span>
+                        </div>
+                        <p class="detail-description">${anime.description || 'Tidak ada deskripsi.'}</p>
+                        <h2 class="section-title">Daftar Episode</h2>
+                        <div id="episode-list-container" class="episode-grid">
+                            <div class="loading">Memuat daftar episode...</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            // Fetch episodes after detail is rendered
+            fetchEpisodes(anime.id);
+        }
+
+        function renderEpisodes(episodes) {
+            const container = document.getElementById('episode-list-container');
+            if (!episodes || episodes.length === 0) {
+                container.innerHTML = '<p class="error">Tidak ada episode yang tersedia.</p>';
+                return;
+            }
+            container.innerHTML = '';
+            episodes.reverse().forEach((ep, index) => {
+                const card = document.createElement('div');
+                card.className = 'episode-card';
+                card.innerHTML = `
+                    <h3>Episode ${ep.number}</h3>
+                    <p>${ep.title || 'Tanpa Judul'}</p>
+                `;
+                card.addEventListener('click', () => {
+                    showWatchPage(ep.id);
+                });
+                container.appendChild(card);
+            });
+        }
+
+        function renderWatchPage(episodeId) {
+            watchContent.innerHTML = `
+                <div class="watch-container">
+                    <iframe src="https://aniwave.to/ajax/embed/episode/${episodeId}" allowfullscreen></iframe>
+                </div>
+                <div class="watch-info">
+                    <h1>${currentAnimeDetail.title.userPreferred || currentAnimeDetail.title.romaji}</h1>
+                    <p>Menonton episode...</p>
+                </div>
+            `;
+        }
+
+        // --- PAGE-SPECIFIC LOGIC ---
+        async function loadPopularAnime() {
+            const data = await fetchFromAPI('popular');
+            if (data && data.results) {
+                renderAnimeList(data.results, popularAnimeList);
+            } else {
+                popularAnimeList.innerHTML = '<div class="error">Gagal memuat anime populer.</div>';
+            }
+        }
+
+        searchInput.addEventListener('input', async (e) => {
+            const query = e.target.value.trim();
+            if (query.length < 2) {
+                searchResultsList.innerHTML = '';
+                return;
+            }
+            const data = await fetchFromAPI(`search?q=${encodeURIComponent(query)}`);
+            if (data && data.results) {
+                renderAnimeList(data.results, searchResultsList);
+            } else {
+                searchResultsList.innerHTML = '<div class="error">Pencarian tidak ditemukan.</div>';
+            }
+        });
+
+        async function showAnimeDetail(animeId) {
+            showPage('detail-page');
+            detailContent.innerHTML = '<div class="loading">Memuat detail anime...</div>';
+            const data = await fetchFromAPI(`info/${animeId}`);
+            renderAnimeDetail(data);
+        }
+        
+        async function fetchEpisodes(animeId) {
+            // Note: Anify API doesn't seem to have a direct endpoint for episodes list.
+            // The watch page uses an episode ID, which is usually sequential.
+            // We will simulate this by creating episode numbers up to totalEpisodes.
+            // This is a limitation of the provided API structure.
+            // A real app would need a more robust API for episode listings.
+            const animeData = await fetchFromAPI(`info/${animeId}`);
+            if (animeData && animeData.totalEpisodes) {
+                const episodes = [];
+                for (let i = 1; i <= animeData.totalEpisodes; i++) {
+                    // We assume the provider is 'gogoanime' and construct a potential ID.
+                    // This is a guess and might not work for all anime.
+                    // The actual provider ID needs to be fetched from a more detailed endpoint if available.
+                    const providerId = animeData.id; // This is a placeholder
+                    episodes.push({ id: `${providerId}?provider=gogoanime&episode=${i}`, number: i, title: `Episode ${i}` });
+                }
+                renderEpisodes(episodes);
+            } else {
+                document.getElementById('episode-list-container').innerHTML = '<p class="error">Tidak dapat memuat daftar episode.</p>';
+            }
+        }
+
+        function showWatchPage(episodeId) {
+            showPage('watch-page');
+            renderWatchPage(episodeId);
+        }
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadPopularAnime();
+        });
+    </script>
+</body>
+</html>
