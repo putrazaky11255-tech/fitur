@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evolusi Bintang: Dari Nebula hingga Lubang Hitam</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #00000d;
+            --text-color: #e0e0e0;
+            --primary-color: #00d4ff;
+            --secondary-color: #ff0080;
+            --panel-bg: rgba(10, 10, 30, 0.8);
+            --border-color: #00d4ff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background: linear-gradient(135deg, #00000d, #0a0a1e);
+            color: var(--text-color);
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- Header & Navigation --- */
+        header {
+            padding: 1rem 2rem;
+            background: var(--panel-bg);
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        h1 {
+            font-weight: 900;
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+
+        nav {
+            margin-top: 1rem;
+        }
+
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            margin: 0 1.5rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+            font-weight: 700;
+        }
+
+        nav a:hover, nav a.active {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        /* --- Main Content Area --- */
+        main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .content-section {
+            display: none;
+            width: 100%;
+            max-width: 1200px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Simulation View --- */
+        #simulation-view {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 70vh;
+        }
+
+        #star-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .star {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #fff, #ffcc00);
+            box-shadow: 0 0 60px #ffcc00, 0 0 100px #ff9900;
+            transition: all 1s ease-in-out;
+        }
+
+        /* --- Star Stage Animations --- */
+        .stage-nebula .star {
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(138, 43, 226, 0.3), rgba(75, 0, 130, 0.1), transparent);
+            box-shadow: 0 0 80px rgba(138, 43, 226, 0.5), inset 0 0 40px rgba(138, 43, 226, 0.3);
+            animation: swirl 10s infinite linear;
+        }
+        @keyframes swirl { to { transform: rotate(360deg); } }
+
+        .stage-newborn .star {
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, #ffffff, #87ceeb, #4682b4);
+            box-shadow: 0 0 50px #87ceeb, 0 0 100px #4682b4;
+            animation: pulse 2s infinite ease-in-out, jets 4s infinite ease-out;
+        }
+        @keyframes pulse { 50% { transform: scale(1.1); } }
+        @keyframes jets {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; box-shadow: 0 0 100px #87ceeb, 0 0 200px #4682b4, 0 -50px 30px #87ceeb, 0 50px 30px #87ceeb; }
+        }
+
+        .stage-main-sequence .star {
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, #fffacd, #ffd700, #ffb347);
+            box-shadow: 0 0 70px #ffd700, 0 0 120px #ffb347;
+            animation: stable-glow 3s infinite ease-in-out;
+        }
+        @keyframes stable-glow { 50% { box-shadow: 0 0 80px #ffd700, 0 0 130px #ffb347; } }
+
+        .stage-red-supergiant .star {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, #ff6347, #dc143c, #8b0000);
+            box-shadow: 0 0 100px #dc143c, 0 0 200px #8b0000;
+            animation: unstable-pulse 1s infinite ease-in-out;
+        }
+        @keyframes unstable-pulse { 50% { transform: scale(1.05); opacity: 0.8; } }
+
+        .stage-supernova .star {
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, #ffffff, #ffeb3b, #ff9800, #f44336, transparent);
+            box-shadow: 0 0 150px #ffeb3b, 0 0 250px #ff9800, 0 0 350px #f44336;
+            animation: explode 2s ease-out forwards;
+        }
+        @keyframes explode {
+            0% { transform: scale(0.5); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        .stage-black-hole .star {
+            width: 10px;
+            height: 10px;
+            background: #000;
+            box-shadow: inset 0 0 10px #000, 0 0 20px #fff;
+            animation: form-black-hole 1s ease-out forwards;
+        }
+        .stage-black-hole .star::after {
+            content: '';
+            position: absolute;
+            top: -100%; left: -100%;
+            width: 300%; height: 300%;
+            border-radius: 50%;
+            background: radial-gradient(circle, transparent 30%, rgba(0, 212, 255, 0.2) 70%, transparent);
+            animation: accretion-disk 5s infinite linear;
+        }
+        @keyframes form-black-hole { to { transform: scale(1); } }
+        @keyframes accretion-disk { to { transform: rotate(360deg); } }
+
+
+        /* --- Info Panel --- */
+        .info-panel {
+            margin-top: 2rem;
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+        }
+
+        .info-panel h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .info-panel p {
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .star-stats {
+            display: flex;
+            justify-content: space-around;
+            font-size: 0.9rem;
+            color: #a0a0a0;
+        }
+
+        .star-stats span {
+            display: block;
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        /* --- Controls --- */
+        .controls {
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            color: #fff;
+            border: none;
+            padding: 12px 25px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--primary-color);
+        }
+
+        /* --- Stellar Data View --- */
+        #stellar-data-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .star-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.1);
+        }
+
+        .star-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.3);
+            border-color: var(--secondary-color);
+        }
+
+        .star-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .star-card p {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 0.5rem;
+        }
+
+        .star-card strong {
+            color: #a0a0a0;
+        }
+        
+        /* --- Footer --- */
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--panel-bg);
+            border-top: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            color: #a0a0a0;
+        }
+
+        footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Evolusi Bintang</h1>
+        <nav>
+            <a href="#" class="nav-link active" data-section="simulation">Simulasi</a>
+            <a href="#" class="nav-link" data-section="data">Katalog Data</a>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Simulation Section -->
+        <section id="simulation" class="content-section active">
+            <div id="simulation-view">
+                <div id="star-container">
+                    <div id="star" class="star stage-nebula"></div>
+                </div>
+                <div class="info-panel">
+                    <h2 id="stage-title">Nebula</h2>
+                    <p id="stage-description">Awal dari segalanya. Awan gas dan debu yang mulai mengerut karena gravitasi.</p>
+                    <div class="star-stats">
+                        <div>Usia: <span id="star-age">0</span> tahun</div>
+                        <div>Massa: <span id="star-mass">-</span></div>
+                        <div>Suhu: <span id="star-temp">-</span></div>
+                    </div>
+                </div>
+                <div class="controls">
+                    <button id="restart-btn" class="btn">Mulai Ulang Siklus</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stellar Data Section -->
+        <section id="data" class="content-section">
+            <h2 style="text-align: center; margin-bottom: 2rem;">Katalog Data Bintang (NASA Exoplanet Archive)</h2>
+            <div id="stellar-data-container">
+                <!-- Data will be injected here by JS -->
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Stellar Evolution Simulator. Dibuat dengan <span style="color: var(--secondary-color);">❤</span> oleh Opus AI Coder.</p>
+        <p>Data Bintang dari <a href="https://exoplanetarchive.ipac.caltech.edu/" target="_blank">NASA Exoplanet Archive</a></p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Navigation Logic ---
+            const navLinks = document.querySelectorAll('.nav-link');
+            const contentSections = document.querySelectorAll('.content-section');
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetSectionId = link.dataset.section;
+
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    contentSections.forEach(s => s.classList.remove('active'));
+
+                    link.classList.add('active');
+                    document.getElementById(targetSectionId).classList.add('active');
+                    
+                    // Fetch data when the data section is clicked
+                    if (targetSectionId === 'data') {
+                        fetchStellarData();
+                    }
+                });
+            });
+
+            // --- Stellar Evolution Simulation Logic ---
+            const starElement = document.getElementById('star');
+            const stageTitle = document.getElementById('stage-title');
+            const stageDescription = document.getElementById('stage-description');
+            const starAge = document.getElementById('star-age');
+            const starMass = document.getElementById('star-mass');
+            const starTemp = document.getElementById('star-temp');
+            const restartBtn = document.getElementById('restart-btn');
+
+            let currentStageIndex = 0;
+            let ageInterval;
+            let currentAge = 0;
+
+            const stages = [
+                { name: 'Nebula', class: 'stage-nebula', duration: 3, description: 'Awal dari segalanya. Awan gas dan debu yang mulai mengerut karena gravitasi.', mass: 'T/A', temp: '10 K' },
+                { name: 'Bintang Baru (Newborn)', class: 'stage-newborn', duration: 5, description: 'Inti bintang menyala, memulai fusi nuklir. Angin kencang bintang terbentuk.', mass: '0.5 M☉', temp: '3,000 K' },
+                { name: 'Urutan Utama (Main Sequence)', class: 'stage-main-sequence', duration: 10, description: 'Tahapan paling stabil. Bintang memadukan hidrogen menjadi helium di intinya.', mass: '1.0 M☉', temp: '5,500 K' },
+                { name: 'Raksasa Merah (Red Supergiant)', class: 'stage-red-supergiant', duration: 5, description: 'Bahan bakar hidrogen habis. Bintang memuai dan mendingin, menjadi tidak stabil.', mass: '10 M☉', temp: '3,500 K' },
+                { name: 'Supernova', class: 'stage-supernova', duration: 3, description: 'Ledakan dahsyat! Lapisan luar bintang terlempar ke ruang angkasa, menciptakan elemen-elemen baru.', mass: 'Runuh', temp: '10⁹ K' },
+                { name: 'Lubang Hitam (Black Hole)', class: 'stage-black-hole', duration: Infinity, description: 'Inti yang runtuh memiliki gravitasi yang sangat kuat sehingga tidak ada cahaya yang bisa lepas.', mass: '5 M☉ (inti)', temp: 'N/A' }
+            ];
+
+            function updateStage() {
+                if (currentStageIndex >= stages.length) {
+                    clearInterval(ageInterval);
+                    return;
+                }
+
+                const stage = stages[currentStageIndex];
+                
+                // Update UI
+                starElement.className = `star ${stage.class}`;
+                stageTitle.textContent = stage.name;
+                stageDescription.textContent = stage.description;
+                starMass.textContent = stage.mass;
+                starTemp.textContent = stage.temp;
+
+                // Handle age display
+                if (stage.name === 'Supernova') {
+                    starAge.textContent = 'Ledakan!';
+                } else if (stage.name === 'Lubang Hitam (Black Hole)') {
+                    starAge.textContent = 'Abadi';
+                    clearInterval(ageInterval);
+                } else {
+                    // Reset age for the new stage
+                    currentAge = 0;
+                    starAge.textContent = currentAge;
+                }
+
+                // Move to next stage after duration
+                setTimeout(() => {
+                    currentStageIndex++;
+                    updateStage();
+                }, stage.duration * 1000);
+            }
+
+            function startSimulation() {
+                // Reset state
+                currentStageIndex = 0;
+                currentAge = 0;
+                clearInterval(ageInterval);
+
+                // Start the stage progression
+                updateStage();
+
+                // Start the age counter
+                ageInterval = setInterval(() => {
+                    if (currentStageIndex < stages.length && stages[currentStageIndex].name !== 'Supernova' && stages[currentStageIndex].name !== 'Lubang Hitam (Black Hole)') {
+                        currentAge += 1000000; // Increment by 1 million years per second
+                        starAge.textContent = currentAge.toLocaleString('id-ID');
+                    }
+                }, 1000);
+            }
+
+            restartBtn.addEventListener('click', startSimulation);
+
+            // Start simulation on page load
+            startSimulation();
+
+
+            // --- Stellar Data Fetching Logic ---
+            const stellarDataContainer = document.getElementById('stellar-data-container');
+            const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+            const apiUrl = 'https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=SELECT+pl_hostname,st_mass,st_teff,st_lum,sy_dist+FROM+ps+where+st_mass+is+not+null+order+by+st_mass+desc&format=json';
+
+            async function fetchStellarData() {
+                // Clear previous data and show loading message
+                stellarDataContainer.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">Mengambil data dari NASA...</p>';
+                
+                try {
+                    const response = await fetch(proxyUrl + apiUrl);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    displayStellarData(data);
+                } catch (error) {
+                    console.error('Error fetching stellar data:', error);
+                    stellarDataContainer.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--secondary-color);">Gagal memuat data. Coba lagi nanti.</p>`;
+                }
+            }
+
+            function displayStellarData(data) {
+                stellarDataContainer.innerHTML = ''; // Clear loading message
+
+                if (!data || data.length === 0) {
+                    stellarDataContainer.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">Tidak ada data bintang yang ditemukan.</p>';
+                    return;
+                }
+
+                // Display first 12 stars for performance
+                const starsToShow = data.slice(0, 12);
+
+                starsToShow.forEach(star => {
+                    const starCard = document.createElement('div');
+                    starCard.className = 'star-card';
+                    
+                    const mass = star.st_mass ? `${star.st_mass} M☉` : 'N/A';
+                    const temp = star.st_teff ? `${parseInt(star.st_teff).toLocaleString('id-ID')} K` : 'N/A';
+                    const lum = star.st_lum ? `${star.st_lum} L☉` : 'N/A';
+                    const dist = star.sy_dist ? `${star.sy_dist} pc` : 'N/A';
+
+                    starCard.innerHTML = `
+                        <h3>${star.pl_hostname || 'Bintang Tanpa Nama'}</h3>
+                        <p><strong>Massa:</strong> ${mass}</p>
+                        <p><strong>Suhu Efektif:</strong> ${temp}</p>
+                        <p><strong>Luminositas:</strong> ${lum}</p>
+                        <p><strong>Jarak:</strong> ${dist}</p>
+                    `;
+                    stellarDataContainer.appendChild(starCard);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
