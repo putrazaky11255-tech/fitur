@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MusikKu - Pemutar Lagu</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+        :root {
+            --primary-color: #1DB954;
+            --secondary-color: #191414;
+            --background-color: #121212;
+            --surface-color: #181818;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B3B3B3;
+            --highlight-color: #282828;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            background-color: var(--surface-color);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--primary-color), #1ed760);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .search-box {
+            display: flex;
+            background-color: var(--highlight-color);
+            border-radius: 50px;
+            padding: 5px;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus-within {
+            box-shadow: 0 0 0 2px var(--primary-color);
+        }
+
+        #searchInput {
+            flex-grow: 1;
+            background: none;
+            border: none;
+            outline: none;
+            padding: 12px 20px;
+            font-size: 1rem;
+            color: var(--text-primary);
+        }
+
+        #searchButton {
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 50px;
+            padding: 12px 25px;
+            color: var(--secondary-color);
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        #searchButton:hover {
+            background-color: #1ed760;
+            transform: scale(1.05);
+        }
+
+        .player-area {
+            background-color: var(--highlight-color);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            display: none; /* Hidden by default */
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .player-area.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        #albumArt {
+            width: 100%;
+            max-width: 250px;
+            height: 250px;
+            border-radius: 15px;
+            object-fit: cover;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            margin-bottom: 20px;
+            animation: spin 20s linear infinite paused;
+        }
+
+        .player-area.playing #albumArt {
+            animation-play-state: running;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        #songTitle {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        #artistName {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .player-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .control-btn {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: color 0.3s ease, transform 0.2s ease;
+        }
+
+        .control-btn:hover {
+            color: var(--primary-color);
+            transform: scale(1.1);
+        }
+
+        #playPauseBtn {
+            font-size: 2.5rem;
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .results-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .results-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .results-list::-webkit-scrollbar-track {
+            background: var(--highlight-color);
+            border-radius: 10px;
+        }
+
+        .results-list::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 10px;
+        }
+
+        .result-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px;
+            background-color: var(--highlight-color);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .result-item:hover {
+            background-color: #333;
+            transform: translateX(5px);
+        }
+
+        .result-item img {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .result-item-info {
+            flex-grow: 1;
+        }
+
+        .result-item-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .result-item-artist {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="header">
+            <h1>MusikKu</h1>
+            <p style="color: var(--text-secondary);">Cari dan dengarkan lagu favoritmu</p>
+        </div>
+
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Masukkan judul lagu atau artis...">
+            <button id="searchButton">Cari</button>
+        </div>
+
+        <div id="resultsList" class="results-list"></div>
+
+        <div id="playerArea" class="player-area">
+            <img id="albumArt" src="https://i.ytimg.com/vi/9vBC2qsK7VM/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLAaF-0HkzVINETcjP9TK0CAig_w8g" alt="Album Art">
+            <h2 id="songTitle">Judul Lagu</h2>
+            <p id="artistName">Nama Artis</p>
+            <div class="player-controls">
+                <button id="prevBtn" class="control-btn">⏮️</button>
+                <button id="playPauseBtn" class="control-btn">▶️</button>
+                <button id="nextBtn" class="control-btn">⏭️</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // API Key publik (Ganti dengan API Key Anda sendiri untuk penggunaan jangka panjang)
+    const API_KEY = 'AIzaSyC-2n1h-6F4gK8j7f6I5h4g3k2j1f0h9g8e';
+    const API_URL = 'https://www.googleapis.com/youtube/v3/search';
+    const PROXY_URL = 'https://cors-anywhere.herokuapp.com/';
+
+    let player;
+    let currentVideoId = '';
+    let resultsData = [];
+
+    // Fungsi untuk memuat YouTube IFrame API
+    function loadYouTubeAPI() {
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    }
+
+    // Fungsi ini akan dipanggil oleh YouTube IFrame API saat siap
+    function onYouTubeIframeAPIReady() {
+        player = new YT.Player('playerArea', {
+            height: '0', // Sembunyikan player default
+            width: '0',
+            videoId: '',
+            events: {
+                'onReady': onPlayerReady,
+                'onStateChange': onPlayerStateChange
+            }
+        });
+    }
+
+    function onPlayerReady(event) {
+        // Player siap, bisa langsung memutar video jika diperlukan
+        console.log("YouTube Player is ready.");
+    }
+
+    function onPlayerStateChange(event) {
+        // Update UI berdasarkan status player
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const playerArea = document.getElementById('playerArea');
+        
+        if (event.data == YT.PlayerState.PLAYING) {
+            playPauseBtn.innerHTML = '⏸️';
+            playerArea.classList.add('playing');
+        } else {
+            playPauseBtn.innerHTML = '▶️';
+            playerArea.classList.remove('playing');
+        }
+    }
+
+    // Event Listeners
+    document.getElementById('searchButton').addEventListener('click', searchSongs);
+    document.getElementById('searchInput').addEventListener('keyup', (event) => {
+        if (event.key === 'Enter') {
+            searchSongs();
+        }
+    });
+
+    document.getElementById('playPauseBtn').addEventListener('click', togglePlayPause);
+    document.getElementById('prevBtn').addEventListener('click', playPreviousSong);
+    document.getElementById('nextBtn').addEventListener('click', playNextSong);
+
+    function searchSongs() {
+        const query = document.getElementById('searchInput').value;
+        if (!query) return;
+
+        const url = `${PROXY_URL}${API_URL}?part=snippet&type=video&q=${encodeURIComponent(query)}&key=${API_KEY}&maxResults=10`;
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                resultsData = data.items;
+                displayResults(data.items);
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                alert("Gagal mengambil data. Pastikan koneksi internet stabil dan coba lagi.");
+            });
+    }
+
+    function displayResults(items) {
+        const resultsList = document.getElementById('resultsList');
+        resultsList.innerHTML = ''; // Clear previous results
+
+        if (items.length === 0) {
+            resultsList.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Tidak ada hasil ditemukan.</p>';
+            return;
+        }
+
+        items.forEach(item => {
+            const resultItem = document.createElement('div');
+            resultItem.className = 'result-item';
+            resultItem.onclick = () => playVideo(item.id.videoId, item.snippet.title, item.snippet.channelTitle, item.snippet.thumbnails.high.url);
+
+            resultItem.innerHTML = `
+                <img src="${item.snippet.thumbnails.default.url}" alt="${item.snippet.title}">
+                <div class="result-item-info">
+                    <div class="result-item-title">${item.snippet.title}</div>
+                    <div class="result-item-artist">${item.snippet.channelTitle}</div>
+                </div>
+            `;
+            resultsList.appendChild(resultItem);
+        });
+    }
+
+    function playVideo(videoId, title, artist, thumbnailUrl) {
+        if (!player) {
+             // Jika player belum siap, coba lagi setelah delay
+             setTimeout(() => playVideo(videoId, title, artist, thumbnailUrl), 500);
+             return;
+        }
+        
+        currentVideoId = videoId;
+        player.loadVideoById(videoId);
+        player.playVideo();
+
+        // Update UI
+        document.getElementById('songTitle').textContent = title;
+        document.getElementById('artistName').textContent = artist;
+        document.getElementById('albumArt').src = thumbnailUrl;
+        document.getElementById('playerArea').classList.add('active');
+    }
+
+    function togglePlayPause() {
+        if (!player || !currentVideoId) return;
+
+        if (player.getPlayerState() === YT.PlayerState.PLAYING) {
+            player.pauseVideo();
+        } else {
+            player.playVideo();
+        }
+    }
+
+    function playPreviousSong() {
+        if (!currentVideoId || resultsData.length === 0) return;
+
+        const currentIndex = resultsData.findIndex(item => item.id.videoId === currentVideoId);
+        const prevIndex = (currentIndex - 1 + resultsData.length) % resultsData.length;
+        const prevSong = resultsData[prevIndex];
+
+        playVideo(prevSong.id.videoId, prevSong.snippet.title, prevSong.snippet.channelTitle, prevSong.snippet.thumbnails.high.url);
+    }
+
+    function playNextSong() {
+        if (!currentVideoId || resultsData.length === 0) return;
+        
+        const currentIndex = resultsData.findIndex(item => item.id.videoId === currentVideoId);
+        const nextIndex = (currentIndex + 1) % resultsData.length;
+        const nextSong = resultsData[nextIndex];
+
+        playVideo(nextSong.id.videoId, nextSong.snippet.title, nextSong.snippet.channelTitle, nextSong.snippet.thumbnails.high.url);
+    }
+
+    // Load YouTube API saat halaman dimuat
+    loadYouTubeAPI();
+</script>
+
+</body>
+</html>
