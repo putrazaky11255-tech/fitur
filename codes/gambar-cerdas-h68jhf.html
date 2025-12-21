@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gambar Cerdas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* --- Gaya Umum & Reset --- */
+        :root {
+            --primary-color: #007bff;
+            --background-color: #f4f7f6;
+            --surface-color: rgba(255, 255, 255, 0.7);
+            --text-color: #212121;
+            --text-secondary-color: #757575;
+            --border-color: rgba(255, 255, 255, 0.2);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            --shadow-hover: 0 8px 32px 0 rgba(31, 38, 135, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: background-color 0.3s, color 0.3s;
+            background-image: url('https://source.unsplash.com/featured/?nature');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: -1;
+        }
+
+        /* --- Header --- */
+        .header {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 100;
+            position: sticky;
+            top: 0;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-color);
+            cursor: pointer;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        /* --- Area Pencarian --- */
+        .search-container {
+            flex-grow: 1;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .search-input {
+            flex-grow: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+
+        .search-button {
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+        .search-button:hover {
+            background-color: #0056b3;
+        }
+
+        .search-button:active {
+            transform: scale(0.98);
+        }
+
+        /* --- Sidebar (Navigasi Desktop) --- */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding-top: 5rem;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+            z-index: 200;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .sidebar.active {
+            transform: translateX(0);
+        }
+
+        .sidebar-nav {
+            list-style: none;
+        }
+
+        .sidebar-nav li {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+
+        .sidebar-nav a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-nav a i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* --- Overlay untuk Sidebar --- */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 150;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* --- Konten Utama --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 2rem 1rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* --- Grid Gambar --- */
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .image-item {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            aspect-ratio: 1 / 1;
+            border: 1px solid var(--border-color);
+        }
+
+        .image-item:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .image-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* --- Loading & State --- */
+        .loading, .error-message, .initial-message {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-secondary-color);
+            font-size: 1.1rem;
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .loading i {
+            font-size: 2rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* --- Bottom Bar (Navigasi Mobile) --- */
+        .bottom-bar {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            z-index: 100;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .bottom-bar-nav {
+            display: flex;
+            justify-content: space-around;
+            list-style: none;
+        }
+
+        .bottom-bar-nav a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0.75rem;
+            color: var(--text-secondary-color);
+            text-decoration: none;
+            font-size: 0.75rem;
+            transition: color 0.2s;
+        }
+
+        .bottom-bar-nav a:hover, .bottom-bar-nav a.active {
+            color: var(--primary-color);
+        }
+
+        .bottom-bar-nav i {
+            font-size: 1.25rem;
+            margin-bottom: 0.25rem;
+        }
+
+        /* --- Dark Mode --- */
+        body.dark-mode {
+            --background-color: #121212;
+            --surface-color: rgba(30, 30, 30, 0.7);
+            --text-color: #e0e0e0;
+            --text-secondary-color: #a0a0a0;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            --shadow-hover: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+        
+        body.dark-mode .search-input {
+            background: rgba(40, 40, 40, 0.7);
+            color: var(--text-color);
+        }
+
+        body.dark-mode .loading, 
+        body.dark-mode .error-message, 
+        body.dark-mode .initial-message {
+            background: rgba(30, 30, 30, 0.7);
+        }
+
+        /* --- Responsive Design --- */
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+            
+            .sidebar {
+                width: 70%;
+            }
+
+            .image-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+
+            .bottom-bar {
+                display: block;
+            }
+
+            /* Beri jarak di bawah agar tidak tertutup bottom bar */
+            .main-content {
+                padding-bottom: 5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="logo">
+                <i class="fa-solid fa-image"></i> Gambar Cerdas
+            </div>
+            <div class="search-container">
+                <input type="text" class="search-input" id="searchInput" placeholder="Cari gambar apa? (contoh: kucing, pemandangan alam)">
+                <button class="search-button" id="searchButton">
+                    <i class="fa-solid fa-search"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar (Navigasi Desktop & Mobile) -->
+    <nav class="sidebar" id="sidebar">
+        <ul class="sidebar-nav">
+            <li><a href="#" id="homeLink"><i class="fa-solid fa-house"></i> Beranda</a></li>
+            <li><a href="#" id="popularLink"><i class="fa-solid fa-fire"></i> Populer</a></li>
+            <li><a href="#" id="natureLink"><i class="fa-solid fa-mountain"></i> Pemandangan Alam</a></li>
+            <li><a href="#" id="catLink"><i class="fa-solid fa-cat"></i> Kucing Lucu</a></li>
+            <li><a href="#" id="carLink"><i class="fa-solid fa-car"></i> Mobil Sport</a></li>
+            <li><a href="#" id="darkModeToggle"><i class="fa-solid fa-moon"></i> Mode Gelap</a></li>
+        </ul>
+    </nav>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Konten Utama -->
+    <main class="main-content" id="mainContent">
+        <div class="initial-message">
+            <i class="fa-solid fa-arrow-up" style="font-size: 2rem; display: block; margin-bottom: 1rem;"></i>
+            Mulai pencarian Anda dengan mengetik kata kunci di atas.
+        </div>
+    </main>
+
+    <!-- Bottom Bar (Navigasi Mobile) -->
+    <nav class="bottom-bar">
+        <ul class="bottom-bar-nav">
+            <li><a href="#" id="homeLinkMobile"><i class="fa-solid fa-house"></i> Beranda</a></li>
+            <li><a href="#" id="popularLinkMobile"><i class="fa-solid fa-fire"></i> Populer</a></li>
+            <li><a href="#" id="natureLinkMobile"><i class="fa-solid fa-mountain"></i> Alam</a></li>
+            <li><a href="#" id="catLinkMobile"><i class="fa-solid fa-cat"></i> Kucing</a></li>
+            <li><a href="#" id="carLinkMobile"><i class="fa-solid fa-car"></i> Mobil</a></li>
+        </ul>
+    </nav>
+
+    <script>
+        // --- ELEMEN DOM ---
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+        const mainContent = document.getElementById('mainContent');
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const body = document.body;
+
+        // --- FUNGSI UTAMA PENCARIAN ---
+        async function searchImages(query) {
+            showLoading();
+            
+            try {
+                // Menggunakan Unsplash API tanpa API key dengan proxy
+                const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+                const unsplashUrl = `https://source.unsplash.com/featured/?${encodeURIComponent(query)}`;
+                
+                // Buat array URL gambar dari Unsplash
+                const imageUrls = [];
+                for (let i = 0; i < 12; i++) {
+                    // Tambahkan parameter acak untuk mendapatkan gambar yang berbeda
+                    imageUrls.push(`${unsplashUrl}&sig=${Math.random().toString(36).substring(2, 15)}`);
+                }
+                
+                displayImages(imageUrls);
+            } catch (error) {
+                console.error('Fetch Error:', error);
+                showError('Gagal mengambil data. Pastikan koneksi Anda stabil dan coba lagi.');
+            }
+        }
+
+        // --- FUNGSI TAMPILAN ---
+        function showLoading() {
+            mainContent.innerHTML = '<div class="loading"><i class="fa-solid fa-spinner"></i><p>Sedang mencari...</p></div>';
+        }
+
+        function showError(message) {
+            mainContent.innerHTML = `<div class="error-message"><i class="fa-solid fa-exclamation-triangle"></i><p>${message}</p></div>`;
+        }
+
+        function displayImages(urls) {
+            if (urls.length === 0) {
+                showError('Tidak ada gambar untuk ditampilkan.');
+                return;
+            }
+            const imageGrid = document.createElement('div');
+            imageGrid.className = 'image-grid';
+            urls.forEach(url => {
+                const item = document.createElement('div');
+                item.className = 'image-item';
+                const img = document.createElement('img');
+                img.src = url;
+                img.alt = 'Hasil Pencarian';
+                img.loading = 'lazy'; // Lazy loading untuk performa
+                item.appendChild(img);
+                imageGrid.appendChild(item);
+            });
+            mainContent.innerHTML = '';
+            mainContent.appendChild(imageGrid);
+        }
+        
+        // --- EVENT LISTENER PENCARIAN ---
+        function handleSearch() {
+            const query = searchInput.value.trim();
+            if (query) {
+                searchImages(query);
+            }
+        }
+
+        searchButton.addEventListener('click', handleSearch);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleSearch();
+            }
+        });
+
+        // --- EVENT LISTENER SIDEBAR ---
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+            sidebarOverlay.classList.toggle('active');
+        });
+
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+        });
+
+        // --- EVENT LISTENER NAVIGASI & DARK MODE ---
+        function attachNavListeners() {
+            // Home
+            document.getElementById('homeLink').addEventListener('click', (e) => { e.preventDefault(); location.reload(); });
+            document.getElementById('homeLinkMobile').addEventListener('click', (e) => { e.preventDefault(); location.reload(); });
+            // Popular (contoh)
+            document.getElementById('popularLink').addEventListener('click', (e) => { e.preventDefault(); searchImages('popular'); });
+            document.getElementById('popularLinkMobile').addEventListener('click', (e) => { e.preventDefault(); searchImages('popular'); });
+            // Preset
+            document.getElementById('natureLink').addEventListener('click', (e) => { e.preventDefault(); searchImages('pemandangan alam'); });
+            document.getElementById('natureLinkMobile').addEventListener('click', (e) => { e.preventDefault(); searchImages('pemandangan alam'); });
+            document.getElementById('catLink').addEventListener('click', (e) => { e.preventDefault(); searchImages('kucing lucu'); });
+            document.getElementById('catLinkMobile').addEventListener('click', (e) => { e.preventDefault(); searchImages('kucing lucu'); });
+            document.getElementById('carLink').addEventListener('click', (e) => { e.preventDefault(); searchImages('mobil sport'); });
+            document.getElementById('carLinkMobile').addEventListener('click', (e) => { e.preventDefault(); searchImages('mobil sport'); });
+            // Dark Mode
+            darkModeToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                body.classList.toggle('dark-mode');
+                const isDarkMode = body.classList.contains('dark-mode');
+                localStorage.setItem('darkMode', isDarkMode);
+                const icon = darkModeToggle.querySelector('i');
+                icon.className = isDarkMode ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+            });
+        }
+        attachNavListeners();
+
+        // --- INISIALISASI DARK MODE ---
+        const isDarkModeStored = localStorage.getItem('darkMode') === 'true';
+        if (isDarkModeStored) {
+            body.classList.add('dark-mode');
+            const icon = darkModeToggle.querySelector('i');
+            icon.className = 'fa-solid fa-sun';
+        }
+    </script>
+</body>
+</html>
