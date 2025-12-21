@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CariLirik - Temukan Lirik Lagu Favoritmu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #8b5cf6;
+            --background: #0f172a;
+            --surface: #1e293b;
+            --surface-light: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --accent: #fbbf24;
+            --error: #ef4444;
+            --success: #10b981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--background) 0%, #1a1f3a 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 70px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .logo i {
+            font-size: 2.5rem;
+            color: var(--accent);
+            animation: pulse 2s infinite;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            margin-top: 10px;
+        }
+
+        .search-container {
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid var(--surface-light);
+            border-radius: 12px;
+            background: var(--background);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .search-btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .search-btn:active {
+            transform: translateY(0);
+        }
+
+        .suggestions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .suggestion-chip {
+            padding: 8px 16px;
+            background: var(--surface-light);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .suggestion-chip:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .results-container {
+            margin-top: 30px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .result-card {
+            background: var(--surface);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .song-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .artist-name {
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 5px;
+        }
+
+        .lyrics-preview {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            max-height: 100px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .lyrics-preview::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background: linear-gradient(transparent, var(--surface));
+        }
+
+        .lyrics-full {
+            color: var(--text-primary);
+            line-height: 1.8;
+            white-space: pre-wrap;
+            text-align: center;
+            padding: 20px;
+            background: var(--background);
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        .loading i {
+            font-size: 2rem;
+            animation: spin 1s linear infinite;
+            color: var(--primary-color);
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--error);
+            color: var(--error);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .hero-image {
+            width: 100%;
+            max-width: 400px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 15px;
+            margin: 20px auto;
+            display: block;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            border-top: 1px solid var(--surface-light);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+        }
+
+        .nav-item i {
+            font-size: 1.3rem;
+            margin-bottom: 4px;
+        }
+
+        .nav-item span {
+            font-size: 0.75rem;
+        }
+
+        .nav-item:hover {
+            color: var(--primary-color);
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Responsive Design */
+        @media (min-width: 768px) {
+            .bottom-nav {
+                display: none;
+            }
+
+            body {
+                padding-bottom: 0;
+            }
+
+            .sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                width: 250px;
+                height: 100vh;
+                background: var(--surface);
+                border-right: 1px solid var(--surface-light);
+                padding: 20px;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .main-content {
+                margin-left: 250px;
+                padding: 20px;
+            }
+
+            .nav-item {
+                flex-direction: row;
+                justify-content: flex-start;
+                padding: 12px;
+                margin-bottom: 5px;
+                border-radius: 8px;
+            }
+
+            .nav-item i {
+                margin-right: 10px;
+                margin-bottom: 0;
+            }
+        }
+
+        /* Sidebar for Desktop */
+        @media (min-width: 768px) {
+            .desktop-nav {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                margin-top: 40px;
+            }
+
+            .nav-link {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 12px 16px;
+                color: var(--text-secondary);
+                text-decoration: none;
+                border-radius: 8px;
+                transition: all 0.3s ease;
+            }
+
+            .nav-link:hover, .nav-link.active {
+                background: var(--surface-light);
+                color: var(--primary-color);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Desktop Sidebar -->
+    <aside class="sidebar" style="display: none;">
+        <div class="logo">
+            <i class="fas fa-music"></i>
+            <h2>CariLirik</h2>
+        </div>
+        <nav class="desktop-nav">
+            <a href="#" class="nav-link active" data-page="search">
+                <i class="fas fa-search"></i>
+                <span>Cari Lagu</span>
+            </a>
+            <a href="#" class="nav-link" data-page="favorites">
+                <i class="fas fa-heart"></i>
+                <span>Favorit</span>
+            </a>
+            <a href="#" class="nav-link" data-page="history">
+                <i class="fas fa-history"></i>
+                <span>Riwayat</span>
+            </a>
+            <a href="#" class="nav-link" data-page="about">
+                <i class="fas fa-info-circle"></i>
+                <span>Tentang</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <header>
+                <div class="logo">
+                    <i class="fas fa-music"></i>
+                    <h1>CariLirik</h1>
+                </div>
+                <p class="subtitle">Temukan lirik lagu favoritmu dengan mudah</p>
+                <img src="https://cdn.trendhunterstatic.com/thumbs/553/lyrics-search.jpeg" alt="Music Lyrics" class="hero-image">
+            </header>
+
+            <div class="search-container">
+                <div class="search-box">
+                    <input type="text" class="search-input" id="searchInput" placeholder="Masukkan judul lagu atau nama artis...">
+                    <button class="search-btn" id="searchBtn">
+                        <i class="fas fa-search"></i>
+                        Cari
+                    </button>
+                </div>
+                <div class="suggestions">
+                    <div class="suggestion-chip" data-search="Perfect Ed Sheeran">Perfect - Ed Sheeran</div>
+                    <div class="suggestion-chip" data-search="Shape of You">Shape of You</div>
+                    <div class="suggestion-chip" data-search="Blinding Lights The Weeknd">Blinding Lights</div>
+                    <div class="suggestion-chip" data-search="Someone You Loved">Someone You Loved</div>
+                    <div class="suggestion-chip" data-search="Dance Monkey">Dance Monkey</div>
+                </div>
+            </div>
+
+            <div class="results-container" id="resultsContainer">
+                <div class="empty-state">
+                    <i class="fas fa-music"></i>
+                    <h3>Mulai Pencarian</h3>
+                    <p>Ketik judul lagu atau nama artis untuk menemukan liriknya</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Navigation (Mobile) -->
+    <nav class="bottom-nav">
+        <a href="#" class="nav-item active" data-page="search">
+            <i class="fas fa-search"></i>
+            <span>Cari</span>
+        </a>
+        <a href="#" class="nav-item" data-page="favorites">
+            <i class="fas fa-heart"></i>
+            <span>Favorit</span>
+        </a>
+        <a href="#" class="nav-item" data-page="history">
+            <i class="fas fa-history"></i>
+            <span>Riwayat</span>
+        </a>
+        <a href="#" class="nav-item" data-page="about">
+            <i class="fas fa-info-circle"></i>
+            <span>Tentang</span>
+        </a>
+    </nav>
+
+    <script>
+        // Sample lyrics database (simulated)
+        const lyricsDatabase = {
+            "perfect ed sheeran": {
+                title: "Perfect",
+                artist: "Ed Sheeran",
+                lyrics: `I found a love for me
+Darling, just dive right in and follow my lead
+Well, I found a girl, beautiful and sweet
+Oh, I never knew you were the someone waiting for me
+
+'Cause we were just kids when we fell in love
+Not knowing what it was
+I will not give you up this time
+But darling, just kiss me slow, your heart is all I own
+And in your eyes you're holding mine
+
+Baby, I'm dancing in the dark
+With you between my arms
+Barefoot on the grass
+Listening to our favorite song
+When you said you looked a mess
+I whispered underneath my breath
+But you heard it
+Darling, you look perfect tonight`
+            },
+            "shape of you": {
+                title: "Shape of You",
+                artist: "Ed Sheeran",
+                lyrics: `The club isn't the best place to find a lover
+So the bar is where I go
+Me and my friends at the table doing shots
+Drinking fast and then we talk slow
+And you come over and start up a conversation with just me
+And trust me, I'll give it a chance now
+
+Take my hand, stop, put Van the Man on the jukebox
+And then we start to dance
+And now I'm singing like
+Girl, you know I want your love
+Your love was handmade for somebody like me
+Come on now, follow my lead
+I may be crazy, don't mind me
+Say, boy, let's not talk too much
+Grab on my waist and put that body on me
+Come on now, follow my lead
+Come, come on now, follow my lead`
+            },
+            "blinding lights the weeknd": {
+                title: "Blinding Lights",
+                artist: "The Weeknd",
+                lyrics: `Yeah
+I've been trying to call
+I've been on my own for long enough
+Maybe you can show me how to love, maybe
+I'm going through withdrawals
+You don't even have to do too much
+You can turn me on with just a touch, baby
+
+I look around and
+Sin City's cold and empty (oh)
+No one's around to judge me (oh)
+I can't see clearly when you're gone
+
+I said, ooh, I'm blinded by the lights
+No, I can't sleep until I feel your touch
+I said, ooh, I'm drowning in the night
+Oh, when I'm like this, you're the one I trust`
+            },
+            "someone you loved": {
+                title: "Someone You Loved",
+                artist: "Lewis Capaldi",
+                lyrics: `Now the day bleeds
+Into nightfall
+And you're not here
+To get me through it all
+I let my guard down
+And then you pulled the rug
+I was getting kinda used to being someone you loved
+
+I'm going under and this time I fear there's no one to save me
+This all or nothing really got a way of driving me crazy
+I need somebody to heal
+Somebody to know
+Somebody to have
+Somebody to hold
+It's easy to say
+But it's never the same
+I guess I kinda liked the way you numbed all the pain`
+            },
+            "dance monkey": {
+                title: "Dance Monkey",
+                artist: "Tones and I",
+                lyrics: `They say, "Oh my God, I see the way you shine
+Take your hands, my dear, and place them both in mine"
+You know you stopped me dead when I was passing by
+And now I beg to see you dance just one more time
+
+Ooh, I see you, see you, see you, see you, see you, see you, ooh
+I see you, see you, see you, see you, see you, see you, ooh
+I said, "Ooh, I see you, see you, see you, see you, see you, see you, ooh"
+I said, "Ooh, I love you, I love you, I love you, I love you, I love you, I love you, ooh"
+
+Dance for me, dance for me, dance for me, oh, oh, oh
+I've never seen anybody do the things you do before
+They say, "Move for me, move for me, move for me, ay, ay, ay"
+And when you're done, I'll make you do it all again`
+            }
+        };
+
+        // State management
+        let currentView = 'search';
+        let searchHistory = [];
+        let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+
+        // DOM Elements
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const suggestionChips = document.querySelectorAll('.suggestion-chip');
+        const navItems = document.querySelectorAll('.nav-item, .nav-link');
+
+        // Event Listeners
+        searchBtn.addEventListener('click', performSearch);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') performSearch();
+        });
+
+        suggestionChips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                searchInput.value = chip.dataset.search;
+                performSearch();
+            });
+        });
+
+        navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const page = item.dataset.page;
+                switchPage(page);
+                
+                // Update active state
+                navItems.forEach(nav => nav.classList.remove('active'));
+                document.querySelectorAll(`[data-page="${page}"]`).forEach(nav => {
+                    nav.classList.add('active');
+                });
+            });
+        });
+
+        // Functions
+        function performSearch() {
+            const query = searchInput.value.trim().toLowerCase();
+            if (!query) {
+                showError('Silakan masukkan judul lagu atau nama artis');
+                return;
+            }
+
+            // Add to search history
+            if (!searchHistory.includes(query)) {
+                searchHistory.unshift(query);
+                if (searchHistory.length > 10) searchHistory.pop();
+            }
+
+            showLoading();
+            
+            // Simulate API call delay
+            setTimeout(() => {
+                const result = lyricsDatabase[query];
+                if (result) {
+                    displayResults([result]);
+                } else {
+                    // Try partial match
+                    const partialMatch = Object.keys(lyricsDatabase).find(key => 
+                        key.includes(query) || query.includes(key)
+                    );
+                    if (partialMatch) {
+                        displayResults([lyricsDatabase[partialMatch]]);
+                    } else {
+                        showNoResults();
+                    }
+                }
+            }, 500);
+        }
+
+        function displayResults(results) {
+            let html = '';
+            results.forEach((song, index) => {
+                const isFavorite = favorites.some(fav => fav.title === song.title && fav.artist === song.artist);
+                html += `
+                    <div class="result-card" onclick="toggleLyrics(${index})">
+                        <div class="result-header">
+                            <div>
+                                <div class="song-title">${song.title}</div>
+                                <div class="artist-name">
+                                    <i class="fas fa-user"></i>
+                                    ${song.artist}
+                                </div>
+                            </div>
+                            <button class="favorite-btn" onclick="toggleFavorite(event, '${song.title}', '${song.artist}')">
+                                <i class="fas fa-heart ${isFavorite ? 'active' : ''}"></i>
+                            </button>
+                        </div>
+                        <div class="lyrics-preview" id="preview-${index}">
+                            ${song.lyrics.substring(0, 150)}...
+                        </div>
+                        <div class="lyrics-full" id="full-${index}" style="display: none;">
+                            ${song.lyrics}
+                        </div>
+                    </div>
+                `;
+            });
+            resultsContainer.innerHTML = html;
+        }
+
+        function toggleLyrics(index) {
+            const preview = document.getElementById(`preview-${index}`);
+            const full = document.getElementById(`full-${index}`);
+            
+            if (full.style.display === 'none') {
+                preview.style.display = 'none';
+                full.style.display = 'block';
+            } else {
+                preview.style.display = 'block';
+                full.style.display = 'none';
+            }
+        }
+
+        function toggleFavorite(event, title, artist) {
+            event.stopPropagation();
+            const index = favorites.findIndex(fav => fav.title === title && fav.artist === artist);
+            
+            if (index > -1) {
+                favorites.splice(index, 1);
+                event.target.classList.remove('active');
+            } else {
+                favorites.push({ title, artist });
+                event.target.classList.add('active');
+            }
+            
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+        }
+
+        function showLoading() {
+            resultsContainer.innerHTML = `
+                <div class="loading">
+                    <i class="fas fa-spinner"></i>
+                    <p>Mencari lirik...</p>
+                </div>
+            `;
+        }
+
+        function showError(message) {
+            resultsContainer.innerHTML = `
+                <div class="error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    ${message}
+                </div>
+            `;
+        }
+
+        function showNoResults() {
+            resultsContainer.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-search"></i>
+                    <h3>Lirik Tidak Ditemukan</h3>
+                    <p>Coba kata kunci lain atau periksa ejaan lagu</p>
+                </div>
+            `;
+        }
+
+        function switchPage(page) {
+            currentView = page;
+            let html = '';
+            
+            switch(page) {
+                case 'search':
+                    location.reload();
+                    break;
+                    
+                case 'favorites':
+                    if (favorites.length === 0) {
+                        html = `
+                            <div class="empty-state">
+                                <i class="fas fa-heart"></i>
+                                <h3>Belum Ada Favorit</h3>
+                                <p>Tambahkan lagu favoritmu dengan klik ikon hati</p>
+                            </div>
+                        `;
+                    } else {
+                        html = '<h2 style="margin-bottom: 20px;">Lagu Favorit</h2>';
+                        favorites.forEach((fav, index) => {
+                            html += `
+                                <div class="result-card">
+                                    <div class="song-title">${fav.title}</div>
+                                    <div class="artist-name">
+                                        <i class="fas fa-user"></i>
+                                        ${fav.artist}
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    }
+                    resultsContainer.innerHTML = html;
+                    break;
+                    
+                case 'history':
+                    if (searchHistory.length === 0) {
+                        html = `
+                            <div class="empty-state">
+                                <i class="fas fa-history"></i>
+                                <h3>Belum Ada Riwayat</h3>
+                                <p>Riwayat pencarian akan muncul di sini</p>
+                            </div>
+                        `;
+                    } else {
+                        html = '<h2 style="margin-bottom: 20px;">Riwayat Pencarian</h2>';
+                        searchHistory.forEach(query => {
+                            html += `
+                                <div class="suggestion-chip" style="margin: 5px; cursor: pointer;" onclick="searchFromHistory('${query}')">
+                                    ${query}
+                                </div>
+                            `;
+                        });
+                    }
+                    resultsContainer.innerHTML = html;
+                    break;
+                    
+                case 'about':
+                    html = `
+                        <div style="text-align: center; padding: 40px;">
+                            <img src="https://lyrix.io/images/header-screen-2.jpg" alt="About" style="max-width: 100%; border-radius: 15px; margin-bottom: 30px;">
+                            <h2>Tentang CariLirik</h2>
+                            <p style="color: var(--text-secondary); margin-top: 20px; line-height: 1.8;">
+                                CariLirik adalah aplikasi web yang memudahkan Anda menemukan lirik lagu favorit. 
+                                Dengan antarmuka yang sederhana dan modern, Anda dapat mencari lirik lagu dengan cepat dan mudah.
+                            </p>
+                            <div style="margin-top: 30px;">
+                                <h3 style="margin-bottom: 15px;">Fitur Utama</h3>
+                                <ul style="color: var(--text-secondary); text-align: left; max-width: 400px; margin: 0 auto;">
+                                    <li>Pencarian lirik cepat dan akurat</li>
+                                    <li>Simpan lagu favorit</li>
+                                    <li>Riwayat pencarian</li>
+                                    <li>Desain modern dan responsif</li>
+                                </ul>
+                            </div>
+                            <div style="margin-top: 30px;">
+                                <p style="color: var(--text-secondary);">
+                                    Versi 1.0.0<br>
+                                    Dibuat dengan <i class="fas fa-heart" style="color: var(--error);"></i> untuk para pecinta musik
+                                </p>
+                            </div>
+                        </div>
+                    `;
+                    resultsContainer.innerHTML = html;
+                    break;
+            }
+        }
+
+        function searchFromHistory(query) {
+            searchInput.value = query;
+            switchPage('search');
+            performSearch();
+        }
+
+        // Check screen size for responsive navigation
+        function checkScreenSize() {
+            const sidebar = document.querySelector('.sidebar');
+            const bottomNav = document.querySelector('.bottom-nav');
+            const mainContent = document.querySelector('.main-content');
+            
+            if (window.innerWidth >= 768) {
+                sidebar.style.display = 'flex';
+                bottomNav.style.display = 'none';
+                mainContent.style.marginLeft = '250px';
+            } else {
+                sidebar.style.display = 'none';
+                bottomNav.style.display = 'flex';
+                mainContent.style.marginLeft = '0';
+            }
+        }
+
+        // Initialize
+        window.addEventListener('resize', checkScreenSize);
+        checkScreenSize();
+    </script>
+</body>
+</html>
