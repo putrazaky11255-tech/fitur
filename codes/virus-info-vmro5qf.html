@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presentasi Virus - Edukasi Kesehatan</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #10b981;
+            --danger-color: #ef4444;
+            --dark-color: #1f2937;
+            --light-color: #f3f4f6;
+            --text-color: #374151;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            animation: fadeOut 0.5s ease 2s forwards;
+        }
+
+        .virus-loader {
+            width: 100px;
+            height: 100px;
+            position: relative;
+            animation: rotate 2s linear infinite;
+        }
+
+        .virus-loader::before,
+        .virus-loader::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .virus-loader::after {
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.5; }
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transition: var(--transition);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--dark-color);
+            text-decoration: none;
+            font-weight: 500;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 100px 2rem 2rem;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+            animation: slideUp 0.8s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            animation: fadeInScale 1s ease;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 2rem;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: white;
+            color: var(--primary-color);
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: var(--transition);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Section Cards */
+        .section-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin: 4rem 0;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+            animation: fadeInUp 0.8s ease backwards;
+        }
+
+        .section-card:nth-child(1) { animation-delay: 0.1s; }
+        .section-card:nth-child(2) { animation-delay: 0.2s; }
+        .section-card:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .section-card:hover .card-image {
+            transform: scale(1.05);
+        }
+
+        .card-content {
+            padding: 2rem;
+        }
+
+        .card-content h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--dark-color);
+        }
+
+        .card-content p {
+            color: var(--text-color);
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+        }
+
+        .learn-more {
+            display: inline-block;
+            color: var(--primary-color);
+            font-weight: 600;
+            text-decoration: none;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .learn-more::after {
+            content: '→';
+            position: absolute;
+            right: -20px;
+            transition: var(--transition);
+        }
+
+        .learn-more:hover::after {
+            right: -25px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            position: relative;
+            background: white;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 2rem;
+            border-radius: 20px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: var(--transition);
+        }
+
+        .close-modal:hover {
+            color: var(--danger-color);
+            transform: rotate(90deg);
+        }
+
+        /* Virus Scanner */
+        .scanner-section {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            margin: 4rem 0;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .scanner-title {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: var(--dark-color);
+        }
+
+        .scanner-form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--light-color);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .scan-button {
+            width: 100%;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .scan-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .scan-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .scan-result {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--light-color);
+            border-radius: 10px;
+            display: none;
+        }
+
+        .scan-result.show {
+            display: block;
+            animation: slideUp 0.5s ease;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-safe {
+            color: var(--secondary-color);
+            font-weight: bold;
+        }
+
+        .status-danger {
+            color: var(--danger-color);
+            font-weight: bold;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark-color);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .section-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                margin: 20px;
+                padding: 1.5rem;
+            }
+        }
+
+        /* Floating Particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            from {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            to {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen">
+        <div class="virus-loader"></div>
+    </div>
+
+    <!-- Particles Background -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">🦠 VirusEdu</div>
+            <ul class="nav-links">
+                <li><a href="#home">Beranda</a></li>
+                <li><a href="#about">Tentang Virus</a></li>
+                <li><a href="#diseases">Penyakit</a></li>
+                <li><a href="#prevention">Pencegahan</a></li>
+                <li><a href="#scanner">Scanner</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Hero Section -->
+        <section class="hero" id="home">
+            <h1>Mengenal Lebih Dekat Virus</h1>
+            <p>Edukasi lengkap tentang virus, dampaknya bagi kesehatan, dan cara pencegahannya</p>
+            <a href="#about" class="cta-button">Mulai Belajar</a>
+        </section>
+
+        <!-- Section Grid -->
+        <div class="section-grid" id="about">
+            <div class="section-card">
+                <img src="https://www.genome.gov/sites/default/files/media/images/2022-05/Virus.jpg" alt="Virus" class="card-image">
+                <div class="card-content">
+                    <h3>Apa itu Virus?</h3>
+                    <p>Virus adalah mikroorganisme parasit yang sangat kecil yang hanya dapat bereplikasi di dalam sel hidup. Virus menginfeksi semua bentuk kehidupan, dari hewan dan tumbuhan hingga mikroorganisme.</p>
+                    <a href="#" class="learn-more" onclick="openModal('virus'); return false;">Pelajari Lebih Lanjut</a>
+                </div>
+            </div>
+
+            <div class="section-card" id="diseases">
+                <img src="https://pyfahealth.com/wp-content/uploads/2024/11/penyakit-yang-disebabkan-oleh-virus--1200x900.jpg" alt="Penyakit Virus" class="card-image">
+                <div class="card-content">
+                    <h3>Penyakit Akibat Virus</h3>
+                    <p>Banyak penyakit berbahaya yang disebabkan oleh virus, mulai dari flu biasa hingga penyakit serius seperti COVID-19, HIV/AIDS, hepatitis, dan banyak lagi.</p>
+                    <a href="#" class="learn-more" onclick="openModal('diseases'); return false;">Pelajari Lebih Lanjut</a>
+                </div>
+            </div>
+
+            <div class="section-card" id="prevention">
+                <img src="https://www.bcalife.co.id/storage//infographics/langkah-untuk-mencegah-terpapar-covid-19-1595835390.jpg" alt="Pencegahan Virus" class="card-image">
+                <div class="card-content">
+                    <h3>Pencegahan Infeksi Virus</h3>
+                    <p>Mencegah infeksi virus dapat dilakukan dengan berbagai cara seperti mencuci tangan, menggunakan masker, menjaga jarak, dan vaksinasi.</p>
+                    <a href="#" class="learn-more" onclick="openModal('prevention'); return false;">Pelajari Lebih Lanjut</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Virus Scanner Section -->
+        <section class="scanner-section" id="scanner">
+            <h2 class="scanner-title">🔍 Virus Scanner</h2>
+            <div class="scanner-form">
+                <div class="input-group">
+                    <label for="scanInput">Masukkan Hash File (SHA-256) atau URL untuk memindai:</label>
+                    <input type="text" id="scanInput" placeholder="Contoh: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f">
+                </div>
+                <button class="scan-button" onclick="scanVirus()">Mulai Pemindaian</button>
+                <div id="scanResult" class="scan-result"></div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="#home">Beranda</a>
+                <a href="#about">Tentang</a>
+                <a href="#diseases">Penyakit</a>
+                <a href="#prevention">Pencegahan</a>
+                <a href="#scanner">Scanner</a>
+            </div>
+            <p>&copy; 2024 VirusEdu. Dibuat dengan ❤️ untuk edukasi kesehatan.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Generate Particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Modal Functions
+        function openModal(type) {
+            const modal = document.getElementById('modal');
+            const modalBody = document.getElementById('modalBody');
+            
+            let content = '';
+            
+            switch(type) {
+                case 'virus':
+                    content = `
+                        <h2>Mengenal Virus Lebih Dalam</h2>
+                        <img src="https://caltechsites-prod-assets.resources.caltech.edu/scienceexchange/images/Virus-Size-Scale-LABELED-WEB.max-1000x1000.jpg" style="width: 100%; border-radius: 10px; margin: 1rem 0;">
+                        <h3>Struktur Virus</h3>
+                        <p>Virus terdiri dari materi genetik (DNA atau RNA) yang dikelilingi oleh lapisan protein yang disebut kapsid. Beberapa virus memiliki selubung lipid tambahan.</p>
+                        <h3>Cara Kerja Virus</h3>
+                        <p>1. <strong>Adsorpsi:</strong> Virus menempel pada permukaan sel inang<br>
+                        2. <strong>Injeksi:</strong> Materi genetik virus dimasukkan ke dalam sel<br>
+                        3. <strong>Replikasi:</strong> Virus menggunakan mekanisme sel untuk bereproduksi<br>
+                        4. <strong>Lisis:</strong> Sel pecah dan melepaskan virus baru</p>
+                        <h3>Jenis-jenis Virus</h3>
+                        <p>• DNA Virus: Herpes, Poxvirus<br>
+                        • RNA Virus: Influenza, HIV, SARS-CoV-2<br>
+                        • Retrovirus: HIV, HTLV</p>
+                    `;
+                    break;
+                case 'diseases':
+                    content = `
+                        <h2>Penyakit yang Disebabkan Virus</h2>
+                        <img src="https://lifepack.id/wp-content/uploads/2020/09/Penyakit-akibat-VIRUS-768x512.jpg" style="width: 100%; border-radius: 10px; margin: 1rem 0;">
+                        <h3>Penyakit Pernapasan</h3>
+                        <p>• Flu (Influenza)<br>
+                        • COVID-19<br>
+                        • SARS<br>
+                        • MERS<br>
+                        • Common Cold</p>
+                        <h3>Penyakit Sistemik</h3>
+                        <p>• HIV/AIDS<br>
+                        • Hepatitis A, B, C<br>
+                        • Dengue<br>
+                        • Zika<br>
+                        • Ebola</p>
+                        <h3>Penyakit Kulit</h3>
+                        <p>• Herpes Simplex<br>
+                        • Cacar Air<br>
+                        • HPV (Human Papillomavirus)<br>
+                        • Molluscum Contagiosum</p>
+                    `;
+                    break;
+                case 'prevention':
+                    content = `
+                        <h2>Cara Mencegah Infeksi Virus</h2>
+                        <img src="https://panji-buleleng.desa.id/assets/files/artikel/sedang_1584327739CORONA%201.jpg" style="width: 100%; border-radius: 10px; margin: 1rem 0;">
+                        <h3>1. Kebersihan Personal</h3>
+                        <p>• Cuci tangan dengan sabun selama 20 detik<br>
+                        • Gunakan hand sanitizer jika tidak ada air<br>
+                        • Hindari menyentuh wajah dengan tangan kotor</p>
+                        <h3>2. Perlindungan Fisik</h3>
+                        <p>• Gunakan masker di tempat umum<br>
+                        • Jaga jarak fisik minimal 1-2 meter<br>
+                        • Hindari kerumunan</p>
+                        <h3>3. Imunitas</h3>
+                        <p>• Vaksinasi sesuai jadwal<br>
+                        • Makan makanan bergizi<br>
+                        • Istirahat cukup<br>
+                        • Olahraga teratur</p>
+                        <h3>4. Lingkungan</h3>
+                        <p>• Ventilasi ruangan yang baik<br>
+                        • Disinfeksi permukaan yang sering disentuh<br>
+                        • Isolasi diri jika sakit</p>
+                    `;
+                    break;
+            }
+            
+            modalBody.innerHTML = content;
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Virus Scanner Function
+        async function scanVirus() {
+            const input = document.getElementById('scanInput').value.trim();
+            const resultDiv = document.getElementById('scanResult');
+            const scanButton = document.querySelector('.scan-button');
+            
+            if (!input) {
+                alert('Silakan masukkan hash file atau URL untuk dipindai');
+                return;
+            }
+            
+            // Disable button and show loading
+            scanButton.disabled = true;
+            scanButton.textContent = 'Memindai...';
+            resultDiv.classList.remove('show');
+            
+            try {
+                // Determine if input is URL or hash
+                const isUrl = input.startsWith('http://') || input.startsWith('https://');
+                
+                let apiUrl;
+                if (isUrl) {
+                    // For URL, we need to encode it first
+                    const encodedUrl = btoa(input);
+                    apiUrl = `https://cors-anywhere.herokuapp.com/https://www.virustotal.com/api/v3/urls/${encodedUrl}`;
+                } else {
+                    // For file hash
+                    apiUrl = `https://cors-anywhere.herokuapp.com/https://www.virustotal.com/api/v3/files/${input}`;
+                }
+                
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: {
+                        'accept': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Data tidak ditemukan atau terjadi kesalahan');
+                }
+                
+                const data = await response.json();
+                
+                if (data.data) {
+                    const stats = data.data.attributes.last_analysis_stats;
+                    const malicious = stats.malicious;
+                    const suspicious = stats.suspicious;
+                    const undetected = stats.undetected;
+                    const total = stats.total;
+                    
+                    let statusClass = malicious > 0 ? 'status-danger' : 'status-safe';
+                    let statusText = malicious > 0 ? '⚠️ Terdeteksi Berbahaya' : '✅ Aman';
+                    
+                    resultDiv.innerHTML = `
+                        <h3>Hasil Pemindaian</h3>
+                        <div class="result-item">
+                            <span>Status:</span>
+                            <span class="${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="result-item">
+                            <span>Engine Terdeteksi:</span>
+                            <span>${malicious} / ${total}</span>
+                        </div>
+                        <div class="result-item">
+                            <span>Mencurigakan:</span>
+                            <span>${suspicious}</span>
+                        </div>
+                        <div class="result-item">
+                            <span>Tidak Terdeteksi:</span>
+                            <span>${undetected}</span>
+                        </div>
+                        <div class="result-item">
+                            <span>Scan Date:</span>
+                            <span>${new Date(data.data.attributes.last_analysis_date * 1000).toLocaleString()}</span>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <h3>Hasil Pemindaian</h3>
+                        <p style="color: #6b7280;">❌ File/URL tidak ditemukan dalam database VirusTotal. Ini bisa berarti:</p>
+                        <ul style="margin-left: 20px; color: #6b7280;">
+                            <li>File/URL belum pernah dipindai sebelumnya</li>
+                            <li>Hash file tidak valid</li>
+                            <li>URL tidak dapat diakses</li>
+                        </ul>
+                    `;
+                }
+                
+                resultDiv.classList.add('show');
+                
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `
+                    <h3>Terjadi Kesalahan</h3>
+                    <p style="color: #ef4444;">Gagal memindai. Pastikan koneksi internet stabil dan coba lagi.</p>
+                    <p style="color: #6b7280; font-size: 0.9rem;">Error: ${error.message}</p>
+                `;
+                resultDiv.classList.add('show');
+            } finally {
+                // Re-enable button
+                scanButton.disabled = false;
+                scanButton.textContent = 'Mulai Pemindaian';
+            }
+        }
+
+        // Smooth Scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('modal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            
+            // Add scroll effect to navigation
+            window.addEventListener('scroll', function() {
+                const nav = document.querySelector('nav');
+                if (window.scrollY > 50) {
+                    nav.style.background = 'rgba(255, 255, 255, 0.98)';
+                    nav.style.boxShadow = '0 4px 30px rgba(0, 0, 0, 0.15)';
+                } else {
+                    nav.style.background = 'rgba(255, 255, 255, 0.95)';
+                    nav.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.1)';
+                }
+            });
+        });
+
+        // Add enter key support for scanner
+        document.getElementById('scanInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                scanVirus();
+            }
+        });
+    </script>
+</body>
+</html>
