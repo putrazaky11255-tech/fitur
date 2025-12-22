@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎵 LirikFinder - Temukan Lirik Lagu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --dark: #1e293b;
+            --light: #f1f5f9;
+            --white: #ffffff;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--dark);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .music-note {
+            position: absolute;
+            font-size: 2rem;
+            animation: float 15s infinite linear;
+            opacity: 0.5;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.5;
+            }
+            90% {
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Header */
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        /* Search Section */
+        .search-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .search-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 50px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--white);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            transform: scale(1.02);
+        }
+
+        .search-btn {
+            padding: 1rem 2rem;
+            background: var(--gradient);
+            color: var(--white);
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .search-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Popular Searches */
+        .popular-searches {
+            margin-top: 1.5rem;
+        }
+
+        .popular-title {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+        }
+
+        .popular-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tag {
+            padding: 0.5rem 1rem;
+            background: var(--light);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .tag:hover {
+            background: var(--primary);
+            color: var(--white);
+            transform: scale(1.05);
+        }
+
+        /* Results Section */
+        .results-section {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .result-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .song-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--light);
+        }
+
+        .song-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--white);
+            animation: rotate 3s linear infinite;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .song-info h3 {
+            font-size: 1.5rem;
+            color: var(--dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .song-info p {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .lyrics-content {
+            line-height: 1.8;
+            color: var(--dark);
+            white-space: pre-wrap;
+            font-size: 1.1rem;
+            padding: 1rem;
+            background: var(--light);
+            border-radius: 15px;
+            max-height: 500px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) var(--light);
+        }
+
+        .lyrics-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .lyrics-content::-webkit-scrollbar-track {
+            background: var(--light);
+            border-radius: 10px;
+        }
+
+        .lyrics-content::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 0.75rem;
+            background: var(--white);
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .action-btn:hover {
+            background: var(--primary);
+            color: var(--white);
+            transform: scale(1.05);
+        }
+
+        /* Loading State */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--light);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 2rem 0;
+            margin-top: 4rem;
+            box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            text-align: center;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .social-link {
+            width: 45px;
+            height: 45px;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+        }
+
+        .social-link:hover {
+            transform: translateY(-5px) rotate(360deg);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .credit {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--dark);
+            color: var(--white);
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .search-form {
+                flex-direction: column;
+            }
+
+            .search-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .song-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .social-links {
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animation" id="bgAnimation"></div>
+
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <span>🎵</span>
+                <span>LirikFinder</span>
+            </div>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <span style="font-size: 0.9rem; color: #64748b;">Temukan lirik lagu favoritmu</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Search Section -->
+        <section class="search-section">
+            <h1 class="search-title">🎤 Cari Lirik Lagu Berdasarkan Judul</h1>
+            
+            <form class="search-form" id="searchForm">
+                <input 
+                    type="text" 
+                    class="search-input" 
+                    id="searchInput" 
+                    placeholder="Masukkan judul lagu..."
+                    autocomplete="off"
+                >
+                <button type="submit" class="search-btn">
+                    <span>🔍</span>
+                    <span>Cari</span>
+                </button>
+            </form>
+
+            <div class="popular-searches">
+                <p class="popular-title">Pencarian Populer:</p>
+                <div class="popular-tags">
+                    <span class="tag" onclick="searchLyrics('Perfect')">Perfect</span>
+                    <span class="tag" onclick="searchLyrics('Shape of You')">Shape of You</span>
+                    <span class="tag" onclick="searchLyrics('Blinding Lights')">Blinding Lights</span>
+                    <span class="tag" onclick="searchLyrics('Someone Like You')">Someone Like You</span>
+                    <span class="tag" onclick="searchLyrics('Bohemian Rhapsody')">Bohemian Rhapsody</span>
+                    <span class="tag" onclick="searchLyrics('Stairway to Heaven')">Stairway to Heaven</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loading State -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Sedang mencari lirik...</p>
+        </div>
+
+        <!-- Results Section -->
+        <section class="results-section" id="resultsSection">
+            <!-- Results will be dynamically inserted here -->
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="social-links">
+                <a href="#" class="social-link" onclick="handleSocialClick('WhatsApp'); return false;">
+                    <span>💬</span>
+                </a>
+                <a href="#" class="social-link" onclick="handleSocialClick('Facebook'); return false;">
+                    <span>📘</span>
+                </a>
+                <a href="#" class="social-link" onclick="handleSocialClick('Twitter'); return false;">
+                    <span>🐦</span>
+                </a>
+                <a href="#" class="social-link" onclick="handleSocialClick('Telegram'); return false;">
+                    <span>✈️</span>
+                </a>
+                <a href="#" class="social-link" onclick="handleSocialClick('Instagram'); return false;">
+                    <span>📷</span>
+                </a>
+            </div>
+            <p class="credit">© 2024 LirikFinder. Created with ❤️ by Opus AI Coder</p>
+        </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Database lirik lagu (contoh)
+        const lyricsDatabase = {
+            "perfect": {
+                title: "Perfect",
+                artist: "Ed Sheeran",
+                lyrics: `I found a love for me
+Darling, just dive right in and follow my lead
+Well, I found a girl, beautiful and sweet
+Oh, I never knew you were the someone waiting for me
+
+'Cause we were just kids when we fell in love
+Not knowing what it was
+I will not give you up this time
+But darling, just kiss me slow, your heart is all I own
+And in your eyes you're holding mine
+
+Baby, I'm dancing in the dark
+With you between my arms
+Barefoot on the grass
+Listening to our favorite song
+When you said you looked a mess
+I whispered underneath my breath
+But you heard it, darling, you look perfect tonight
+
+Well, I found a woman, stronger than anyone I know
+She shares my dreams, I hope that someday I'll share her home
+I found a love, to carry more than just my secrets
+To carry love, to carry children of our own
+
+We are still kids, but we're so in love
+Fighting against all odds
+I know we'll be alright this time
+Darling, just hold my hand
+Be my girl, I'll be your man
+I see my future in your eyes
+
+Baby, I'm dancing in the dark
+With you between my arms
+Barefoot on the grass
+Listening to our favorite song
+When I saw you in that dress
+Looking so beautiful
+I don't deserve this, darling, you look perfect tonight
+
+Baby, I'm dancing in the dark
+With you between my arms
+Barefoot on the grass
+Listening to our favorite song
+I have faith in what I see
+Now I know I have met an angel in person
+And she looks perfect
+I don't deserve this
+You look perfect tonight`
+            },
+            "shape of you": {
+                title: "Shape of You",
+                artist: "Ed Sheeran",
+                lyrics: `The club isn't the best place to find a lover
+So the bar is where I go
+Me and my friends at the table doing shots
+Drinking fast and then we talk slow
+Come over and start up a conversation with just me
+And trust me I'll give it a chance now
+Take my hand, stop, put Van the Man on the jukebox
+And then we start to dance
+And now I'm singing like
+
+Girl, you know I want your love
+Your love was handmade for somebody like me
+Come on now, follow my lead
+I may be crazy, don't mind me
+Say, boy, let's not talk too much
+Grab on my waist and put that body on me
+Come on now, follow my lead
+Come, come on now, follow my lead
+
+I'm in love with the shape of you
+We push and pull like a magnet do
+Although my heart is falling too
+I'm in love with your body
+
+And last night you were in my room
+And now my bedsheets smell like you
+Every day discovering something brand new
+I'm in love with your body
+
+Oh—I—oh—I—oh—I—oh—I
+I'm in love with your body
+Oh—I—oh—I—oh—I—oh—I
+I'm in love with your body
+Oh—I—oh—I—oh—I—oh—I
+I'm in love with your body
+Every day discovering something brand new
+I'm in love with the shape of you
+
+One week in we let the story begin
+We're going out on our first date
+But you and me are thrifty so go all you can eat
+Fill up your bag and I fill up a plate
+We talk for hours and hours about the sweet and the sour
+And how your family is doing okay
+Leave and get in a taxi, then kiss in the backseat
+Tell the driver make the radio play, and I'm singing like
+
+Girl, you know I want your love
+Your love was handmade for somebody like me
+Come on now, follow my lead
+I may be crazy, don't mind me
+Say, boy, let's not talk too much
+Grab on my waist and put that body on me
+Come on now, follow my lead
+Come, come on now, follow my lead
+
+I'm in love with the shape of you
+We push and pull like a magnet do
+Although my heart is falling too
+I'm in love with your body
+
+And last night you were in my room
+And now my bedsheets smell like you
+Every day discovering something brand new
+I'm in love with your body
+
+Oh—I—oh—I—oh—I—oh—I
+I'm in love with your body
+Oh—I—oh—I—oh—I—oh—I
+I'm in love with your body
+Oh—I—oh—I—oh—I—oh—I
+I'm in love with your body
+Every day discovering something brand new
+I'm in love with the shape of you
+
+Come on, be my baby, come on
+Come on, be my baby, come on
+Come on, be my baby, come on
+Come on, be my baby, come on
+Come on, be my baby, come on
+Come on, be my baby, come on
+Come on, be my baby, come on
+Come on, be my baby, come on
+
+I'm in love with the shape of you
+We push and pull like a magnet do
+Although my heart is falling too
+I'm in love with your body
+
+Last night you were in my room
+And now my bedsheets smell like you
+Every day discovering something brand new
+I'm in love with your body
+
+Oh—I—oh—I—oh—I—oh—I
+I'm in love with your body
+Oh—I—oh—I—oh—I—oh—I
+I'm in love with your body
+Oh—I—oh—I—oh—I—oh—I
+I'm in love with your body
+Every day discovering something brand new
+I'm in love with the shape of you`
+            },
+            "blinding lights": {
+                title: "Blinding Lights",
+                artist: "The Weeknd",
+                lyrics: `Yeah
+I've been trying to call
+I've been on my own for long enough
+Maybe you can show me how to love, maybe
+I'm going through withdrawals
+You don't even have to do too much
+You can turn me on with just a touch, baby
+
+I look around and
+Sin City's cold and empty (Oh)
+No one's around to judge me (Oh)
+I can't see clearly when you're gone
+
+I said, ooh, I'm blinded by the lights
+No, I can't sleep until I feel your touch
+I said, ooh, I'm drowning in the night
+Oh, when I'm like this, you're the one I trust
+Hey, hey, hey
+
+I'm running out of time
+'Cause I can see the sun light up the sky
+So I hit the road in overdrive, baby, oh
+The city's cold and empty (Oh)
+No one's around to judge me (Oh)
+I can't see clearly when you're gone
+
+I said, ooh, I'm blinded by the lights
+No, I can't sleep until I feel your touch
+I said, ooh, I'm drowning in the night
+Oh, when I'm like this, you're the one I trust
+
+I'm just calling back to let you know (Back to let you know)
+I could never say it on the phone (Say it on the phone)
+Will never let you go this time (Ooh)
+
+I said, ooh, I'm blinded by the lights
+No, I can't sleep until I feel your touch
+
+I said, ooh, I'm blinded by the lights
+No, I can't sleep until I feel your touch`
+            },
+            "someone like you": {
+                title: "Someone Like You",
+                artist: "Adele",
+                lyrics: `I heard that you're settled down
+That you found a girl and you're married now
+I heard that your dreams came true
+Guess she gave you things I didn't give to you
+Old friend, why are you so shy?
+Ain't like you to hold back or hide from the light
+
+I hate to turn up out of the blue, uninvited
+But I couldn't stay away, I couldn't fight it
+I had hoped you'd see my face
+And that you'd be reminded that for me it isn't over
+
+Never mind, I'll find someone like you
+I wish nothing but the best for you, too
+Don't forget me, I beg, I remember you said
+"Sometimes it lasts in love, but sometimes it hurts instead"
+Sometimes it lasts in love, but sometimes it hurts instead
+
+You know how the time flies
+Only yesterday was the time of our lives
+We were born and raised in a summer haze
+Bound by the surprise of our glory days
+
+I hate to turn up out of the blue, uninvited
+But I couldn't stay away, I couldn't fight it
+I had hoped you'd see my face
+And that you'd be reminded that for me it isn't over
+
+Never mind, I'll find someone like you
+I wish nothing but the best for you, too
+Don't forget me, I beg, I remember you said
+"Sometimes it lasts in love, but sometimes it hurts instead"
+
+Nothing compares, no worries or cares
+Regrets and mistakes, they're memories made
+Who would have known how bittersweet this would taste?
+
+Never mind, I'll find someone like you
+I wish nothing but the best for you
+Don't forget me, I beg, I remember you said
+"Sometimes it lasts in love, but sometimes it hurts instead"
+
+Never mind, I'll find someone like you
+I wish nothing but the best for you, too
+Don't forget me, I beg, I remember you said
+"Sometimes it lasts in love, but sometimes it hurts instead"
+Sometimes it lasts in love, but sometimes it hurts instead`
+            },
+            "bohemian rhapsody": {
+                title: "Bohemian Rhapsody",
+                artist: "Queen",
+                lyrics: `Is this the real life? Is this just fantasy?
+Caught in a landslide, no escape from reality
+Open your eyes, look up to the skies and see
+I'm just a poor boy, I need no sympathy
+Because I'm easy come, easy go, little high, little low
+Any way the wind blows, doesn't really matter to me, to me
+
+Mama, just killed a man
+Put a gun against his head, pulled my trigger, now he's dead
+Mama, life had just begun
+But now I've gone and thrown it all away
+Mama, ooh, didn't mean to make you cry
+If I'm not back again this time tomorrow
+Carry on, carry on as if nothing really matters
+
+Too late, my time has come
+Sends shivers down my spine, body's aching all the time
+Goodbye everybody, I've got to go
+Gotta leave you all behind and face the truth
+Mama, ooh (any way the wind blows)
+I don't wanna die
+I sometimes wish I'd never been born at all
+
+I see a little silhouetto of a man
+Scaramouche, Scaramouche, will you do the Fandango?
+Thunderbolt and lightning, very, very frightening me
+(Galileo) Galileo
+(Galileo) Galileo
+Galileo Figaro magnifico
+But I'm just a poor boy, nobody loves me
+He's just a poor boy from a poor family
+Spare him his life from this monstrosity
+Easy come, easy go, will you let me go?
+Bismillah! We will not let you go
+(Let him go) Bismillah! We will not let you go
+(Let him go) Bismillah! We will not let you go
+(Let me go) Will not let you go
+(Let me go) Never, never let you go
+Never let me go, oh
+No, no, no, no, no, no, no
+Oh, mama mia, mama mia, mama mia, let me go
+Beelzebub has a devil put aside for me, for me, for me
+
+So you think you can stone me and spit in my eye?
+So you think you can love me and leave me to die?
+Oh, baby, can't do this to me, baby
+Just gotta get out, just gotta get right outta here
+
+Nothing really matters, anyone can see
+Nothing really matters
+Nothing really matters to me
+
+Any way the wind blows`
+            },
+            "stairway to heaven": {
+                title: "Stairway to Heaven",
+                artist: "Led Zeppelin",
+                lyrics: `There's a lady who's sure all that glitters is gold
+And she's buying a stairway to heaven
+When she gets there she knows, if the stores are all closed
+With a word she can get what she came for
+Ooh, ooh, and she's buying a stairway to heaven
+
+There's a sign on the wall, but she wants to be sure
+'Cause you know sometimes words have two meanings
+In a tree by the brook, there's a songbird who sings
+Sometimes all of our thoughts are misgiven
+
+Ooh, it makes me wonder
+Ooh, it makes me wonder
+
+There's a feeling I get when I look to the west
+And my spirit is crying for leaving
+In my thoughts I have seen rings of smoke through the trees
+And the voices of those who stand looking
+
+Ooh, it makes me wonder
+Ooh, it really makes me wonder
+
+And it's whispered that soon, if we all call the tune
+Then the piper will lead us to reason
+And a new day will dawn for those who stand long
+And the forests will echo with laughter
+
+If there's a bustle in your hedgerow, don't be alarmed now
+It's just a spring clean for the May queen
+Yes, there are two paths you can go by, but in the long run
+There's still time to change the road you're on
+And it makes me wonder
+
+Your head is humming and it won't go, in case you don't know
+The piper's calling you to join him
+Dear lady, can you hear the wind blow, and did you know
+Your stairway lies on the whispering wind?
+
+And as we wind on down the road
+Our shadows taller than our soul
+There walks a lady we all know
+Who shines white light and wants to show
+How everything still turns to gold
+And if you listen very hard
+The tune will come to you at last
+When all are one and one is all
+To be a rock and not to roll
+
+And she's buying a stairway to heaven`
+            }
+        };
+
+        // Initialize background animation
+        function initBackground() {
+            const bgAnimation = document.getElementById('bgAnimation');
+            const notes = ['🎵', '🎶', '🎤', '🎸', '🎹', '🎺', '🎷', '🥁'];
+            
+            for (let i = 0; i < 15; i++) {
+                const note = document.createElement('div');
+                note.className = 'music-note';
+                note.textContent = notes[Math.floor(Math.random() * notes.length)];
+                note.style.left = Math.random() * 100 + '%';
+                note.style.animationDelay = Math.random() * 15 + 's';
+                note.style.animationDuration = (15 + Math.random() * 10) + 's';
+                bgAnimation.appendChild(note);
+            }
+        }
+
+        // Search lyrics function
+        function searchLyrics(query) {
+            if (!query) {
+                showToast('Silakan masukkan judul lagu');
+                return;
+            }
+
+            document.getElementById('searchInput').value = query;
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('resultsSection').style.display = 'none';
+
+            // Simulate API call delay
+            setTimeout(() => {
+                const normalizedQuery = query.toLowerCase().trim();
+                const lyrics = lyricsDatabase[normalizedQuery];
+
+                document.getElementById('loading').style.display = 'none';
+
+                if (lyrics) {
+                    displayResults(lyrics);
+                } else {
+                    // Try to fetch from external API (using proxy)
+                    fetchLyricsFromAPI(query);
+                }
+            }, 1000);
+        }
+
+        // Fetch lyrics from external API
+        async function fetchLyricsFromAPI(songTitle) {
+            try {
+                // Using a public lyrics API with CORS proxy
+                const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+                const apiUrl = `https://api.lyrics.ovh/v1/solosong/${encodeURIComponent(songTitle)}`;
+                
+                const response = await fetch(proxyUrl + apiUrl);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.lyrics) {
+                        displayResults({
+                            title: songTitle,
+                            artist: 'Unknown Artist',
+                            lyrics: data.lyrics
+                        });
+                        return;
+                    }
+                }
+            } catch (error) {
+                console.log('API fetch failed, showing not found');
+            }
+
+            // If not found in database or API
+            showNotFound(songTitle);
+        }
+
+        // Display search results
+        function displayResults(lyrics) {
+            const resultsSection = document.getElementById('resultsSection');
+            resultsSection.innerHTML = `
+                <div class="result-card">
+                    <div class="song-header">
+                        <div class="song-icon">🎵</div>
+                        <div class="song-info">
+                            <h3>${lyrics.title}</h3>
+                            <p>🎤 ${lyrics.artist}</p>
+                        </div>
+                    </div>
+                    <div class="lyrics-content">${lyrics.lyrics}</div>
+                    <div class="action-buttons">
+                        <button class="action-btn" onclick="copyLyrics()">
+                            <span>📋</span>
+                            <span>Salin Lirik</span>
+                        </button>
+                        <button class="action-btn" onclick="shareLyrics()">
+                            <span>🔗</span>
+                            <span>Bagikan</span>
+                        </button>
+                        <button class="action-btn" onclick="downloadLyrics()">
+                            <span>💾</span>
+                            <span>Unduh</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+            resultsSection.style.display = 'block';
+            
+            // Store current lyrics for actions
+            window.currentLyrics = lyrics;
+        }
+
+        // Show not found message
+        function showNotFound(query) {
+            const resultsSection = document.getElementById('resultsSection');
+            resultsSection.innerHTML = `
+                <div class="result-card" style="text-align: center; padding: 3rem;">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">😔</div>
+                    <h3 style="margin-bottom: 1rem;">Lirik Tidak Ditemukan</h3>
+                    <p style="color: #64748b; margin-bottom: 1.5rem;">
+                        Maaf, kami tidak dapat menemukan lirik untuk lagu "<strong>${query}</strong>"
+                    </p>
+                    <p style="color: #64748b; font-size: 0.9rem;">
+                        Coba periksa ejaan judul lagu atau gunakan kata kunci yang berbeda
+                    </p>
+                </div>
+            `;
+            resultsSection.style.display = 'block';
+        }
+
+        // Copy lyrics to clipboard
+        function copyLyrics() {
+            if (!window.currentLyrics) return;
+            
+            const textToCopy = `${window.currentLyrics.title}\n${window.currentLyrics.artist}\n\n${window.currentLyrics.lyrics}`;
+            
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                showToast('Lirik berhasil disalin! 📋');
+            }).catch(() => {
+                showToast('Gagal menyalin lirik');
+            });
+        }
+
+        // Share lyrics
+        function shareLyrics() {
+            if (!window.currentLyrics) return;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: `Lirik ${window.currentLyrics.title}`,
+                    text: `Lirik lagu "${window.currentLyrics.title}" oleh ${window.currentLyrics.artist}`,
+                    url: window.location.href
+                }).then(() => {
+                    showToast('Berhasil membagikan! 🔗');
+                }).catch(() => {
+                    showToast('Gagal membagikan');
+                });
+            } else {
+                // Fallback: copy to clipboard
+                copyLyrics();
+            }
+        }
+
+        // Download lyrics as text file
+        function downloadLyrics() {
+            if (!window.currentLyrics) return;
+            
+            const text = `${window.currentLyrics.title}\n${window.currentLyrics.artist}\n\n${window.currentLyrics.lyrics}`;
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${window.currentLyrics.title} - ${window.currentLyrics.artist}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showToast('Lirik berhasil diunduh! 💾');
+        }
+
+        // Handle social media clicks
+        function handleSocialClick(platform) {
+            showToast(`Terima kasih! Kami akan segera hadir di ${platform} 🎉`);
+            
+            // Add animation effect
+            event.target.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                event.target.style.transform = '';
+            }, 200);
+        }
+
+        // Show toast notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Event listeners
+        document.getElementById('searchForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const query = document.getElementById('searchInput').value;
+            searchLyrics(query);
+        });
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            initBackground();
+            
+            // Add enter key support for search input
+            document.getElementById('searchInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const query = e.target.value;
+                    searchLyrics(query);
+                }
+            });
+        });
+
+        // Add smooth scroll behavior
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
