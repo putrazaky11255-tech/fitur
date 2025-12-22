@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MusicFinder - Temukan & Putar Musik Favoritmu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--dark);
+        }
+
+        /* Header */
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .logo i {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        /* Search Section */
+        .search-section {
+            max-width: 800px;
+            margin: 3rem auto;
+            padding: 0 1rem;
+        }
+
+        .search-container {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            animation: fadeInUp 0.6s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 3rem 1rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 50px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .search-btn:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+
+        /* Filter Tags */
+        .filter-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .tag {
+            padding: 0.5rem 1rem;
+            background: var(--light);
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .tag:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .tag.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Results Section */
+        .results-section {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .music-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .music-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+        }
+
+        .music-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .music-info {
+            padding: 1rem;
+        }
+
+        .music-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .music-artist {
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .music-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .play-btn, .like-btn {
+            flex: 1;
+            padding: 0.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .play-btn {
+            background: var(--primary);
+            color: white;
+        }
+
+        .play-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .like-btn {
+            background: var(--light);
+            color: var(--gray);
+        }
+
+        .like-btn:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .like-btn.liked {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Player */
+        .player {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .player.active {
+            transform: translateY(0);
+        }
+
+        .player-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .player-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .player-info {
+            flex: 1;
+        }
+
+        .player-title {
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+
+        .player-artist {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .player-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .control-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dark);
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            color: var(--primary);
+            transform: scale(1.2);
+        }
+
+        .control-btn.play-pause {
+            background: var(--primary);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 4px;
+            background: var(--light);
+            border-radius: 2px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .progress {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: white;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem 0;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            text-align: center;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .social-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .social-link:hover {
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .credit {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 2000;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .results-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+
+            .player-content {
+                flex-wrap: wrap;
+            }
+
+            .player-info {
+                order: 3;
+                flex-basis: 100%;
+            }
+
+            .player-controls {
+                order: 2;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <i class="fas fa-music"></i>
+                <span>MusicFinder</span>
+            </div>
+            <div class="header-actions">
+                <button class="control-btn" onclick="toggleTheme()">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="search-section">
+            <div class="search-container">
+                <div class="search-box">
+                    <input type="text" class="search-input" id="searchInput" placeholder="Cari lagu favoritmu...">
+                    <button class="search-btn" onclick="searchMusic()">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <div class="filter-tags">
+                    <span class="tag active" onclick="filterByGenre('all', this)">Semua</span>
+                    <span class="tag" onclick="filterByGenre('pop', this)">Pop</span>
+                    <span class="tag" onclick="filterByGenre('rock', this)">Rock</span>
+                    <span class="tag" onclick="filterByGenre('jazz', this)">Jazz</span>
+                    <span class="tag" onclick="filterByGenre('electronic', this)">Electronic</span>
+                    <span class="tag" onclick="filterByGenre('classical', this)">Classical</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="results-section">
+            <div class="results-grid" id="resultsGrid">
+                <!-- Results will be inserted here -->
+            </div>
+            <div class="loading" id="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Mencari lagu...</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Music Player -->
+    <div class="player" id="player">
+        <div class="player-content">
+            <img class="player-image" id="playerImage" src="https://i.ytimg.com/vi/5k96z6MxX28/hq720.jpg" alt="Album Art">
+            <div class="player-info">
+                <div class="player-title" id="playerTitle">Pilih lagu untuk diputar</div>
+                <div class="player-artist" id="playerArtist">Artis</div>
+            </div>
+            <div class="player-controls">
+                <button class="control-btn" onclick="previousTrack()">
+                    <i class="fas fa-step-backward"></i>
+                </button>
+                <button class="control-btn play-pause" onclick="togglePlayPause()">
+                    <i class="fas fa-play" id="playPauseIcon"></i>
+                </button>
+                <button class="control-btn" onclick="nextTrack()">
+                    <i class="fas fa-step-forward"></i>
+                </button>
+            </div>
+            <div class="progress-bar" onclick="seekTrack(event)">
+                <div class="progress" id="progress"></div>
+            </div>
+            <button class="control-btn" onclick="toggleMute()">
+                <i class="fas fa-volume-up" id="volumeIcon"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="social-links">
+                <a href="#" class="social-link" onclick="handleSocialClick('whatsapp'); return false;">
+                    <i class="fab fa-whatsapp"></i>
+                </a>
+                <a href="#" class="social-link" onclick="handleSocialClick('facebook'); return false;">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+                <a href="#" class="social-link" onclick="handleSocialClick('twitter'); return false;">
+                    <i class="fab fa-twitter"></i>
+                </a>
+                <a href="#" class="social-link" onclick="handleSocialClick('instagram'); return false;">
+                    <i class="fab fa-instagram"></i>
+                </a>
+                <a href="#" class="social-link" onclick="handleSocialClick('telegram'); return false;">
+                    <i class="fab fa-telegram"></i>
+                </a>
+            </div>
+            <div class="credit">
+                <p>&copy; 2024 MusicFinder. Dibuat dengan <i class="fas fa-heart" style="color: var(--danger);"></i> oleh Opus AI</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Hidden Audio Element -->
+    <audio id="audioPlayer"></audio>
+
+    <script>
+        // Music Database
+        const musicDatabase = [
+            {
+                id: 1,
+                title: "Perfect Symphony",
+                artist: "Ed Sheeran & Andrea Bocelli",
+                genre: "pop",
+                image: "https://i.ytimg.com/vi/5k96z6MxX28/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLBg0LM0kT9SRlen6gk_kE70tc41og",
+                audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+            },
+            {
+                id: 2,
+                title: "Bohemian Rhapsody",
+                artist: "Queen",
+                genre: "rock",
+                image: "https://thumbs.dreamstime.com/b/musik-background-notes-colorful-40722329.jpg",
+                audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
+            },
+            {
+                id: 3,
+                title: "Fly Me to the Moon",
+                artist: "Frank Sinatra",
+                genre: "jazz",
+                image: "https://as2.ftcdn.net/jpg/01/31/08/81/1000_F_131088103_37VlVRmcwXIT7zgLnfqm49hNHk1mB805.jpg",
+                audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
+            },
+            {
+                id: 4,
+                title: "Clair de Lune",
+                artist: "Claude Debussy",
+                genre: "classical",
+                image: "https://imgv2-1-f.scribdassets.com/img/document/180715707/original/1c56df60de/1?v=1",
+                audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3"
+            },
+            {
+                id: 5,
+                title: "Strobe",
+                artist: "Deadmau5",
+                genre: "electronic",
+                image: "https://lookaside.instagram.com/seo/google_widget/crawler/?media_id=3536647572452013095",
+                audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3"
+            },
+            {
+                id: 6,
+                title: "Shape of You",
+                artist: "Ed Sheeran",
+                genre: "pop",
+                image: "https://i0.wp.com/www.wokandkin.com/wp-content/uploads/2022/09/Ga-Ragu-Bread-saved-for-web-1200px.png?fit=1200%2C1800&ssl=1",
+                audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3"
+            },
+            {
+                id: 7,
+                title: "Hotel California",
+                artist: "Eagles",
+                genre: "rock",
+                image: "https://i.ytimg.com/vi/5k96z6MxX28/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLBg0LM0kT9SRlen6gk_kE70tc41og",
+                audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3"
+            },
+            {
+                id: 8,
+                title: "Take Five",
+                artist: "Dave Brubeck",
+                genre: "jazz",
+                image: "https://thumbs.dreamstime.com/b/musik-background-notes-colorful-40722329.jpg",
+                audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3"
+            }
+        ];
+
+        let currentTrack = null;
+        let isPlaying = false;
+        let currentPlaylist = [...musicDatabase];
+        let likedSongs = new Set();
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            displayMusic(musicDatabase);
+            setupAudioPlayer();
+        });
+
+        // Search Music
+        function searchMusic() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = musicDatabase.filter(song => 
+                song.title.toLowerCase().includes(searchTerm) || 
+                song.artist.toLowerCase().includes(searchTerm)
+            );
+            displayMusic(filtered);
+            showToast(`Menemukan ${filtered.length} lagu`, 'success');
+        }
+
+        // Filter by Genre
+        function filterByGenre(genre, element) {
+            // Update active tag
+            document.querySelectorAll('.tag').forEach(tag => tag.classList.remove('active'));
+            element.classList.add('active');
+
+            // Filter music
+            if (genre === 'all') {
+                displayMusic(musicDatabase);
+            } else {
+                const filtered = musicDatabase.filter(song => song.genre === genre);
+                displayMusic(filtered);
+            }
+        }
+
+        // Display Music
+        function displayMusic(musicList) {
+            const grid = document.getElementById('resultsGrid');
+            grid.innerHTML = '';
+
+            musicList.forEach((song, index) => {
+                const card = document.createElement('div');
+                card.className = 'music-card';
+                card.style.animationDelay = `${index * 0.1}s`;
+                
+                const isLiked = likedSongs.has(song.id);
+                
+                card.innerHTML = `
+                    <img class="music-image" src="${song.image}" alt="${song.title}">
+                    <div class="music-info">
+                        <div class="music-title">${song.title}</div>
+                        <div class="music-artist">${song.artist}</div>
+                        <div class="music-actions">
+                            <button class="play-btn" onclick="playTrack(${song.id})">
+                                <i class="fas fa-play"></i> Putar
+                            </button>
+                            <button class="like-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike(${song.id}, this)">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Play Track
+        function playTrack(songId) {
+            const song = musicDatabase.find(s => s.id === songId);
+            if (!song) return;
+
+            currentTrack = song;
+            const audioPlayer = document.getElementById('audioPlayer');
+            const player = document.getElementById('player');
+
+            // Update player UI
+            document.getElementById('playerImage').src = song.image;
+            document.getElementById('playerTitle').textContent = song.title;
+            document.getElementById('playerArtist').textContent = song.artist;
+
+            // Load and play audio
+            audioPlayer.src = song.audioUrl;
+            audioPlayer.play();
+            isPlaying = true;
+            updatePlayPauseIcon();
+
+            // Show player
+            player.classList.add('active');
+            showToast(`Memutar: ${song.title}`, 'success');
+        }
+
+        // Setup Audio Player
+        function setupAudioPlayer() {
+            const audioPlayer = document.getElementById('audioPlayer');
+            
+            audioPlayer.addEventListener('timeupdate', () => {
+                const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+                document.getElementById('progress').style.width = `${progress}%`;
+            });
+
+            audioPlayer.addEventListener('ended', () => {
+                nextTrack();
+            });
+        }
+
+        // Toggle Play/Pause
+        function togglePlayPause() {
+            const audioPlayer = document.getElementById('audioPlayer');
+            
+            if (!currentTrack) {
+                playTrack(musicDatabase[0].id);
+                return;
+            }
+
+            if (isPlaying) {
+                audioPlayer.pause();
+            } else {
+                audioPlayer.play();
+            }
+            isPlaying = !isPlaying;
+            updatePlayPauseIcon();
+        }
+
+        // Update Play/Pause Icon
+        function updatePlayPauseIcon() {
+            const icon = document.getElementById('playPauseIcon');
+            icon.className = isPlaying ? 'fas fa-pause' : 'fas fa-play';
+        }
+
+        // Previous Track
+        function previousTrack() {
+            if (!currentTrack) return;
+            const currentIndex = musicDatabase.findIndex(s => s.id === currentTrack.id);
+            const prevIndex = currentIndex > 0 ? currentIndex - 1 : musicDatabase.length - 1;
+            playTrack(musicDatabase[prevIndex].id);
+        }
+
+        // Next Track
+        function nextTrack() {
+            if (!currentTrack) return;
+            const currentIndex = musicDatabase.findIndex(s => s.id === currentTrack.id);
+            const nextIndex = currentIndex < musicDatabase.length - 1 ? currentIndex + 1 : 0;
+            playTrack(musicDatabase[nextIndex].id);
+        }
+
+        // Seek Track
+        function seekTrack(event) {
+            const audioPlayer = document.getElementById('audioPlayer');
+            const progressBar = event.currentTarget;
+            const clickX = event.offsetX;
+            const width = progressBar.offsetWidth;
+            const percentage = clickX / width;
+            audioPlayer.currentTime = percentage * audioPlayer.duration;
+        }
+
+        // Toggle Mute
+        function toggleMute() {
+            const audioPlayer = document.getElementById('audioPlayer');
+            const volumeIcon = document.getElementById('volumeIcon');
+            
+            audioPlayer.muted = !audioPlayer.muted;
+            volumeIcon.className = audioPlayer.muted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
+        }
+
+        // Toggle Like
+        function toggleLike(songId, button) {
+            if (likedSongs.has(songId)) {
+                likedSongs.delete(songId);
+                button.classList.remove('liked');
+                showToast('Dihapus dari favorit', 'success');
+            } else {
+                likedSongs.add(songId);
+                button.classList.add('liked');
+                showToast('Ditambahkan ke favorit', 'success');
+            }
+        }
+
+        // Handle Social Click
+        function handleSocialClick(platform) {
+            const messages = {
+                whatsapp: 'Terima kasih! Kami akan segera menghubungi Anda via WhatsApp.',
+                facebook: 'Follow kami di Facebook untuk update terbaru!',
+                twitter: 'Follow kami di Twitter @MusicFinder!',
+                instagram: 'Follow kami di Instagram @MusicFinder!',
+                telegram: 'Bergabung dengan kami di Telegram!'
+            };
+            showToast(messages[platform], 'success');
+        }
+
+        // Show Toast
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Toggle Theme (Bonus Feature)
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+            showToast('Tema diubah', 'success');
+        }
+
+        // Enter key search
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchMusic();
+            }
+        });
+    </script>
+</body>
+</html>
