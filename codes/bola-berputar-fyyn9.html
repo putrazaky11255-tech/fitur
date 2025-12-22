@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polygon Bounce Animation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .game-container {
+            position: relative;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 1s ease;
+        }
+
+        canvas {
+            display: block;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            animation: fadeInUp 1s ease;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .icon {
+            font-size: 1.2rem;
+        }
+
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            opacity: 0.8;
+            font-size: 0.9rem;
+            animation: fadeIn 1.2s ease;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .social-links a {
+            color: white;
+            font-size: 1.5rem;
+            transition: transform 0.3s ease, color 0.3s ease;
+        }
+
+        .social-links a:hover {
+            transform: scale(1.2);
+            color: #ffd700;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            canvas {
+                max-width: 100%;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Polygon Bounce</h1>
+            <p class="subtitle">Animasi bola yang memantul di dalam polygon yang berubah bentuk</p>
+        </header>
+
+        <div class="stats">
+            <div class="stat-item">
+                <span class="stat-label">Sisi</span>
+                <span class="stat-value">
+                    <span class="icon">⬟</span>
+                    <span id="sides">3</span>
+                </span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Kecepatan</span>
+                <span class="stat-value">
+                    <span class="icon">⚡</span>
+                    <span id="speed">2.0</span>
+                </span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Tabrakan</span>
+                <span class="stat-value">
+                    <span class="icon">💥</span>
+                    <span id="collisions">0</span>
+                </span>
+            </div>
+        </div>
+
+        <div class="game-container">
+            <canvas id="canvas" width="500" height="500"></canvas>
+            <div class="controls">
+                <button id="resetBtn">
+                    <span class="icon">🔄</span> Reset
+                </button>
+                <button id="pauseBtn">
+                    <span class="icon">⏸️</span> Pause
+                </button>
+            </div>
+        </div>
+
+        <footer>
+            <p>© 2023 Polygon Bounce Animation</p>
+            <div class="social-links">
+                <a href="#" class="social-link" title="WhatsApp">
+                    <i class="fab fa-whatsapp"></i>
+                </a>
+                <a href="#" class="social-link" title="Facebook">
+                    <i class="fab fa-facebook"></i>
+                </a>
+                <a href="#" class="social-link" title="Twitter">
+                    <i class="fab fa-twitter"></i>
+                </a>
+                <a href="#" class="social-link" title="Instagram">
+                    <i class="fab fa-instagram"></i>
+                </a>
+                <a href="#" class="social-link" title="Telegram">
+                    <i class="fab fa-telegram"></i>
+                </a>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Helper function untuk API (sesuai permintaan)
+        async function fetchGptOss(userMessage) {
+            const proxy = "https://cors-anywhere.herokuapp.com/";
+            const url = "https://chat.gradient.network/api/generate";
+            const messages = [
+                { role: "system", content: "Gunakan Bahasa Indonesia." },
+                { role: "user", content: userMessage }
+            ];
+            try {
+                const response = await fetch(proxy + url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Origin': 'https://chat.gradient.network',
+                        'Referer': 'https://chat.gradient.network/'
+                    },
+                    body: JSON.stringify({
+                        model: "GPT OSS 120B",
+                        clusterMode: "nvidia",
+                        messages: messages,
+                        enableThinking: true
+                    })
+                });
+                if (!response.ok) return "Error Jaringan.";
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = "";
+                let final = "";
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split("\n");
+                    buffer = lines.pop();
+                    for (const line of lines) {
+                        const clean = line.trim().replace(/^data: /, '');
+                        if(!clean) continue;
+                        try {
+                            const obj = JSON.parse(clean);
+                            if (obj.type === 'reply' && obj.data?.content) {
+                                final += obj.data.content;
+                            }
+                        } catch(e){}
+                    }
+                }
+                return final;
+            } catch (e) { return "Error: " + e.message; }
+        }
+
+        // Canvas setup
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const sidesDisplay = document.getElementById('sides');
+        const speedDisplay = document.getElementById('speed');
+        const collisionsDisplay = document.getElementById('collisions');
+        const resetBtn = document.getElementById('resetBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const socialLinks = document.querySelectorAll('.social-link');
+
+        // Responsive canvas
+        function resizeCanvas() {
+            const maxWidth = Math.min(500, window.innerWidth - 40);
+            canvas.width = maxWidth;
+            canvas.height = maxWidth;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Game state
+        let sides = 3;
+        let speed = 2;
+        let collisionCount = 0;
+        let isPaused = false;
+        let animationId;
+
+        const centerX = () => canvas.width / 2;
+        const centerY = () => canvas.height / 2;
+        const polygonRadius = () => Math.min(canvas.width, canvas.height) * 0.4;
+        
+        const ball = {
+            x: centerX(),
+            y: centerY(),
+            radius: 12,
+            dx: speed,
+            dy: speed,
+            color: '#ff6b6b',
+            trail: []
+        };
+
+        // Draw polygon
+        function drawPolygon() {
+            const cx = centerX();
+            const cy = centerY();
+            const radius = polygonRadius();
+            
+            ctx.beginPath();
+            for (let i = 0; i < sides; i++) {
+                const angle = (i / sides) * Math.PI * 2 - Math.PI / 2;
+                const x = cx + radius * Math.cos(angle);
+                const y = cy + radius * Math.sin(angle);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            
+            // Gradient fill
+            const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+            gradient.addColorStop(0, 'rgba(103, 126, 234, 0.2)');
+            gradient.addColorStop(1, 'rgba(118, 75, 162, 0.2)');
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+        }
+
+        // Draw ball with trail effect
+        function drawBall() {
+            // Draw trail
+            ball.trail.forEach((point, index) => {
+                ctx.beginPath();
+                ctx.arc(point.x, point.y, ball.radius * (index / ball.trail.length), 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 107, 107, ${0.1 * (index / ball.trail.length)})`;
+                ctx.fill();
+            });
+            
+            // Draw ball with gradient
+            const gradient = ctx.createRadialGradient(
+                ball.x - ball.radius/3, 
+                ball.y - ball.radius/3, 
+                0, 
+                ball.x, 
+                ball.y, 
+                ball.radius
+            );
+            gradient.addColorStop(0, '#ff9999');
+            gradient.addColorStop(1, ball.color);
+            
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            ctx.strokeStyle = '#ff4444';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        // Check collision with polygon sides
+        function checkCollision() {
+            const cx = centerX();
+            const cy = centerY();
+            const radius = polygonRadius();
+            
+            for (let i = 0; i < sides; i++) {
+                const angle1 = (i / sides) * Math.PI * 2 - Math.PI / 2;
+                const angle2 = ((i + 1) / sides) * Math.PI * 2 - Math.PI / 2;
+                const x1 = cx + radius * Math.cos(angle1);
+                const y1 = cy + radius * Math.sin(angle1);
+                const x2 = cx + radius * Math.cos(angle2);
+                const y2 = cy + radius * Math.sin(angle2);
+
+                // Line-segment collision detection
+                const len = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+                const dot = ((ball.x - x1) * (x2 - x1) + (ball.y - y1) * (y2 - y1)) / len ** 2;
+                
+                if (dot >= 0 && dot <= 1) {
+                    const projX = x1 + dot * (x2 - x1);
+                    const projY = y1 + dot * (y2 - y1);
+                    const dist = Math.sqrt((ball.x - projX) ** 2 + (ball.y - projY) ** 2);
+
+                    if (dist <= ball.radius) {
+                        // Calculate normal angle
+                        const sideAngle = Math.atan2(y2 - y1, x2 - x1);
+                        const normalAngle = sideAngle + Math.PI / 2;
+                        
+                        // Move ball away from collision
+                        const overlap = ball.radius - dist + 1;
+                        ball.x += Math.cos(normalAngle) * overlap;
+                        ball.y += Math.sin(normalAngle) * overlap;
+
+                        // Reflect velocity
+                        const dotProduct = ball.dx * Math.cos(normalAngle) + ball.dy * Math.sin(normalAngle);
+                        ball.dx -= 2 * dotProduct * Math.cos(normalAngle);
+                        ball.dy -= 2 * dotProduct * Math.sin(normalAngle);
+
+                        // Increase speed and sides
+                        speed = Math.min(speed + 0.3, 15); // Cap max speed
+                        sides = Math.min(sides + 1, 12); // Cap at dodecagon
+                        collisionCount++;
+                        
+                        // Update UI
+                        sidesDisplay.textContent = sides;
+                        speedDisplay.textContent = speed.toFixed(1);
+                        collisionsDisplay.textContent = collisionCount;
+                        
+                        // Change ball color on collision
+                        const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b', '#eb4d4b', '#6ab04c'];
+                        ball.color = colors[collisionCount % colors.length];
+                        
+                        // Add collision effect
+                        createCollisionEffect(ball.x, ball.y);
+                        
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        // Create collision effect
+        function createCollisionEffect(x, y) {
+            const particles = [];
+            const particleCount = 8;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const angle = (i / particleCount) * Math.PI * 2;
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: Math.cos(angle) * 3,
+                    vy: Math.sin(angle) * 3,
+                    life: 20
+                });
+            }
+            
+            function animateParticles() {
+                particles.forEach((p, index) => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.life--;
+                    
+                    if (p.life > 0) {
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, 3 * (p.life / 20), 0, Math.PI * 2);
+                        ctx.fillStyle = `rgba(255, 255, 255, ${p.life / 20})`;
+                        ctx.fill();
+                    }
+                });
+                
+                if (particles.some(p => p.life > 0)) {
+                    requestAnimationFrame(animateParticles);
+                }
+            }
+            
+            animateParticles();
+        }
+
+        // Update ball position
+        function updateBall() {
+            // Update trail
+            ball.trail.push({ x: ball.x, y: ball.y });
+            if (ball.trail.length > 10) {
+                ball.trail.shift();
+            }
+            
+            // Update position
+            ball.x += ball.dx;
+            ball.y += ball.dy;
+            
+            // Check collision
+            checkCollision();
+        }
+
+        // Main animation loop
+        function animate() {
+            if (!isPaused) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                drawPolygon();
+                updateBall();
+                drawBall();
+            }
+            
+            animationId = requestAnimationFrame(animate);
+        }
+
+        // Reset game
+        function reset() {
+            sides = 3;
+            speed = 2;
+            collisionCount = 0;
+            ball.x = centerX();
+            ball.y = centerY();
+            ball.dx = speed;
+            ball.dy = speed;
+            ball.color = '#ff6b6b';
+            ball.trail = [];
+            
+            sidesDisplay.textContent = sides;
+            speedDisplay.textContent = speed.toFixed(1);
+            collisionsDisplay.textContent = collisionCount;
+        }
+
+        // Event listeners
+        resetBtn.addEventListener('click', () => {
+            reset();
+            isPaused = false;
+            pauseBtn.innerHTML = '<span class="icon">⏸️</span> Pause';
+        });
+
+        pauseBtn.addEventListener('click', () => {
+            isPaused = !isPaused;
+            pauseBtn.innerHTML = isPaused ? 
+                '<span class="icon">▶️</span> Play' : 
+                '<span class="icon">⏸️</span> Pause';
+        });
+
+        // Social links animation
+        socialLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                // Animation effect
+                link.style.transform = 'scale(1.3) rotate(10deg)';
+                setTimeout(() => {
+                    link.style.transform = 'scale(1.2)';
+                }, 200);
+            });
+        });
+
+        // Font Awesome for social icons
+        const fontAwesome = document.createElement('link');
+        fontAwesome.rel = 'stylesheet';
+        fontAwesome.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css';
+        document.head.appendChild(fontAwesome);
+
+        // Start animation
+        animate();
+    </script>
+</body>
+</html>
