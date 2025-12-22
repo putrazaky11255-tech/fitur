@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bouncing Ball in Polygon</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2rem;
+            background: linear-gradient(90deg, #ff7e5f, #feb47b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: pulse 2s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from {
+                transform: scale(1);
+            }
+            to {
+                transform: scale(1.05);
+            }
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        canvas {
+            border: 3px solid #ff7e5f;
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: linear-gradient(135deg, #ff7e5f, #feb47b);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 10px;
+            flex: 1;
+            min-width: 150px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 15px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transform: translateX(150%);
+            transition: transform 0.5s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification-text {
+            color: #333;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Bouncing Ball in Polygon</h1>
+        <div class="canvas-container">
+            <canvas id="canvas" width="600" height="600"></canvas>
+        </div>
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-label">Polygon Sides</div>
+                <div class="stat-value" id="sides">3</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Ball Speed</div>
+                <div class="stat-value" id="speed">5.0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Bounces</div>
+                <div class="stat-value" id="bounces">0</div>
+            </div>
+        </div>
+        <div class="controls">
+            <button id="resetBtn">Reset</button>
+            <button id="pauseBtn">Pause</button>
+        </div>
+    </div>
+    <div class="notification" id="notification">
+        <div class="notification-text" id="notificationText"></div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const sidesElement = document.getElementById('sides');
+        const speedElement = document.getElementById('speed');
+        const bouncesElement = document.getElementById('bounces');
+        const resetBtn = document.getElementById('resetBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const notification = document.getElementById('notification');
+        const notificationText = document.getElementById('notificationText');
+
+        let animationId;
+        let isPaused = false;
+        let bounces = 0;
+        let polygonSides = 3; // Start with triangle
+        let polygonRadius = 250;
+        let centerX = canvas.width / 2;
+        let centerY = canvas.height / 2;
+        let polygonVertices = [];
+        let ball = {
+            x: centerX,
+            y: centerY,
+            radius: 15,
+            vx: 5,
+            vy: 5,
+            speed: 5,
+            color: '#ff7e5f',
+            trail: []
+        };
+
+        // Initialize polygon vertices
+        function updatePolygonVertices() {
+            polygonVertices = [];
+            const angleStep = (Math.PI * 2) / polygonSides;
+            
+            for (let i = 0; i < polygonSides; i++) {
+                const angle = angleStep * i - Math.PI / 2; // Start from top
+                const x = centerX + polygonRadius * Math.cos(angle);
+                const y = centerY + polygonRadius * Math.sin(angle);
+                polygonVertices.push({ x, y });
+            }
+        }
+
+        // Draw polygon
+        function drawPolygon() {
+            ctx.beginPath();
+            ctx.moveTo(polygonVertices[0].x, polygonVertices[0].y);
+            
+            for (let i = 1; i < polygonVertices.length; i++) {
+                ctx.lineTo(polygonVertices[i].x, polygonVertices[i].y);
+            }
+            
+            ctx.closePath();
+            ctx.strokeStyle = '#6a11cb';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            ctx.fillStyle = 'rgba(106, 17, 203, 0.1)';
+            ctx.fill();
+        }
+
+        // Draw ball
+        function drawBall() {
+            // Draw trail
+            ctx.beginPath();
+            for (let i = 0; i < ball.trail.length; i++) {
+                const point = ball.trail[i];
+                const opacity = i / ball.trail.length;
+                ctx.fillStyle = `rgba(255, 126, 95, ${opacity * 0.5})`;
+                ctx.beginPath();
+                ctx.arc(point.x, point.y, ball.radius * (i / ball.trail.length), 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Draw ball
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fillStyle = ball.color;
+            ctx.fill();
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        // Check if ball collides with polygon edge
+        function checkCollision() {
+            for (let i = 0; i < polygonVertices.length; i++) {
+                const v1 = polygonVertices[i];
+                const v2 = polygonVertices[(i + 1) % polygonVertices.length];
+                
+                // Calculate edge vector
+                const edgeX = v2.x - v1.x;
+                const edgeY = v2.y - v1.y;
+                
+                // Calculate normal vector (perpendicular to edge)
+                const normalX = -edgeY;
+                const normalY = edgeX;
+                
+                // Normalize the normal vector
+                const length = Math.sqrt(normalX * normalX + normalY * normalY);
+                const unitNormalX = normalX / length;
+                const unitNormalY = normalY / length;
+                
+                // Calculate vector from edge start to ball center
+                const ballToEdgeX = ball.x - v1.x;
+                const ballToEdgeY = ball.y - v1.y;
+                
+                // Calculate distance from ball center to edge
+                const distance = ballToEdgeX * unitNormalX + ballToEdgeY * unitNormalY;
+                
+                // Check if ball is on the outside of the edge
+                if (distance > 0) {
+                    // Calculate projection of ball center onto edge
+                    const edgeLength = Math.sqrt(edgeX * edgeX + edgeY * edgeY);
+                    const unitEdgeX = edgeX / edgeLength;
+                    const unitEdgeY = edgeY / edgeLength;
+                    
+                    const projection = ballToEdgeX * unitEdgeX + ballToEdgeY * unitEdgeY;
+                    
+                    // Check if projection is within edge bounds
+                    if (projection >= 0 && projection <= edgeLength) {
+                        // Calculate distance from ball center to edge
+                        const actualDistance = Math.abs(distance);
+                        
+                        // Check if ball is colliding with edge
+                        if (actualDistance <= ball.radius) {
+                            // Calculate reflection
+                            const dotProduct = ball.vx * unitNormalX + ball.vy * unitNormalY;
+                            
+                            ball.vx -= 2 * dotProduct * unitNormalX;
+                            ball.vy -= 2 * dotProduct * unitNormalY;
+                            
+                            // Move ball outside of edge to prevent sticking
+                            const overlap = ball.radius - actualDistance;
+                            ball.x += unitNormalX * overlap;
+                            ball.y += unitNormalY * overlap;
+                            
+                            // Increase speed
+                            ball.speed *= 1.05;
+                            const currentSpeed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
+                            ball.vx = (ball.vx / currentSpeed) * ball.speed;
+                            ball.vy = (ball.vy / currentSpeed) * ball.speed;
+                            
+                            // Increase polygon sides
+                            polygonSides++;
+                            updatePolygonVertices();
+                            
+                            // Update stats
+                            bounces++;
+                            updateStats();
+                            
+                            // Show notification
+                            showNotification(`Polygon upgraded to ${polygonSides} sides!`);
+                            
+                            // Change ball color randomly
+                            const colors = ['#ff7e5f', '#feb47b', '#6a11cb', '#2575fc', '#FF5733', '#33FF57', '#3357FF'];
+                            ball.color = colors[Math.floor(Math.random() * colors.length)];
+                            
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        // Update ball position
+        function updateBall() {
+            // Add current position to trail
+            ball.trail.push({ x: ball.x, y: ball.y });
+            if (ball.trail.length > 20) {
+                ball.trail.shift();
+            }
+            
+            // Update position
+            ball.x += ball.vx;
+            ball.y += ball.vy;
+            
+            // Check collision
+            checkCollision();
+        }
+
+        // Update UI stats
+        function updateStats() {
+            sidesElement.textContent = polygonSides;
+            speedElement.textContent = ball.speed.toFixed(1);
+            bouncesElement.textContent = bounces;
+        }
+
+        // Show notification
+        function showNotification(message) {
+            notificationText.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Animation loop
+        function animate() {
+            if (!isPaused) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                drawPolygon();
+                updateBall();
+                drawBall();
+            }
+            
+            animationId = requestAnimationFrame(animate);
+        }
+
+        // Reset game
+        function reset() {
+            polygonSides = 3;
+            bounces = 0;
+            ball.x = centerX;
+            ball.y = centerY;
+            ball.vx = 5;
+            ball.vy = 5;
+            ball.speed = 5;
+            ball.color = '#ff7e5f';
+            ball.trail = [];
+            updatePolygonVertices();
+            updateStats();
+            isPaused = false;
+            pauseBtn.textContent = 'Pause';
+        }
+
+        // Event listeners
+        resetBtn.addEventListener('click', reset);
+        
+        pauseBtn.addEventListener('click', () => {
+            isPaused = !isPaused;
+            pauseBtn.textContent = isPaused ? 'Resume' : 'Pause';
+        });
+
+        // Initialize
+        updatePolygonVertices();
+        updateStats();
+        animate();
+    </script>
+</body>
+</html>
