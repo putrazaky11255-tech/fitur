@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎵 Cari Lagu - Temukan Musik Favoritmu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        /* --- Global Styles & Variables --- */
+        :root {
+            --primary-color: #1DB954; /* Spotify Green */
+            --secondary-color: #191414; /* Spotify Black */
+            --background-color: #121212;
+            --surface-color: #181818;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B3B3B3;
+            --accent-color: #FFC107;
+            --shadow: 0 4px 60px rgba(0, 0, 0, 0.5);
+            --border-radius: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(29, 185, 84, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 193, 7, 0.05) 0%, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        /* --- Header --- */
+        .header {
+            background-color: var(--secondary-color);
+            padding: 1.5rem 2rem;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .logo i {
+            animation: spin 3s linear infinite;
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* --- Search Section --- */
+        .search-section {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeIn 1s ease-out 0.3s both;
+        }
+
+        .search-section h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .search-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 2rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            flex-grow: 1;
+            max-width: 500px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 3rem 1rem 1.5rem;
+            font-size: 1rem;
+            border: 2px solid transparent;
+            border-radius: 50px;
+            background-color: var(--surface-color);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 15px rgba(29, 185, 84, 0.4);
+        }
+
+        .search-button {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--primary-color);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            color: var(--secondary-color);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-button:hover {
+            background-color: #1ed760;
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        /* --- Results Section --- */
+        .results-section {
+            animation: fadeIn 1s ease-out 0.5s both;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .song-card {
+            background-color: var(--surface-color);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .song-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+            background-color: #282828;
+        }
+
+        .song-card img {
+            width: 100%;
+            max-width: 200px;
+            height: auto;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .song-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            width: 100%;
+        }
+
+        .song-card p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            width: 100%;
+        }
+        
+        .audio-player {
+            width: 100%;
+            margin-top: auto;
+        }
+
+        /* --- Loading & Error States --- */
+        .loading, .error-message, .no-results {
+            text-align: center;
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            padding: 3rem;
+        }
+
+        .loading i {
+            font-size: 3rem;
+            color: var(--primary-color);
+            animation: spin 1s linear infinite;
+        }
+        
+        .error-message {
+            color: #e74c3c;
+        }
+
+        /* --- Footer --- */
+        .footer {
+            background-color: var(--secondary-color);
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+            margin-top: auto;
+        }
+
+        .social-links {
+            margin-bottom: 1rem;
+        }
+
+        .social-links a {
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            margin: 0 1rem;
+            transition: color 0.3s ease, transform 0.3s ease;
+            display: inline-block;
+        }
+
+        .social-links a:hover {
+            color: var(--primary-color);
+            transform: translateY(-5px) scale(1.2);
+        }
+
+        .footer p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* --- Animations --- */
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* --- Responsive Design --- */
+        @media (max-width: 768px) {
+            .header-content {
+                justify-content: center;
+            }
+            
+            .search-section h1 {
+                font-size: 2rem;
+            }
+
+            .results-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="logo">
+                <i class="fas fa-music"></i>
+                <span>CariLagu</span>
+            </a>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section class="search-section">
+            <h1>Temukan Lagu Kesukaanmu 🎶</h1>
+            <p>Masukkan judul lagu dan dengarkan preview-nya secara gratis!</p>
+            <div class="search-container">
+                <div class="search-input-wrapper">
+                    <input type="text" id="searchInput" class="search-input" placeholder="Contoh: Perfect Ed Sheeran...">
+                    <button id="searchButton" class="search-button">
+                        <i class="fas fa-search"></i> Cari
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="resultsSection" class="results-section">
+            <!-- Hasil pencarian akan dimuat di sini -->
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="social-links">
+            <a href="#" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+            <a href="#" title="Facebook"><i class="fab fa-facebook"></i></a>
+            <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" title="Telegram"><i class="fab fa-telegram"></i></a>
+        </div>
+        <p>&copy; 2024 CariLagu. Dibuat dengan <i class="fas fa-heart" style="color: var(--accent-color);"></i> oleh Opus AI Coder.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('searchInput');
+            const searchButton = document.getElementById('searchButton');
+            const resultsSection = document.getElementById('resultsSection');
+            const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+            const apiUrl = 'https://itunes.apple.com/search?term=';
+
+            // Fungsi untuk melakukan pencarian
+            const fetchSongs = async (query) => {
+                resultsSection.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i><p>Sedang mencari lagu...</p></div>';
+                
+                try {
+                    const response = await fetch(`${proxyUrl}${apiUrl}${encodeURIComponent(query)}&entity=song&limit=20`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    displayResults(data.results);
+                } catch (error) {
+                    console.error('Fetch error:', error);
+                    resultsSection.innerHTML = `<div class="error-message"><i class="fas fa-exclamation-triangle"></i><p>Terjadi kesalahan. Coba lagi nanti ya! 🙏</p></div>`;
+                }
+            };
+
+            // Fungsi untuk menampilkan hasil
+            const displayResults = (songs) => {
+                if (songs.length === 0) {
+                    resultsSection.innerHTML = `<div class="no-results"><i class="fas fa-search"></i><p>Lagu tidak ditemukan. Coba kata kunci lain! 🤔</p></div>`;
+                    return;
+                }
+
+                const resultsGrid = document.createElement('div');
+                resultsGrid.className = 'results-grid';
+
+                songs.forEach(song => {
+                    const card = document.createElement('div');
+                    card.className = 'song-card';
+
+                    // Menggunakan gambar yang diberikan jika ada, jika tidak gunakan gambar dari API
+                    const albumArt = song.artworkUrl100 ? song.artworkUrl100.replace('100x100', '300x300') : 'https://static.wixstatic.com/media/b42422_d833eeac7f9e46b8b12b8689410c9630~mv2.jpg/v1/fill/w_568,h_364,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/b42422_d833eeac7f9e46b8b12b8689410c9630~mv2.jpg';
+
+                    card.innerHTML = `
+                        <img src="${albumArt}" alt="Album Art for ${song.trackName}">
+                        <h3 title="${song.trackName}">${song.trackName || 'Judul Tidak Diketahui'}</h3>
+                        <p title="${song.artistName}">${song.artistName || 'Artis Tidak Diketahui'}</p>
+                        ${song.previewUrl ? `<audio controls class="audio-player" src="${song.previewUrl}"></audio>` : '<p class="text-secondary">Preview tidak tersedia</p>'}
+                    `;
+                    resultsGrid.appendChild(card);
+                });
+
+                resultsSection.innerHTML = '';
+                resultsSection.appendChild(resultsGrid);
+            };
+
+            // Event listener untuk tombol cari
+            searchButton.addEventListener('click', () => {
+                const query = searchInput.value.trim();
+                if (query) {
+                    fetchSongs(query);
+                } else {
+                    alert('Masukkan judul lagu terlebih dahulu! 😊');
+                }
+            });
+
+            // Event listener untuk tombol 'Enter' di input
+            searchInput.addEventListener('keyup', (event) => {
+                if (event.key === 'Enter') {
+                    searchButton.click();
+                }
+            });
+            
+            // Event listener untuk link sosial media (animasi klik)
+            document.querySelectorAll('.social-links a').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    link.style.transform = 'translateY(-5px) scale(1.2) rotate(360deg)';
+                    setTimeout(() => {
+                        link.style.transform = '';
+                    }, 500);
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>
