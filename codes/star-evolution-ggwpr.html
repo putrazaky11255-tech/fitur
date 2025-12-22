@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stellar Evolution Simulator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: radial-gradient(ellipse at center, #0a0e27 0%, #000000 100%);
+            color: white;
+            overflow: hidden;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* Stars Background */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* Main Container */
+        .universe {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Star Container */
+        .star-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* The Star */
+        .the-star {
+            position: absolute;
+            border-radius: 50%;
+            transition: all 1s ease-in-out;
+            box-shadow: 0 0 60px rgba(255, 255, 255, 0.8);
+        }
+
+        /* Newborn Star */
+        .newborn {
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, #ffffff 0%, #87ceeb 40%, #4a90e2 100%);
+            animation: pulse 2s infinite, rotate 20s linear infinite;
+            box-shadow: 0 0 80px rgba(135, 206, 235, 0.9),
+                        0 0 120px rgba(74, 144, 226, 0.6),
+                        inset 0 0 20px rgba(255, 255, 255, 0.8);
+        }
+
+        /* Main Sequence Star */
+        .main-sequence {
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, #fff8dc 0%, #ffd700 40%, #ffa500 100%);
+            animation: pulse 1.5s infinite, rotate 15s linear infinite;
+            box-shadow: 0 0 100px rgba(255, 215, 0, 0.9),
+                        0 0 150px rgba(255, 165, 0, 0.6),
+                        inset 0 0 30px rgba(255, 255, 255, 0.8);
+        }
+
+        /* Red Supergiant */
+        .red-supergiant {
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, #ff6b6b 0%, #dc143c 40%, #8b0000 100%);
+            animation: pulse 1s infinite, rotate 10s linear infinite, unstable 0.5s infinite;
+            box-shadow: 0 0 150px rgba(220, 20, 60, 0.9),
+                        0 0 200px rgba(139, 0, 0, 0.6),
+                        inset 0 0 50px rgba(255, 107, 107, 0.8);
+        }
+
+        /* Supernova */
+        .supernova {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, #ffffff 0%, #ff00ff 30%, #00ffff 60%, transparent 100%);
+            animation: explode 2s ease-out forwards;
+            box-shadow: 0 0 300px rgba(255, 255, 255, 1),
+                        0 0 500px rgba(255, 0, 255, 0.8),
+                        0 0 700px rgba(0, 255, 255, 0.6);
+        }
+
+        /* Black Hole */
+        .black-hole {
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, #000000 40%, #1a0033 60%, transparent 100%);
+            animation: blackHoleSpin 3s linear infinite;
+            box-shadow: inset 0 0 50px rgba(0, 0, 0, 1),
+                        0 0 100px rgba(138, 43, 226, 0.8);
+        }
+
+        /* Accretion Disk */
+        .accretion-disk {
+            position: absolute;
+            width: 200px;
+            height: 60px;
+            border: 3px solid transparent;
+            border-top-color: rgba(255, 140, 0, 0.8);
+            border-bottom-color: rgba(255, 69, 0, 0.8);
+            border-radius: 50%;
+            animation: diskRotate 2s linear infinite;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotateX(60deg);
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes unstable {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.05) rotate(5deg); }
+            50% { transform: scale(0.95) rotate(-5deg); }
+            75% { transform: scale(1.02) rotate(3deg); }
+        }
+
+        @keyframes explode {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(3);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(0.1);
+                opacity: 0;
+            }
+        }
+
+        @keyframes blackHoleSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes diskRotate {
+            from { transform: translate(-50%, -50%) rotateX(60deg) rotateZ(0deg); }
+            to { transform: translate(-50%, -50%) rotateX(60deg) rotateZ(360deg); }
+        }
+
+        /* Info Panel */
+        .info-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            min-width: 250px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .info-panel h2 {
+            color: #ffd700;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .stage {
+            font-size: 1.2em;
+            color: #87ceeb;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .age {
+            font-size: 1em;
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        .description {
+            font-size: 0.9em;
+            color: #cccccc;
+            line-height: 1.5;
+            margin-top: 10px;
+        }
+
+        /* Controls */
+        .controls {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 15px 25px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        /* Speed Indicator */
+        .speed-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        /* Particles Effect */
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        @keyframes particleFloat {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 30px 50px;
+            border-radius: 20px;
+            border: 2px solid #ffd700;
+            font-size: 1.5em;
+            color: #ffd700;
+            text-align: center;
+            display: none;
+            z-index: 1000;
+            animation: notificationPop 0.5s ease-out;
+        }
+
+        @keyframes notificationPop {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.1);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .notification.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Stars Background -->
+    <div class="stars" id="starsContainer"></div>
+
+    <!-- Main Universe Container -->
+    <div class="universe">
+        <!-- Star Container -->
+        <div class="star-container">
+            <div class="the-star newborn" id="theStar"></div>
+        </div>
+    </div>
+
+    <!-- Info Panel -->
+    <div class="info-panel">
+        <h2>⭐ Stellar Evolution</h2>
+        <div class="stage" id="stage">Newborn Star</div>
+        <div class="age" id="age">Age: 0 years</div>
+        <div class="description" id="description">
+            A newborn star ignites as nuclear fusion begins in its core, lighting up the cosmos.
+        </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+        <button class="btn" id="pauseBtn">⏸️ Pause</button>
+        <button class="btn" id="resetBtn">🔄 Reset</button>
+        <div class="speed-indicator">
+            <span>Speed:</span>
+            <button class="btn" id="speedBtn">1x</button>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Star Evolution Simulator
+        class StarEvolution {
+            constructor() {
+                this.star = document.getElementById('theStar');
+                this.stageElement = document.getElementById('stage');
+                this.ageElement = document.getElementById('age');
+                this.descriptionElement = document.getElementById('description');
+                this.notification = document.getElementById('notification');
+                
+                this.age = 0;
+                this.stage = 'newborn';
+                this.isPaused = false;
+                this.speed = 1;
+                this.evolutionInterval = null;
+                
+                this.stages = {
+                    newborn: {
+                        duration: 5000,
+                        name: 'Newborn Star',
+                        class: 'newborn',
+                        description: 'A newborn star ignites as nuclear fusion begins in its core, lighting up the cosmos.'
+                    },
+                    'main-sequence': {
+                        duration: 8000,
+                        name: 'Main Sequence Star',
+                        class: 'main-sequence',
+                        description: 'The star is now in its stable phase, fusing hydrogen into helium for millions of years.'
+                    },
+                    'red-supergiant': {
+                        duration: 5000,
+                        name: 'Red Supergiant',
+                        class: 'red-supergiant',
+                        description: 'The star has exhausted its hydrogen and swells to enormous proportions, becoming unstable.'
+                    },
+                    supernova: {
+                        duration: 2000,
+                        name: 'Supernova!',
+                        class: 'supernova',
+                        description: 'The massive star explodes in a cataclysmic event, outshining entire galaxies!'
+                    },
+                    'black-hole': {
+                        duration: Infinity,
+                        name: 'Black Hole',
+                        class: 'black-hole',
+                        description: 'The collapsed core forms a black hole, with gravity so strong that not even light can escape.'
+                    }
+                };
+                
+                this.init();
+            }
+            
+            init() {
+                this.createBackgroundStars();
+                this.startEvolution();
+                this.setupControls();
+            }
+            
+            createBackgroundStars() {
+                const starsContainer = document.getElementById('starsContainer');
+                for (let i = 0; i < 200; i++) {
+                    const star = document.createElement('div');
+                    star.className = 'star';
+                    star.style.left = Math.random() * 100 + '%';
+                    star.style.top = Math.random() * 100 + '%';
+                    star.style.width = star.style.height = Math.random() * 3 + 'px';
+                    star.style.animationDelay = Math.random() * 3 + 's';
+                    starsContainer.appendChild(star);
+                }
+            }
+            
+            startEvolution() {
+                if (this.evolutionInterval) {
+                    clearInterval(this.evolutionInterval);
+                }
+                
+                this.evolutionInterval = setInterval(() => {
+                    if (!this.isPaused) {
+                        this.age += this.speed * 1000;
+                        this.updateStage();
+                        this.createParticles();
+                    }
+                }, 1000);
+            }
+            
+            updateStage() {
+                const stageKeys = Object.keys(this.stages);
+                let totalDuration = 0;
+                let currentStage = 'newborn';
+                
+                for (const stage of stageKeys) {
+                    if (this.age < totalDuration + this.stages[stage].duration) {
+                        currentStage = stage;
+                        break;
+                    }
+                    totalDuration += this.stages[stage].duration;
+                }
+                
+                if (currentStage !== this.stage) {
+                    this.transitionToStage(currentStage);
+                }
+                
+                this.updateDisplay();
+            }
+            
+            transitionToStage(newStage) {
+                const oldStage = this.stage;
+                this.stage = newStage;
+                
+                // Remove all stage classes
+                this.star.className = 'the-star';
+                
+                // Add new stage class
+                this.star.classList.add(this.stages[newStage].class);
+                
+                // Special handling for black hole
+                if (newStage === 'black-hole') {
+                    this.createAccretionDisk();
+                    this.showNotification('🌌 Black Hole Formed!');
+                } else if (newStage === 'supernova') {
+                    this.showNotification('💥 SUPERNOVA!');
+                    this.createExplosionEffect();
+                } else if (newStage === 'red-supergiant') {
+                    this.showNotification('🔴 Red Supergiant Phase');
+                }
+                
+                // Clean up accretion disk if not black hole
+                if (newStage !== 'black-hole') {
+                    const disk = document.querySelector('.accretion-disk');
+                    if (disk) disk.remove();
+                }
+            }
+            
+            createAccretionDisk() {
+                const disk = document.createElement('div');
+                disk.className = 'accretion-disk';
+                this.star.parentElement.appendChild(disk);
+            }
+            
+            createExplosionEffect() {
+                for (let i = 0; i < 50; i++) {
+                    setTimeout(() => {
+                        this.createExplosionParticle();
+                    }, i * 50);
+                }
+            }
+            
+            createExplosionParticle() {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.width = particle.style.height = Math.random() * 10 + 5 + 'px';
+                particle.style.background = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                
+                const rect = this.star.getBoundingClientRect();
+                particle.style.left = rect.left + rect.width / 2 + 'px';
+                particle.style.top = rect.top + rect.height / 2 + 'px';
+                
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 300 + 100;
+                particle.style.setProperty('--tx', Math.cos(angle) * distance + 'px');
+                particle.style.setProperty('--ty', Math.sin(angle) * distance + 'px');
+                particle.style.animation = 'particleFloat 2s ease-out forwards';
+                
+                document.body.appendChild(particle);
+                setTimeout(() => particle.remove(), 2000);
+            }
+            
+            createParticles() {
+                if (Math.random() > 0.7 && this.stage !== 'black-hole') {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    
+                    const rect = this.star.getBoundingClientRect();
+                    const starRadius = rect.width / 2;
+                    
+                    const angle = Math.random() * Math.PI * 2;
+                    const distance = starRadius + Math.random() * 50;
+                    
+                    particle.style.left = rect.left + starRadius + Math.cos(angle) * distance + 'px';
+                    particle.style.top = rect.top + starRadius + Math.sin(angle) * distance + 'px';
+                    particle.style.background = this.getParticleColor();
+                    particle.style.animation = 'particleFloat 3s ease-out forwards';
+                    particle.style.setProperty('--tx', (Math.random() - 0.5) * 100 + 'px');
+                    particle.style.setProperty('--ty', -Math.random() * 100 + 'px');
+                    
+                    document.body.appendChild(particle);
+                    setTimeout(() => particle.remove(), 3000);
+                }
+            }
+            
+            getParticleColor() {
+                const colors = {
+                    newborn: '#87ceeb',
+                    'main-sequence': '#ffd700',
+                    'red-supergiant': '#ff6b6b',
+                    supernova: '#ff00ff',
+                    'black-hole': '#8a2be2'
+                };
+                return colors[this.stage] || '#ffffff';
+            }
+            
+            updateDisplay() {
+                const stageInfo = this.stages[this.stage];
+                this.stageElement.textContent = stageInfo.name;
+                this.ageElement.textContent = `Age: ${this.formatAge(this.age)}`;
+                this.descriptionElement.textContent = stageInfo.description;
+            }
+            
+            formatAge(age) {
+                if (age < 1000) {
+                    return `${age} years`;
+                } else if (age < 1000000) {
+                    return `${(age / 1000).toFixed(1)}K years`;
+                } else {
+                    return `${(age / 1000000).toFixed(1)}M years`;
+                }
+            }
+            
+            showNotification(message) {
+                this.notification.textContent = message;
+                this.notification.classList.add('show');
+                setTimeout(() => {
+                    this.notification.classList.remove('show');
+                }, 3000);
+            }
+            
+            setupControls() {
+                const pauseBtn = document.getElementById('pauseBtn');
+                const resetBtn = document.getElementById('resetBtn');
+                const speedBtn = document.getElementById('speedBtn');
+                
+                pauseBtn.addEventListener('click', () => {
+                    this.isPaused = !this.isPaused;
+                    pauseBtn.textContent = this.isPaused ? '▶️ Play' : '⏸️ Pause';
+                });
+                
+                resetBtn.addEventListener('click', () => {
+                    this.reset();
+                });
+                
+                speedBtn.addEventListener('click', () => {
+                    const speeds = [1, 2, 5, 10];
+                    const currentIndex = speeds.indexOf(this.speed);
+                    this.speed = speeds[(currentIndex + 1) % speeds.length];
+                    speedBtn.textContent = `${this.speed}x`;
+                });
+            }
+            
+            reset() {
+                this.age = 0;
+                this.stage = 'newborn';
+                this.isPaused = false;
+                this.speed = 1;
+                
+                this.star.className = 'the-star newborn';
+                document.getElementById('pauseBtn').textContent = '⏸️ Pause';
+                document.getElementById('speedBtn').textContent = '1x';
+                
+                const disk = document.querySelector('.accretion-disk');
+                if (disk) disk.remove();
+                
+                this.updateDisplay();
+                this.startEvolution();
+            }
+        }
+        
+        // Initialize the simulation when page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            new StarEvolution();
+        });
+    </script>
+</body>
+</html>
