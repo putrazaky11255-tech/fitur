@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volcanic Eruption Simulation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to bottom, #0a0e27 0%, #1a1f3a 50%, #2d1b69 100%);
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Sky and atmosphere */
+        .sky {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, 
+                #000428 0%, 
+                #004e92 40%, 
+                #1a1f3a 70%, 
+                #2d1b69 100%);
+            animation: skyDarken 8s ease-in-out infinite;
+        }
+
+        @keyframes skyDarken {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(0.6) hue-rotate(-20deg); }
+        }
+
+        /* Stars */
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 70%;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, white, transparent),
+                radial-gradient(2px 2px at 40px 70px, white, transparent),
+                radial-gradient(1px 1px at 50px 50px, white, transparent),
+                radial-gradient(1px 1px at 80px 10px, white, transparent),
+                radial-gradient(2px 2px at 130px 80px, white, transparent),
+                radial-gradient(1px 1px at 110px 120px, white, transparent);
+            background-repeat: repeat;
+            background-size: 200px 200px;
+            opacity: 0.5;
+            animation: twinkle 4s ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 0.8; }
+        }
+
+        /* Ground */
+        .ground {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 30%;
+            background: linear-gradient(to top, #1a0f0a 0%, #2d1810 50%, #3d2418 100%);
+            box-shadow: 0 -20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Volcano */
+        .volcano-container {
+            position: absolute;
+            bottom: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 400px;
+            height: 300px;
+        }
+
+        .volcano {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #2d1810 0%, #1a0f0a 50%, #0a0505 100%);
+            clip-path: polygon(35% 100%, 50% 0%, 65% 100%);
+            animation: rumble 8s ease-in-out infinite;
+            box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.8);
+        }
+
+        @keyframes rumble {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            25% { transform: translateX(-2px) rotate(-0.5deg); }
+            50% { transform: translateX(2px) rotate(0.5deg); }
+            75% { transform: translateX(-1px) rotate(-0.3deg); }
+        }
+
+        /* Crater */
+        .crater {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 40px;
+            background: radial-gradient(ellipse at center, #000 0%, #1a0f0a 100%);
+            border-radius: 50%;
+            box-shadow: inset 0 5px 15px rgba(0, 0, 0, 0.9);
+        }
+
+        /* Lava cracks */
+        .crack {
+            position: absolute;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                #ff6b00 20%, 
+                #ff9500 50%, 
+                #ff6b00 80%, 
+                transparent 100%);
+            opacity: 0;
+            animation: glowCrack 8s ease-in-out infinite;
+            box-shadow: 0 0 20px #ff6b00;
+        }
+
+        .crack1 {
+            top: 20%;
+            left: 45%;
+            width: 10%;
+            height: 2px;
+            transform: rotate(-30deg);
+            animation-delay: 2s;
+        }
+
+        .crack2 {
+            top: 25%;
+            left: 55%;
+            width: 8%;
+            height: 2px;
+            transform: rotate(25deg);
+            animation-delay: 2.2s;
+        }
+
+        .crack3 {
+            top: 15%;
+            left: 50%;
+            width: 12%;
+            height: 3px;
+            transform: rotate(0deg);
+            animation-delay: 2.4s;
+        }
+
+        @keyframes glowCrack {
+            0%, 40%, 100% { opacity: 0; }
+            50%, 70% { 
+                opacity: 1; 
+                box-shadow: 0 0 30px #ff6b00, 0 0 50px #ff4500;
+            }
+        }
+
+        /* Canvas for particles */
+        #particleCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        /* Smoke effect */
+        .smoke {
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(100, 100, 100, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            opacity: 0;
+            animation: smokeRise 8s ease-in-out infinite;
+        }
+
+        @keyframes smokeRise {
+            0%, 40%, 100% { 
+                opacity: 0; 
+                transform: translateX(-50%) translateY(0) scale(0.5);
+            }
+            50%, 80% { 
+                opacity: 0.6; 
+                transform: translateX(-50%) translateY(-100px) scale(2);
+            }
+        }
+
+        /* Info panel */
+        .info-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 300px;
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .info-panel h2 {
+            margin-bottom: 10px;
+            font-size: 1.5em;
+            color: #ff9500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-panel p {
+            font-size: 0.9em;
+            line-height: 1.5;
+            opacity: 0.9;
+        }
+
+        .status {
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(255, 149, 0, 0.2);
+            border-radius: 5px;
+            border-left: 3px solid #ff9500;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            font-size: 0.85em;
+        }
+
+        .status-value {
+            color: #ff9500;
+            font-weight: bold;
+        }
+
+        /* Controls */
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .control-btn {
+            padding: 12px 24px;
+            background: rgba(255, 149, 0, 0.8);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 149, 0, 1);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 149, 0, 0.4);
+        }
+
+        .control-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Footer */
+        footer {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.8em;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .social-links a {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.2em;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .social-links a:hover {
+            color: #ff9500;
+            transform: translateY(-3px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .volcano-container {
+                width: 300px;
+                height: 225px;
+            }
+
+            .info-panel {
+                max-width: 200px;
+                padding: 15px;
+            }
+
+            .info-panel h2 {
+                font-size: 1.2em;
+            }
+
+            .controls {
+                bottom: 60px;
+                right: 10px;
+            }
+
+            .control-btn {
+                padding: 10px 18px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sky">
+        <div class="stars"></div>
+    </div>
+    
+    <div class="ground"></div>
+    
+    <div class="volcano-container">
+        <div class="volcano">
+            <div class="crater"></div>
+            <div class="crack crack1"></div>
+            <div class="crack crack2"></div>
+            <div class="crack crack3"></div>
+            <div class="smoke"></div>
+        </div>
+    </div>
+    
+    <canvas id="particleCanvas"></canvas>
+    
+    <div class="info-panel">
+        <h2>🌋 Volcano Monitor</h2>
+        <p>Real-time volcanic eruption simulation with realistic physics and particle effects.</p>
+        <div class="status">
+            <div class="status-item">
+                <span>Activity:</span>
+                <span class="status-value" id="activity">Dormant</span>
+            </div>
+            <div class="status-item">
+                <span>Temperature:</span>
+                <span class="status-value" id="temperature">500°C</span>
+            </div>
+            <div class="status-item">
+                <span>Pressure:</span>
+                <span class="status-value" id="pressure">Low</span>
+            </div>
+            <div class="status-item">
+                <span>Phase:</span>
+                <span class="status-value" id="phase">Stable</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="controls">
+        <button class="control-btn" onclick="triggerEruption()">
+            ⚡ Trigger Eruption
+        </button>
+        <button class="control-btn" onclick="toggleAnimation()">
+            ⏸️ Pause
+        </button>
+    </div>
+    
+    <footer>
+        <p>© 2024 Volcano Simulation Lab</p>
+        <div class="social-links">
+            <a href="#" onclick="handleSocialClick(event, 'twitter')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"></path>
+                </svg>
+            </a>
+            <a href="#" onclick="handleSocialClick(event, 'instagram')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                    <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" fill="white"></path>
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" stroke="white" stroke-width="2" stroke-linecap="round"></line>
+                </svg>
+            </a>
+            <a href="#" onclick="handleSocialClick(event, 'github')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"></path>
+                </svg>
+            </a>
+            <a href="#" onclick="handleSocialClick(event, 'whatsapp')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"></path>
+                </svg>
+            </a>
+        </div>
+    </footer>
+
+    <script>
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let animationPaused = false;
+        let animationId;
+        let particles = [];
+        let pyroclasticClouds = [];
+        let lavaFlows = [];
+        let eruptionPhase = 'dormant';
+        let cycleTime = 0;
+        
+        // Resize canvas
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        // Particle class for lava
+        class LavaParticle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 8;
+                this.vy = -Math.random() * 15 - 10;
+                this.size = Math.random() * 4 + 2;
+                this.life = 1;
+                this.decay = Math.random() * 0.015 + 0.005;
+                this.gravity = 0.3;
+                this.color = `hsl(${Math.random() * 30 + 10}, 100%, ${Math.random() * 30 + 50}%)`;
+                this.trail = [];
+                this.maxTrailLength = 10;
+            }
+            
+            update() {
+                this.trail.push({ x: this.x, y: this.y, life: this.life });
+                if (this.trail.length > this.maxTrailLength) {
+                    this.trail.shift();
+                }
+                
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vy += this.gravity;
+                this.vx *= 0.99;
+                this.life -= this.decay;
+                this.size *= 0.995;
+            }
+            
+            draw() {
+                // Draw trail
+                this.trail.forEach((point, index) => {
+                    ctx.globalAlpha = (index / this.trail.length) * this.life * 0.3;
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(point.x, point.y, this.size * (index / this.trail.length), 0, Math.PI * 2);
+                    ctx.fill();
+                });
+                
+                // Draw particle with glow
+                ctx.globalAlpha = this.life;
+                
+                // Outer glow
+                const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 3);
+                gradient.addColorStop(0, this.color);
+                gradient.addColorStop(0.3, this.color.replace('50%', '30%'));
+                gradient.addColorStop(1, 'transparent');
+                
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size * 3, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Core
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size * 0.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        // Pyroclastic cloud class
+        class PyroclasticCloud {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 3;
+                this.vy = Math.random() * 2;
+                this.size = Math.random() * 60 + 40;
+                this.life = 1;
+                this.decay = 0.002;
+                this.particles = [];
+                
+                // Create cloud particles
+                for (let i = 0; i < 20; i++) {
+                    this.particles.push({
+                        offsetX: (Math.random() - 0.5) * this.size,
+                        offsetY: (Math.random() - 0.5) * this.size,
+                        size: Math.random() * 15 + 5
+                    });
+                }
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vx *= 0.995;
+                this.vy *= 0.995;
+                this.life -= this.decay;
+                this.size *= 1.002;
+            }
+            
+            draw() {
+                ctx.globalAlpha = this.life * 0.6;
+                
+                this.particles.forEach(p => {
+                    const px = this.x + p.offsetX;
+                    const py = this.y + p.offsetY;
+                    
+                    const gradient = ctx.createRadialGradient(px, py, 0, px, py, p.size);
+                    gradient.addColorStop(0, 'rgba(100, 50, 20, 0.8)');
+                    gradient.addColorStop(0.5, 'rgba(80, 40, 20, 0.4)');
+                    gradient.addColorStop(1, 'transparent');
+                    
+                    ctx.fillStyle = gradient;
+                    ctx.beginPath();
+                    ctx.arc(px, py, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+            }
+        }
+        
+        // Lava flow class
+        class LavaFlow {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.width = Math.random() * 20 + 10;
+                this.height = 0;
+                this.maxHeight = Math.random() * 100 + 50;
+                this.speed = Math.random() * 2 + 1;
+                this.life = 1;
+                this.decay = 0.005;
+            }
+            
+            update() {
+                if (this.height < this.maxHeight) {
+                    this.height += this.speed;
+                }
+                this.life -= this.decay;
+            }
+            
+            draw() {
+                ctx.globalAlpha = this.life * 0.8;
+                
+                const gradient = ctx.createLinearGradient(this.x, this.y, this.x, this.y + this.height);
+                gradient.addColorStop(0, '#ff9500');
+                gradient.addColorStop(0.5, '#ff6b00');
+                gradient.addColorStop(1, '#ff4500');
+                
+                ctx.fillStyle = gradient;
+                ctx.fillRect(this.x - this.width/2, this.y, this.width, this.height);
+                
+                // Glow effect
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = '#ff6b00';
+                ctx.fillRect(this.x - this.width/2, this.y, this.width, this.height);
+                ctx.shadowBlur = 0;
+            }
+        }
+        
+        // Eruption cycle
+        function eruptionCycle() {
+            cycleTime += 16; // Assuming 60fps
+            
+            // Phase 1: Dormant (0-3000ms)
+            if (cycleTime < 3000) {
+                eruptionPhase = 'dormant';
+                updateStatus('Dormant', '500°C', 'Low', 'Stable');
+            }
+            // Phase 2: Warning signs (3000-5000ms)
+            else if (cycleTime < 5000) {
+                eruptionPhase = 'warning';
+                updateStatus('Warning', '800°C', 'Rising', 'Unstable');
+                
+                // Create some smoke
+                if (Math.random() < 0.1) {
+                    const centerX = canvas.width / 2;
+                    const centerY = canvas.height * 0.45;
+                    particles.push(new LavaParticle(centerX + (Math.random() - 0.5) * 50, centerY));
+                }
+            }
+            // Phase 3: Eruption (5000-7000ms)
+            else if (cycleTime < 7000) {
+                eruptionPhase = 'erupting';
+                updateStatus('ERUPTING', '1200°C', 'Critical', 'Explosive');
+                
+                const centerX = canvas.width / 2;
+                const centerY = canvas.height * 0.45;
+                
+                // Create explosion particles
+                for (let i = 0; i < 5; i++) {
+                    particles.push(new LavaParticle(centerX + (Math.random() - 0.5) * 30, centerY));
+                }
+                
+                // Create pyroclastic clouds
+                if (Math.random() < 0.05) {
+                    pyroclasticClouds.push(new PyroclasticCloud(centerX, centerY + 50));
+                }
+                
+                // Create lava flows
+                if (Math.random() < 0.02) {
+                    lavaFlows.push(new LavaFlow(centerX + (Math.random() - 0.5) * 60, centerY + 100));
+                }
+            }
+            // Phase 4: Aftermath (7000-8000ms)
+            else if (cycleTime < 8000) {
+                eruptionPhase = 'aftermath';
+                updateStatus('Cooling', '900°C', 'Falling', 'Stabilizing');
+            }
+            // Reset cycle
+            else {
+                cycleTime = 0;
+            }
+        }
+        
+        // Update status display
+        function updateStatus(activity, temp, pressure, phase) {
+            document.getElementById('activity').textContent = activity;
+            document.getElementById('temperature').textContent = temp;
+            document.getElementById('pressure').textContent = pressure;
+            document.getElementById('phase').textContent = phase;
+        }
+        
+        // Animation loop
+        function animate() {
+            if (!animationPaused) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Run eruption cycle
+                eruptionCycle();
+                
+                // Update and draw lava flows
+                lavaFlows = lavaFlows.filter(flow => {
+                    flow.update();
+                    flow.draw();
+                    return flow.life > 0;
+                });
+                
+                // Update and draw pyroclastic clouds
+                pyroclasticClouds = pyroclasticClouds.filter(cloud => {
+                    cloud.update();
+                    cloud.draw();
+                    return cloud.life > 0;
+                });
+                
+                // Update and draw particles
+                particles = particles.filter(particle => {
+                    particle.update();
+                    particle.draw();
+                    return particle.life > 0 && particle.y < canvas.height;
+                });
+                
+                // Add ambient particles during eruption
+                if (eruptionPhase === 'erupting' && Math.random() < 0.3) {
+                    const centerX = canvas.width / 2;
+                    const centerY = canvas.height * 0.45;
+                    particles.push(new LavaParticle(centerX + (Math.random() - 0.5) * 40, centerY));
+                }
+            }
+            
+            animationId = requestAnimationFrame(animate);
+        }
+        
+        // Trigger manual eruption
+        function triggerEruption() {
+            cycleTime = 3000; // Jump to warning phase
+            
+            // Create initial burst
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height * 0.45;
+            
+            for (let i = 0; i < 50; i++) {
+                particles.push(new LavaParticle(centerX + (Math.random() - 0.5) * 50, centerY));
+            }
+            
+            // Create pyroclastic clouds
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => {
+                    pyroclasticClouds.push(new PyroclasticCloud(centerX, centerY + 50));
+                }, i * 200);
+            }
+        }
+        
+        // Toggle animation
+        function toggleAnimation() {
+            animationPaused = !animationPaused;
+            const btn = event.target;
+            btn.innerHTML = animationPaused ? '▶️ Play' : '⏸️ Pause';
+        }
+        
+        // Handle social clicks
+        function handleSocialClick(event, platform) {
+            event.preventDefault();
+            const btn = event.currentTarget;
+            btn.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                btn.style.transform = 'translateY(-3px)';
+            }, 100);
+            
+            // Visual feedback
+            const message = document.createElement('div');
+            message.textContent = `Opening ${platform}...`;
+            message.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(0, 0, 0, 0.8);
+                color: white;
+                padding: 15px 30px;
+                border-radius: 10px;
+                z-index: 1000;
+                animation: fadeIn 0.3s ease-out;
+            `;
+            document.body.appendChild(message);
+            
+            setTimeout(() => {
+                message.remove();
+            }, 1500);
+        }
+        
+        // Start animation
+        animate();
+    </script>
+</body>
+</html>
