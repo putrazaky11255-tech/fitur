@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bakwan Bu Jami - Cita Rasa Autentik Demak</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #D2691E;
+            --secondary-color: #8B4513;
+            --accent-color: #FFD700;
+            --text-dark: #3E2723;
+            --text-light: #FFF8E1;
+            --bg-light: #FFF3E0;
+            --bg-pattern: #FFE0B2;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        /* Animated Background Pattern */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(210, 105, 30, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(139, 69, 19, 0.1) 0%, transparent 50%);
+            z-index: -1;
+            animation: floatPattern 20s ease-in-out infinite;
+        }
+
+        @keyframes floatPattern {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(-20px, -20px) rotate(1deg); }
+            66% { transform: translate(20px, -10px) rotate(-1deg); }
+        }
+
+        /* Navigation */
+        nav {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(139, 69, 19, 0.3);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--text-light);
+            font-size: 1.5rem;
+            font-weight: bold;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .logo i {
+            font-size: 2rem;
+            color: var(--accent-color);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-light);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 0.5rem 1rem;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: var(--accent-color);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 4rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '🌽';
+            position: absolute;
+            font-size: 100px;
+            opacity: 0.1;
+            animation: float 15s infinite ease-in-out;
+        }
+
+        .hero::after {
+            content: '🥘';
+            position: absolute;
+            font-size: 100px;
+            opacity: 0.1;
+            right: 10%;
+            animation: float 20s infinite ease-in-out reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(180deg); }
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: slideInFromTop 1s ease-out;
+        }
+
+        @keyframes slideInFromTop {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--secondary-color);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            animation: fadeIn 1.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(210, 105, 30, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 4px 15px rgba(210, 105, 30, 0.4); }
+            50% { box-shadow: 0 4px 25px rgba(210, 105, 30, 0.6); }
+            100% { box-shadow: 0 4px 15px rgba(210, 105, 30, 0.4); }
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 6px 20px rgba(210, 105, 30, 0.6);
+        }
+
+        /* Products Section */
+        .products {
+            padding: 4rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: var(--secondary-color);
+            position: relative;
+        }
+
+        .section-title::before,
+        .section-title::after {
+            content: '🍳';
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2rem;
+        }
+
+        .section-title::before {
+            left: -50px;
+            animation: rotateLeft 3s linear infinite;
+        }
+
+        .section-title::after {
+            right: -50px;
+            animation: rotateRight 3s linear infinite;
+        }
+
+        @keyframes rotateLeft {
+            from { transform: translateY(-50%) rotate(0deg); }
+            to { transform: translateY(-50%) rotate(360deg); }
+        }
+
+        @keyframes rotateRight {
+            from { transform: translateY(-50%) rotate(0deg); }
+            to { transform: translateY(-50%) rotate(-360deg); }
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(139, 69, 19, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(139, 69, 19, 0.3);
+        }
+
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--accent-color), var(--primary-color));
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover .product-image {
+            transform: scale(1.1);
+        }
+
+        .product-content {
+            padding: 1.5rem;
+        }
+
+        .product-badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            background: var(--accent-color);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+            animation: badgeGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes badgeGlow {
+            0%, 100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
+            50% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.8); }
+        }
+
+        .product-title {
+            font-size: 1.5rem;
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .product-description {
+            color: #666;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .product-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .product-price {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .order-btn {
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .order-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(210, 105, 30, 0.4);
+        }
+
+        /* About Section */
+        .about {
+            padding: 4rem 2rem;
+            background: linear-gradient(135deg, rgba(210, 105, 30, 0.1), rgba(255, 215, 0, 0.1));
+        }
+
+        .about-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .about-image {
+            position: relative;
+            animation: floatImage 3s ease-in-out infinite;
+        }
+
+        @keyframes floatImage {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .about-image img {
+            width: 100%;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(139, 69, 19, 0.3);
+        }
+
+        .about-content h2 {
+            font-size: 2rem;
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+        }
+
+        .about-content p {
+            line-height: 1.8;
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-top: 1.5rem;
+        }
+
+        .feature-list li {
+            padding: 0.5rem 0;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .feature-list i {
+            color: var(--accent-color);
+        }
+
+        /* Contact Section */
+        .contact {
+            padding: 4rem 2rem;
+            background: white;
+        }
+
+        .contact-container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .social-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 50%;
+            text-decoration: none;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .social-link:hover {
+            transform: translateY(-5px) rotate(360deg);
+            box-shadow: 0 10px 20px rgba(210, 105, 30, 0.4);
+        }
+
+        /* Footer */
+        footer {
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            color: var(--text-light);
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: var(--text-light);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-color);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .section-title::before,
+            .section-title::after {
+                display: none;
+            }
+
+            .about-container {
+                grid-template-columns: 1fr;
+            }
+
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(139, 69, 19, 0.4);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 2000;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-utensils"></i>
+                <span>Bakwan Bu Jami</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home">Beranda</a></li>
+                <li><a href="#products">Produk</a></li>
+                <li><a href="#about">Tentang</a></li>
+                <li><a href="#contact">Kontak</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <h1>Bakwan Bu Jami</h1>
+        <p>Cita Rasa Autentik Demak Sejak 1985</p>
+        <a href="#products" class="cta-button">
+            <i class="fas fa-shopping-basket"></i> Lihat Menu Kami
+        </a>
+    </section>
+
+    <!-- Products Section -->
+    <section id="products" class="products">
+        <h2 class="section-title">Menu Spesial Kami</h2>
+        <div class="product-grid" id="productGrid">
+            <!-- Products will be dynamically inserted here -->
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="about-container">
+            <div class="about-image">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Perkedel_Jagung_Jakarta.jpg/330px-Perkedel_Jagung_Jakarta.jpg" alt="Bakwan Bu Jami">
+            </div>
+            <div class="about-content">
+                <h2>Tentang Bakwan Bu Jami</h2>
+                <p>Bakwan Bu Jami adalah legenda kuliner Demak yang telah melayani pelanggan sejak tahun 1985. Dengan resep turun-temurun yang dijaga keasliannya, kami menghadirkan bakwan dengan cita rasa autentik yang tak tertandingi.</p>
+                <p>Setiap bakwan kami dibuat dengan bahan-bahan pilihan segar setiap hari, diproses dengan higienis, dan digoreng dengan minyak berkualitas untuk menghasilkan tekstur renyah di luar dan lembut di dalam.</p>
+                <ul class="feature-list">
+                    <li><i class="fas fa-check-circle"></i> 100% Bahan Alami</li>
+                    <li><i class="fas fa-check-circle"></i> Tanpa Pengawet</li>
+                    <li><i class="fas fa-check-circle"></i> Halal & Bersertifikat</li>
+                    <li><i class="fas fa-check-circle"></i> Dibuat Fresh Setiap Hari</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="contact-container">
+            <h2 class="section-title">Hubungi Kami</h2>
+            <p>Temukan dan pesan bakwan favorit Anda melalui:</p>
+            <div class="social-links">
+                <a class="social-link" onclick="handleSocialClick('WhatsApp')">
+                    <i class="fab fa-whatsapp"></i>
+                </a>
+                <a class="social-link" onclick="handleSocialClick('Facebook')">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+                <a class="social-link" onclick="handleSocialClick('Instagram')">
+                    <i class="fab fa-instagram"></i>
+                </a>
+                <a class="social-link" onclick="handleSocialClick('Twitter')">
+                    <i class="fab fa-twitter"></i>
+                </a>
+                <a class="social-link" onclick="handleSocialClick('Telegram')">
+                    <i class="fab fa-telegram"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="#home">Beranda</a>
+                <a href="#products">Produk</a>
+                <a href="#about">Tentang</a>
+                <a href="#contact">Kontak</a>
+            </div>
+            <p>&copy; 2024 Bakwan Bu Jami - Demak, Jawa Tengah. All Rights Reserved.</p>
+            <p><i class="fas fa-heart" style="color: #FF6B6B;"></i> Dibuat dengan cinta untuk pecinta bakwan Indonesia</p>
+        </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <span id="toastMessage">Pesan notifikasi</span>
+    </div>
+
+    <script>
+        // Product Data
+        const products = [
+            {
+                id: 1,
+                name: "Bakwan Jagung Spesial",
+                description: "Bakwan gurih dengan campuran jagung manis pilihan, renyah di luar dan lembut di dalam. Specialties dari Bu Jami!",
+                price: "Rp 15.000",
+                badge: "Best Seller",
+                images: [
+                    "https://cdn.rri.co.id/berita/Jakarta/t/1726485284232-1000495680/q4mnhfjwg7qn3kd.jpeg",
+                    "https://www.astronauts.id/blog/wp-content/uploads/2023/10/Rahasia-Resep-Bakwan-Jagung-Renyah-Empuk-Anti-Alot-1024x678.jpg",
+                    "https://img-global.cpcdn.com/recipes/6f017ba577e35a5b/680x781cq80/bakwan-jagung-empuk-foto-resep-utama.jpg"
+                ]
+            },
+            {
+                id: 2,
+                name: "Bakwan Biasa Lezat",
+                description: "Bakwan klasik dengan sayuran segar, resep tradisional yang sudah teruji kelezatannya selama puluhan tahun.",
+                price: "Rp 10.000",
+                badge: "Terlaris",
+                images: [
+                    "https://i.ytimg.com/vi/5qv20xT3Yjs/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLBQfz2GqPizW9s4SnkElMq4j9e90g",
+                    "https://img-global.cpcdn.com/recipes/eac0403a7f650e3a/680x781cq80/bakwan-sayur-renyah-dan-gurih-foto-resep-utama.jpg",
+                    "https://asset.kompas.com/crops/uA9-5lQ7CQwvaVPkEYiAJPijmBU=/0x0:1000x667/1200x800/data/photo/2023/06/13/6487fc3a3c5ef.jpg"
+                ]
+            },
+            {
+                id: 3,
+                name: "Bakwan Jumbo Crunchy",
+                description: "Ukuran super besar dengan tekstur ekstra renyah, cocok untuk berbagi dengan keluarga tercinta.",
+                price: "Rp 25.000",
+                badge: "Jumbo Size",
+                images: [
+                    "https://i.ytimg.com/vi/Zu2-55mT4_E/maxresdefault.jpg",
+                    "https://dishfullofmemories.com/wp-content/uploads/2024/07/bakwan-fi-720x720.jpg",
+                    "https://img-global.cpcdn.com/recipes/0388a888302e4a26/680x781cq80/bakwan-sayur-renyah-crunchy-indonesian-vegetables-fritters-recipe-main-photo.jpg"
+                ]
+            },
+            {
+                id: 4,
+                name: "Bakwan Mini Unik",
+                description: "Bakwan kecil-kecil yang gurih dan praktis, sempurna untuk camilan atau bekal perjalanan Anda.",
+                price: "Rp 8.000",
+                badge: "Mini Snack",
+                images: [
+                    "https://www.tiktok.com/api/img/?itemId=7438183294983785735&location=0&aid=1988",
+                    "https://i0.wp.com/resepkoki.id/wp-content/uploads/2016/11/Resep-Bakwan-Udang.jpg?fit=1342%2C1184&ssl=1",
+                    "https://assets.dapurumami.com/uploads/article_tips/3-3f7abded18625185ed5880e9a1e409b9.jpg"
+                ]
+            }
+        ];
+
+        // Initialize products
+        function initializeProducts() {
+            const productGrid = document.getElementById('productGrid');
+            
+            products.forEach((product, index) => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.style.animationDelay = `${index * 0.1}s`;
+                
+                const randomImage = product.images[Math.floor(Math.random() * product.images.length)];
+                
+                card.innerHTML = `
+                    <img src="${randomImage}" alt="${product.name}" class="product-image">
+                    <div class="product-content">
+                        <span class="product-badge">${product.badge}</span>
+                        <h3 class="product-title">${product.name}</h3>
+                        <p class="product-description">${product.description}</p>
+                        <div class="product-footer">
+                            <span class="product-price">${product.price}</span>
+                            <button class="order-btn" onclick="handleOrder('${product.name}')">
+                                <i class="fas fa-shopping-cart"></i> Pesan
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                productGrid.appendChild(card);
+            });
+        }
+
+        // Handle order button click
+        function handleOrder(productName) {
+            showToast(`Pesanan ${productName} telah ditambahkan ke keranjang! 🛒`);
+            
+            // Add animation to button
+            event.target.innerHTML = '<span class="loading"></span>';
+            setTimeout(() => {
+                event.target.innerHTML = '<i class="fas fa-check"></i> Ditambahkan';
+                setTimeout(() => {
+                    event.target.innerHTML = '<i class="fas fa-shopping-cart"></i> Pesan';
+                }, 1500);
+            }, 1000);
+        }
+
+        // Handle social media clicks
+        function handleSocialClick(platform) {
+            showToast(`Terima kasih! Kami akan segera menghubungi Anda melalui ${platform} 📱`);
+            
+            // Add ripple effect
+            event.target.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                event.target.style.transform = '';
+            }, 200);
+        }
+
+        // Show toast notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            toastMessage.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe elements for animation
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeProducts();
+            
+            // Observe all cards
+            document.querySelectorAll('.product-card').forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'all 0.6s ease';
+                observer.observe(card);
+            });
+        });
+
+        // Add parallax effect to hero section
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const hero = document.querySelector('.hero');
+            if (hero) {
+                hero.style.transform = `translateY(${scrolled * 0.5}px)`;
+            }
+        });
+
+        // Dynamic favicon based on time
+        function updateFavicon() {
+            const hour = new Date().getHours();
+            const favicon = document.querySelector('link[rel="icon"]');
+            
+            if (hour >= 6 && hour < 18) {
+                favicon.href = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🌞</text></svg>';
+            } else {
+                favicon.href = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🌙</text></svg>';
+            }
+        }
+
+        updateFavicon();
+        setInterval(updateFavicon, 60000); // Update every minute
+    </script>
+</body>
+</html>
