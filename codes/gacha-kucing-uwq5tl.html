@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Gacha Kucing - Koleksi Kucing Digital</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Background Animation */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            33% { transform: translateY(-20px) rotate(1deg); }
+            66% { transform: translateY(20px) rotate(-1deg); }
+        }
+
+        /* Header */
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .stats {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 15px;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-3px);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Gacha Machine */
+        .gacha-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .gacha-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .gacha-machine {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .gacha-display {
+            width: 300px;
+            height: 300px;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 
+                0 0 50px rgba(255, 154, 158, 0.5),
+                inset 0 0 30px rgba(255, 255, 255, 0.3);
+            animation: rotate 10s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .gacha-display.spinning {
+            animation: spin 0.5s ease-in-out;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.1); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        .cat-preview {
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid white;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .gacha-controls {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .gacha-btn {
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gacha-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .gacha-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-single {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-multi {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+            box-shadow: 0 10px 30px rgba(240, 147, 251, 0.4);
+        }
+
+        .gacha-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .gacha-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .gacha-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Result Modal */
+        .result-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .result-modal.show {
+            display: flex;
+        }
+
+        .result-content {
+            background: white;
+            border-radius: 30px;
+            padding: 2rem;
+            max-width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: bounceIn 0.5s ease;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .result-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .result-title {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .cat-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 20px;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: rotate(45deg);
+            transition: all 0.5s;
+            opacity: 0;
+        }
+
+        .cat-card:hover::before {
+            animation: shine 0.5s ease;
+        }
+
+        @keyframes shine {
+            0% {
+                transform: translateX(-100%) translateY(-100%) rotate(45deg);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(100%) translateY(100%) rotate(45deg);
+                opacity: 0;
+            }
+        }
+
+        .cat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .cat-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 15px;
+            object-fit: cover;
+            margin-bottom: 1rem;
+        }
+
+        .cat-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .cat-rarity {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .rarity-common {
+            background: linear-gradient(135deg, #84fab0, #8fd3f4);
+            color: #2c5f2d;
+        }
+
+        .rarity-rare {
+            background: linear-gradient(135deg, #a8edea, #fed6e3);
+            color: #5a4a78;
+        }
+
+        .rarity-epic {
+            background: linear-gradient(135deg, #ffecd2, #fcb69f);
+            color: #8b4513;
+        }
+
+        .rarity-legendary {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #8b6914;
+            animation: shimmer 2s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+            }
+        }
+
+        .close-btn {
+            display: block;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Collection Section */
+        .collection-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            padding: 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+
+        .collection-title {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .collection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .collection-item {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .collection-item.new {
+            animation: bounce 0.5s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .collection-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .collection-item.locked {
+            background: linear-gradient(135deg, #e0e0e0, #bdbdbd);
+            opacity: 0.6;
+        }
+
+        .collection-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            object-fit: cover;
+            margin-bottom: 0.5rem;
+        }
+
+        .collection-name {
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 0.3rem;
+        }
+
+        .collection-count {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            margin-top: 3rem;
+            text-align: center;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .social-link {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            color: white;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .social-link:hover {
+            transform: translateY(-5px) rotate(360deg);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .footer-text {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .stats {
+                width: 100%;
+                justify-content: space-around;
+            }
+
+            .gacha-display {
+                width: 250px;
+                height: 250px;
+            }
+
+            .cat-preview {
+                width: 200px;
+                height: 200px;
+            }
+
+            .gacha-title {
+                font-size: 2rem;
+            }
+
+            .result-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+        }
+
+        @media (max-width: 480px) {
+            .gacha-section {
+                padding: 1.5rem;
+            }
+
+            .gacha-display {
+                width: 200px;
+                height: 200px;
+            }
+
+            .cat-preview {
+                width: 150px;
+                height: 150px;
+            }
+
+            .gacha-btn {
+                padding: 0.8rem 1.5rem;
+                font-size: 1rem;
+            }
+
+            .collection-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: -400px;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: right 0.5s ease;
+            z-index: 3000;
+        }
+
+        .notification.show {
+            right: 20px;
+        }
+
+        .notification-icon {
+            font-size: 2rem;
+        }
+
+        .notification-text {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: bold;
+            margin-bottom: 0.3rem;
+        }
+
+        .notification-message {
+            font-size: 0.9rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <span>🐱</span>
+                <span>Gacha Kucing</span>
+            </div>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="coinCount">1000</div>
+                    <div class="stat-label">💰 Koin</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="collectionCount">0</div>
+                    <div class="stat-label">📚 Koleksi</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="totalPulls">0</div>
+                    <div class="stat-label">🎯 Total Gacha</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="gacha-section">
+            <h1 class="gacha-title">🎰 Mesin Gacha Kucing Ajaib 🎰</h1>
+            <div class="gacha-machine">
+                <div class="gacha-display" id="gachaDisplay">
+                    <img src="https://i.pinimg.com/236x/8e/be/f1/8ebef130b12b9302eac8c8921882b6c4.jpg" alt="Kucing" class="cat-preview" id="catPreview">
+                </div>
+                <div class="gacha-controls">
+                    <button class="gacha-btn btn-single" id="singlePull" onclick="doSinglePull()">
+                        <span>🎲 Gacha 1x (100 Koin)</span>
+                    </button>
+                    <button class="gacha-btn btn-multi" id="multiPull" onclick="doMultiPull()">
+                        <span>🎰 Gacha 10x (900 Koin)</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="collection-section">
+            <h2 class="collection-title">📖 Koleksi Kucing Kamu</h2>
+            <div class="collection-grid" id="collectionGrid">
+                <!-- Collection items will be generated here -->
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="social-links">
+            <a href="#" class="social-link" onclick="handleSocialClick('whatsapp'); return false;">
+                <span>📱</span>
+            </a>
+            <a href="#" class="social-link" onclick="handleSocialClick('facebook'); return false;">
+                <span>📘</span>
+            </a>
+            <a href="#" class="social-link" onclick="handleSocialClick('twitter'); return false;">
+                <span>🐦</span>
+            </a>
+            <a href="#" class="social-link" onclick="handleSocialClick('instagram'); return false;">
+                <span>📷</span>
+            </a>
+            <a href="#" class="social-link" onclick="handleSocialClick('telegram'); return false;">
+                <span>✈️</span>
+            </a>
+        </div>
+        <p class="footer-text">
+            © 2024 Gacha Kucing - Dibuat dengan ❤️ oleh Opus AI Coder
+        </p>
+    </footer>
+
+    <!-- Result Modal -->
+    <div class="result-modal" id="resultModal">
+        <div class="result-content">
+            <div class="result-header">
+                <h2 class="result-title" id="resultTitle">🎉 Hasil Gacha!</h2>
+                <p id="resultSubtitle">Kucing baru berhasil didapatkan!</p>
+            </div>
+            <div class="result-grid" id="resultGrid">
+                <!-- Results will be displayed here -->
+            </div>
+            <button class="close-btn" onclick="closeResultModal()">Tutup</button>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <span class="notification-icon" id="notificationIcon">✨</span>
+        <div class="notification-text">
+            <div class="notification-title" id="notificationTitle">Notifikasi</div>
+            <div class="notification-message" id="notificationMessage">Pesan notifikasi</div>
+        </div>
+    </div>
+
+    <script>
+        // Game Data
+        const catDatabase = [
+            // Common Cats (60% chance)
+            { id: 1, name: "Mochi", rarity: "common", type: "Kucing imut", image: "https://i.pinimg.com/236x/8e/be/f1/8ebef130b12b9302eac8c8921882b6c4.jpg" },
+            { id: 2, name: "Oreo", rarity: "common", type: "Kucing imut", image: "https://i.pinimg.com/736x/30/5c/fc/305cfce56d1fdd61fcbfd0fda6a7e697.jpg" },
+            { id: 3, name: "Luna", rarity: "common", type: "Kucing imut", image: "https://lookaside.fbsbx.com/lookaside/crawler/media/?media_id=3584168905060732" },
+            { id: 4, name: "Milo", rarity: "common", type: "Kucing imut", image: "https://i.pinimg.com/474x/11/bc/16/11bc16ddf9be60aec58989dea1317d94.jpg" },
+            { id: 5, name: "Bella", rarity: "common", type: "Kucing imut", image: "https://lookaside.fbsbx.com/lookaside/crawler/media/?media_id=100069820340054" },
+            { id: 6, name: "Max", rarity: "common", type: "Kucing peliharaan", image: "https://d1bpj0tv6vfxyp.cloudfront.net/articles/253564_20-5-2021_13-2-0.jpeg" },
+            { id: 7, name: "Coco", rarity: "common", type: "Kucing peliharaan", image: "https://cppetindo.com/wp-content/uploads/Persia.webp" },
+            { id: 8, name: "Kitty", rarity: "common", type: "Kucing peliharaan", image: "https://images.tokopedia.net/blog-tokopedia-com/uploads/2018/02/kucing1.jpg" },
+            
+            // Rare Cats (25% chance)
+            { id: 9, name: "Shadow", rarity: "rare", type: "Kucing langka", image: "https://i1.wp.com/cdn.jatimtimes.com/images/2024/05/11/b3c66120f651.jpg?q=100&resize=1200,675" },
+            { id: 10, name: "Mystic", rarity: "rare", type: "Kucing langka", image: "https://awsimages.detik.net.id/community/media/visual/2023/07/06/minskin_43.jpeg?w=1200" },
+            { id: 11, name: "Nebula", rarity: "rare", type: "Kucing langka", image: "https://pawpower.id/wp-content/uploads/2024/01/pexels-jiri-mikolas-6278427_result-678x1024.webp" },
+            { id: 12, name: "Pixel", rarity: "rare", type: "Gacha kucing digital", image: "https://i.etsystatic.com/26595044/r/il/78f778/7191357151/il_fullxfull.7191357151_73ry.jpg" },
+            { id: 13, name: "Code", rarity: "rare", type: "Gacha kucing digital", image: "https://i.pinimg.com/1200x/3f/76/c5/3f76c559024ead161d7e98c1a935dc76.jpg" },
+            { id: 14, name: "Gamer", rarity: "rare", type: "Permainan kucing", image: "https://i.ytimg.com/vi/3v6aer-QaMY/hqdefault.jpg" },
+            { id: 15, name: "Player", rarity: "rare", type: "Permainan kucing", image: "https://play-lh.googleusercontent.com/BWduQfkupGI0YvvPlE3JXVrpZ1AT5MZ80Jy7tV_IU4BCjQAMHYrDqXCYcLuhha4F_qc=w526-h296-rw" },
+            
+            // Epic Cats (12% chance)
+            { id: 16, name: "Phoenix", rarity: "epic", type: "Kucing langka", image: "https://cdn.rri.co.id/berita/Fak_Fak/o/1731896822142-gold-bengal-cat-black-background/bvtr7x1zfpniefu.jpeg" },
+            { id: 17, name: "Dragon", rarity: "epic", type: "Kucing langka", image: "https://asset.kompas.com/crops/jFRLXKckJafwFgqlnBcm3mVncpA=/100x67:900x600/1200x800/data/photo/2021/11/03/61821c3520b3d.jpg" },
+            { id: 18, name: "Neko", rarity: "epic", type: "Gacha kucing digital", image: "https://static.wikia.nocookie.net/lunime/images/f/fd/Neko.png/revision/latest?cb=20231228130855" },
+            { id: 19, name: "Virtual", rarity: "epic", type: "Gacha kucing digital", image: "https://v.etsystatic.com/video/upload/q_auto/Nimet%C3%B6n_video_Tehty_Clipchampilla_h38xp1.jpg" },
+            { id: 20, name: "Champion", rarity: "epic", type: "Permainan kucing", image: "https://i.ytimg.com/vi/8PmtEPNZdec/maxresdefault.jpg" },
+            { id: 21, name: "Hero", rarity: "epic", type: "Permainan kucing", image: "https://play-lh.googleusercontent.com/6xPYvQZjvFe8sWqpIKXpHt1Pj42I0niNzEBbTfCUx-9fA7ptdvaWdRvgs3q8uOo705yc" },
+            
+            // Legendary Cats (3% chance)
+            { id: 22, name: "Celestial", rarity: "legendary", type: "Gacha kucing digital", image: "https://i.ytimg.com/vi/_-IpHEYFRlI/sddefault.jpg" },
+            { id: 23, name: "Cosmic", rarity: "legendary", type: "Permainan kucing", image: "https://i.ytimg.com/vi/tNQKYHt-ZbE/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLBtLrF0Up3zaQoigqRqvXZoj9FsPQ" },
+            { id: 24, name: "Aurora", rarity: "legendary", type: "Kucing peliharaan", image: "https://awsimages.detik.net.id/community/media/visual/2020/09/20/jenis-jenis-kucing-peliharaan-12_34.jpeg?w=375" },
+            { id: 25, name: "Diamond", rarity: "legendary", type: "Kucing peliharaan", image: "https://static.wixstatic.com/media/80face_75d49722c76a4baf9ac29257a891d793~mv2.jpg/v1/fill/w_489,h_634,al_c,lg_1,q_80,enc_avif,quality_auto/80face_75d49722c76a4baf9ac29257a891d793~mv2.jpg" }
+        ];
+
+        // Game State
+        let gameState = {
+            coins: 1000,
+            collection: {},
+            totalPulls: 0,
+            lastPullTime: null
+        };
+
+        // Load game state from localStorage
+        function loadGameState() {
+            const saved = localStorage.getItem('gachaCatState');
+            if (saved) {
+                gameState = JSON.parse(saved);
+                updateUI();
+            }
+        }
+
+        // Save game state to localStorage
+        function saveGameState() {
+            localStorage.setItem('gachaCatState', JSON.stringify(gameState));
+        }
+
+        // Update UI
+        function updateUI() {
+            document.getElementById('coinCount').textContent = gameState.coins;
+            document.getElementById('collectionCount').textContent = Object.keys(gameState.collection).length;
+            document.getElementById('totalPulls').textContent = gameState.totalPulls;
+            renderCollection();
+        }
+
+        // Get random cat based on rarity
+        function getRandomCat() {
+            const random = Math.random() * 100;
+            let rarity;
+            
+            if (random < 60) rarity = 'common';
+            else if (random < 85) rarity = 'rare';
+            else if (random < 97) rarity = 'epic';
+            else rarity = 'legendary';
+            
+            const catsOfRarity = catDatabase.filter(cat => cat.rarity === rarity);
+            return catsOfRarity[Math.floor(Math.random() * catsOfRarity.length)];
+        }
+
+        // Perform single gacha pull
+        function doSinglePull() {
+            if (gameState.coins < 100) {
+                showNotification('💰', 'Koin Tidak Cukup', 'Butuh 100 koin untuk gacha 1x');
+                return;
+            }
+            
+            gameState.coins -= 100;
+            gameState.totalPulls += 1;
+            
+            const cat = getRandomCat();
+            addToCollection(cat);
+            
+            // Animate gacha machine
+            const display = document.getElementById('gachaDisplay');
+            display.classList.add('spinning');
+            
+            setTimeout(() => {
+                display.classList.remove('spinning');
+                document.getElementById('catPreview').src = cat.image;
+                showResults([cat]);
+                saveGameState();
+                updateUI();
+            }, 500);
+        }
+
+        // Perform multi gacha pull
+        function doMultiPull() {
+            if (gameState.coins < 900) {
+                showNotification('💰', 'Koin Tidak Cukup', 'Butuh 900 koin untuk gacha 10x');
+                return;
+            }
+            
+            gameState.coins -= 900;
+            gameState.totalPulls += 10;
+            
+            const results = [];
+            for (let i = 0; i < 10; i++) {
+                const cat = getRandomCat();
+                results.push(cat);
+                addToCollection(cat);
+            }
+            
+            // Animate gacha machine
+            const display = document.getElementById('gachaDisplay');
+            display.classList.add('spinning');
+            
+            setTimeout(() => {
+                display.classList.remove('spinning');
+                document.getElementById('catPreview').src = results[0].image;
+                showResults(results);
+                saveGameState();
+                updateUI();
+            }, 500);
+        }
+
+        // Add cat to collection
+        function addToCollection(cat) {
+            if (!gameState.collection[cat.id]) {
+                gameState.collection[cat.id] = {
+                    ...cat,
+                    count: 1,
+                    firstObtained: new Date().toISOString()
+                };
+                showNotification('🎉', 'Kucing Baru!', `${cat.name} (${getRarityText(cat.rarity)})`);
+            } else {
+                gameState.collection[cat.id].count += 1;
+            }
+        }
+
+        // Get rarity text
+        function getRarityText(rarity) {
+            const rarityMap = {
+                'common': 'Common',
+                'rare': 'Rare',
+                'epic': 'Epic',
+                'legendary': 'Legendary'
+            };
+            return rarityMap[rarity] || 'Unknown';
+        }
+
+        // Show results modal
+        function showResults(cats) {
+            const modal = document.getElementById('resultModal');
+            const grid = document.getElementById('resultGrid');
+            const title = document.getElementById('resultTitle');
+            const subtitle = document.getElementById('resultSubtitle');
+            
+            // Check for legendary
+            const hasLegendary = cats.some(cat => cat.rarity === 'legendary');
+            if (hasLegendary) {
+                title.textContent = '🌟 LEGENDARY! 🌟';
+                subtitle.textContent = 'Selamat! Kamu mendapatkan kucing legendary!';
+            } else {
+                title.textContent = '🎉 Hasil Gacha!';
+                subtitle.textContent = `Kamu mendapatkan ${cats.length} kucing baru!`;
+            }
+            
+            grid.innerHTML = '';
+            cats.forEach(cat => {
+                const card = createCatCard(cat);
+                grid.appendChild(card);
+            });
+            
+            modal.classList.add('show');
+        }
+
+        // Create cat card element
+        function createCatCard(cat) {
+            const card = document.createElement('div');
+            card.className = 'cat-card';
+            card.innerHTML = `
+                <img src="${cat.image}" alt="${cat.name}" class="cat-image">
+                <div class="cat-name">${cat.name}</div>
+                <span class="cat-rarity rarity-${cat.rarity}">${getRarityText(cat.rarity)}</span>
+                <div style="font-size: 0.9rem; color: #666;">${cat.type}</div>
+            `;
+            return card;
+        }
+
+        // Close result modal
+        function closeResultModal() {
+            document.getElementById('resultModal').classList.remove('show');
+        }
+
+        // Render collection
+        function renderCollection() {
+            const grid = document.getElementById('collectionGrid');
+            grid.innerHTML = '';
+            
+            // Show owned cats
+            Object.values(gameState.collection).forEach(cat => {
+                const item = document.createElement('div');
+                item.className = 'collection-item';
+                item.innerHTML = `
+                    <img src="${cat.image}" alt="${cat.name}" class="collection-image">
+                    <div class="collection-name">${cat.name}</div>
+                    <div class="collection-count">x${cat.count}</div>
+                `;
+                grid.appendChild(item);
+            });
+            
+            // Show locked slots for unowned cats
+            const ownedIds = Object.keys(gameState.collection).map(id => parseInt(id));
+            catDatabase.forEach(cat => {
+                if (!ownedIds.includes(cat.id)) {
+                    const item = document.createElement('div');
+                    item.className = 'collection-item locked';
+                    item.innerHTML = `
+                        <div style="width: 100px; height: 100px; background: #e0e0e0; border-radius: 10px; margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: center; font-size: 2rem;">🔒</div>
+                        <div class="collection-name">???</div>
+                        <div class="collection-count">x0</div>
+                    `;
+                    grid.appendChild(item);
+                }
+            });
+        }
+
+        // Show notification
+        function showNotification(icon, title, message) {
+            const notification = document.getElementById('notification');
+            document.getElementById('notificationIcon').textContent = icon;
+            document.getElementById('notificationTitle').textContent = title;
+            document.getElementById('notificationMessage').textContent = message;
+            
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Handle social media clicks
+        function handleSocialClick(platform) {
+            const messages = {
+                'whatsapp': 'Terima kasih sudah mengklik WhatsApp! 📱',
+                'facebook': 'Terima kasih sudah mengklik Facebook! 📘',
+                'twitter': 'Terima kasih sudah mengklik Twitter! 🐦',
+                'instagram': 'Terima kasih sudah mengklik Instagram! 📷',
+                'telegram': 'Terima kasih sudah mengklik Telegram! ✈️'
+            };
+            
+            showNotification('🎉', 'Social Media', messages[platform]);
+            
+            // Add animation to clicked icon
+            event.target.style.animation = 'bounce 0.5s ease';
+            setTimeout(() => {
+                event.target.style.animation = '';
+            }, 500);
+        }
+
+        // Add daily bonus
+        function checkDailyBonus() {
+            const now = new Date();
+            const lastBonus = gameState.lastBonusTime ? new Date(gameState.lastBonusTime) : null;
+            
+            if (!lastBonus || now.getDate() !== lastBonus.getDate() || now.getMonth() !== lastBonus.getMonth() || now.getFullYear() !== lastBonus.getFullYear()) {
+                gameState.coins += 500;
+                gameState.lastBonusTime = now.toISOString();
+                showNotification('🎁', 'Bonus Harian!', 'Kamu mendapatkan 500 koin gratis!');
+                saveGameState();
+                updateUI();
+            }
+        }
+
+        // Initialize game
+        function initGame() {
+            loadGameState();
+            checkDailyBonus();
+            
+            // Add some animation to the preview
+            setInterval(() => {
+                const preview = document.getElementById('catPreview');
+                preview.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    preview.style.transform = 'scale(1)';
+                }, 500);
+            }, 3000);
+        }
+
+        // Start the game when page loads
+        window.addEventListener('load', initGame);
+
+        // Auto-save every 30 seconds
+        setInterval(saveGameState, 30000);
+
+        // Prevent closing modal when clicking outside
+        document.getElementById('resultModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                closeResultModal();
+            }
+        });
+    </script>
+</body>
+</html>
