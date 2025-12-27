@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎵 Piano Bola Interaktif</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            color: white;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .music-icon {
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            gap: 2rem;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 500px;
+            background: linear-gradient(180deg, #87CEEB 0%, #E0F6FF 50%, #FFF9E6 100%);
+            cursor: pointer;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .sound-mode-buttons {
+            display: flex;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.3rem;
+            border-radius: 50px;
+        }
+
+        .sound-mode-btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 50px;
+            background: transparent;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .sound-mode-btn.active {
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 2px 10px rgba(255, 255, 255, 0.2);
+        }
+
+        .info-panel {
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .note-indicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4rem;
+            color: rgba(255, 255, 255, 0.9);
+            pointer-events: none;
+            opacity: 0;
+            animation: noteFloat 1s ease-out;
+            z-index: 1000;
+        }
+
+        @keyframes noteFloat {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.5);
+            }
+            50% {
+                opacity: 1;
+                transform: translate(-50%, -70%) scale(1.2);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -90%) scale(1);
+            }
+        }
+
+        footer {
+            background: rgba(0, 0, 0, 0.2);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .social-link {
+            color: white;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .social-link:hover {
+            transform: translateY(-3px) scale(1.2);
+            color: #ffd700;
+        }
+
+        .social-link:active {
+            transform: translateY(0) scale(1);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            canvas {
+                height: 400px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>
+                <span class="music-icon">🎹</span>
+                Piano Bola Interaktif
+            </h1>
+            <div style="color: white; display: flex; align-items: center; gap: 0.5rem;">
+                <span>🎵</span>
+                <span>Klik atau geser bola untuk memainkan nada!</span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="game-container">
+            <div class="canvas-wrapper">
+                <canvas id="gameCanvas"></canvas>
+            </div>
+            
+            <div class="controls">
+                <button onclick="resetBalls()">
+                    <span>🔄</span>
+                    Reset Bola
+                </button>
+                <button onclick="addBall()">
+                    <span>➕</span>
+                    Tambah Bola
+                </button>
+                <button onclick="toggleGravity()">
+                    <span>🌍</span>
+                    <span id="gravityText">Gravitasi: ON</span>
+                </button>
+                <button onclick="toggleSound()">
+                    <span>🔊</span>
+                    <span id="soundText">Suara: ON</span>
+                </button>
+                <div class="sound-mode-buttons">
+                    <button class="sound-mode-btn active" onclick="setSoundMode('piano')">
+                        <span>🎹</span>
+                        Piano
+                    </button>
+                    <button class="sound-mode-btn" onclick="setSoundMode('drum')">
+                        <span>🥁</span>
+                        Drum
+                    </button>
+                    <button class="sound-mode-btn" onclick="setSoundMode('flute')">
+                        <span>🎵</span>
+                        Seruling
+                    </button>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <h3 style="color: #667eea; margin-bottom: 1rem;">📊 Statistik Permainan</h3>
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="clickCount">0</div>
+                        <div class="stat-label">Total Interaksi</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="ballCount">1</div>
+                        <div class="stat-label">Jumlah Bola</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="noteCount">0</div>
+                        <div class="stat-label">Nada Dimainkan</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="comboCount">0</div>
+                        <div class="stat-label">Combo</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Piano Bola Interaktif. Dibuat dengan ❤️ dan 🎵</p>
+        <div class="social-links">
+            <span class="social-link" onclick="socialClick('WhatsApp')">📱</span>
+            <span class="social-link" onclick="socialClick('Facebook')">📘</span>
+            <span class="social-link" onclick="socialClick('Twitter')">🐦</span>
+            <span class="social-link" onclick="socialClick('Telegram')">✈️</span>
+            <span class="social-link" onclick="socialClick('Instagram')">📷</span>
+        </div>
+    </footer>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set canvas size
+        function resizeCanvas() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Audio Context
+        let audioContext = null;
+        let soundEnabled = true;
+        let gravityEnabled = true;
+        let soundMode = 'piano'; // 'piano', 'drum', or 'flute'
+
+        // Piano notes frequencies (C4 to B5)
+        const pianoNotes = [
+            261.63, 277.18, 293.66, 311.13, 329.63, 349.23, 369.99, 392.00,
+            415.30, 440.00, 466.16, 493.88, 523.25, 554.37, 587.33, 622.25,
+            659.25, 698.46, 739.99, 783.99, 830.61, 880.00, 932.33, 987.77
+        ];
+
+        const noteNames = [
+            'C4', 'C#4', 'D4', 'D#4', 'E4', 'F4', 'F#4', 'G4',
+            'G#4', 'A4', 'A#4', 'B4', 'C5', 'C#5', 'D5', 'D#5',
+            'E5', 'F5', 'F#5', 'G5', 'G#5', 'A5', 'A#5', 'B5'
+        ];
+
+        // Drum sounds frequencies (simulated)
+        const drumNotes = [
+            60, 80, 100, 120, 150, 180, 200, 250,
+            60, 80, 100, 120, 150, 180, 200, 250,
+            60, 80, 100, 120, 150, 180, 200, 250
+        ];
+
+        const drumNames = [
+            'Kick', 'Snare', 'Hi-Hat', 'Crash', 'Tom1', 'Tom2', 'Ride', 'Floor',
+            'Kick', 'Snare', 'Hi-Hat', 'Crash', 'Tom1', 'Tom2', 'Ride', 'Floor',
+            'Kick', 'Snare', 'Hi-Hat', 'Crash', 'Tom1', 'Tom2', 'Ride', 'Floor'
+        ];
+
+        // Flute notes frequencies (higher range)
+        const fluteNotes = [
+            523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77, 1046.50,
+            1174.66, 1318.51, 1396.91, 1567.98, 1760.00, 1975.53, 2093.00, 2349.32,
+            2637.02, 2793.83, 3135.96, 3520.00, 3951.07, 4186.01, 4698.63, 5274.04
+        ];
+
+        const fluteNames = [
+            'C5', 'D5', 'E5', 'F5', 'G5', 'A5', 'B5', 'C6',
+            'D6', 'E6', 'F6', 'G6', 'A6', 'B6', 'C7', 'D7',
+            'E7', 'F7', 'G7', 'A7', 'B7', 'C8', 'D8', 'E8'
+        ];
+
+        // Game state
+        let balls = [];
+        let stats = {
+            clicks: 0,
+            notes: 0,
+            combo: 0,
+            lastClickTime: 0
+        };
+
+        // Touch/drag state
+        let isDragging = false;
+        let draggedBall = null;
+
+        // Ball class
+        class Ball {
+            constructor(x, y) {
+                this.x = x || Math.random() * (canvas.width - 60) + 30;
+                this.y = y || 50;
+                this.radius = 25;
+                this.vx = (Math.random() - 0.5) * 4;
+                this.vy = 0;
+                this.color = this.generateColor();
+                this.trail = [];
+                this.maxTrailLength = 10;
+                this.glowIntensity = 0;
+            }
+
+            generateColor() {
+                const colors = [
+                    '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', 
+                    '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F'
+                ];
+                return colors[Math.floor(Math.random() * colors.length)];
+            }
+
+            update() {
+                // Skip physics if being dragged
+                if (isDragging && draggedBall === this) return;
+
+                // Add trail
+                this.trail.push({ x: this.x, y: this.y });
+                if (this.trail.length > this.maxTrailLength) {
+                    this.trail.shift();
+                }
+
+                // Apply gravity
+                if (gravityEnabled) {
+                    this.vy += 0.5;
+                }
+
+                // Update position
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Bounce off walls
+                if (this.x + this.radius > canvas.width || this.x - this.radius < 0) {
+                    this.vx = -this.vx * 0.8;
+                    this.x = this.x + this.radius > canvas.width ? 
+                            canvas.width - this.radius : this.radius;
+                }
+
+                // Bounce off floor
+                if (this.y + this.radius > canvas.height) {
+                    this.vy = -this.vy * 0.7;
+                    this.y = canvas.height - this.radius;
+                    
+                    // Add some friction
+                    this.vx *= 0.95;
+                }
+
+                // Decrease glow
+                if (this.glowIntensity > 0) {
+                    this.glowIntensity -= 0.02;
+                }
+            }
+
+            draw() {
+                // Draw trail
+                this.trail.forEach((point, index) => {
+                    ctx.globalAlpha = index / this.trail.length * 0.3;
+                    ctx.beginPath();
+                    ctx.arc(point.x, point.y, this.radius * (index / this.trail.length), 0, Math.PI * 2);
+                    ctx.fillStyle = this.color;
+                    ctx.fill();
+                });
+
+                ctx.globalAlpha = 1;
+
+                // Draw glow effect
+                if (this.glowIntensity > 0) {
+                    const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius * 2);
+                    gradient.addColorStop(0, `rgba(255, 255, 255, ${this.glowIntensity})`);
+                    gradient.addColorStop(0.5, `rgba(255, 215, 0, ${this.glowIntensity * 0.5})`);
+                    gradient.addColorStop(1, 'rgba(255, 215, 0, 0)');
+                    ctx.fillStyle = gradient;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius * 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                // Draw ball
+                const gradient = ctx.createRadialGradient(
+                    this.x - this.radius/3, this.y - this.radius/3, 0,
+                    this.x, this.y, this.radius
+                );
+                gradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
+                gradient.addColorStop(0.3, this.color);
+                gradient.addColorStop(1, this.shadeColor(this.color, -30));
+
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Draw highlight
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                ctx.beginPath();
+                ctx.arc(this.x - this.radius/3, this.y - this.radius/3, this.radius/3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            shadeColor(color, percent) {
+                const num = parseInt(color.replace("#",""), 16);
+                const amt = Math.round(2.55 * percent);
+                const R = (num >> 16) + amt;
+                const G = (num >> 8 & 0x00FF) + amt;
+                const B = (num & 0x0000FF) + amt;
+                return "#" + (0x1000000 + (R<255?R<1?0:R:255)*0x10000 + 
+                        (G<255?G<1?0:G:255)*0x100 + (B<255?B<1?0:B:255))
+                        .toString(16).slice(1);
+            }
+
+            isClicked(x, y) {
+                const distance = Math.sqrt((x - this.x) ** 2 + (y - this.y) ** 2);
+                return distance <= this.radius;
+            }
+
+            playSound() {
+                if (!soundEnabled) return;
+
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+
+                let frequency, noteName, oscillatorType, envelope;
+
+                if (soundMode === 'piano') {
+                    const noteIndex = Math.floor(Math.random() * pianoNotes.length);
+                    frequency = pianoNotes[noteIndex];
+                    noteName = noteNames[noteIndex];
+                    oscillatorType = 'sine';
+                    envelope = {
+                        attack: 0.01,
+                        decay: 0.1,
+                        sustain: 0.2,
+                        release: 0.5
+                    };
+                } else if (soundMode === 'drum') {
+                    const noteIndex = Math.floor(Math.random() * drumNotes.length);
+                    frequency = drumNotes[noteIndex];
+                    noteName = drumNames[noteIndex];
+                    oscillatorType = 'square';
+                    envelope = {
+                        attack: 0.001,
+                        decay: 0.05,
+                        sustain: 0.1,
+                        release: 0.2
+                    };
+                } else if (soundMode === 'flute') {
+                    const noteIndex = Math.floor(Math.random() * fluteNotes.length);
+                    frequency = fluteNotes[noteIndex];
+                    noteName = fluteNames[noteIndex];
+                    oscillatorType = 'triangle';
+                    envelope = {
+                        attack: 0.05,
+                        decay: 0.1,
+                        sustain: 0.3,
+                        release: 0.7
+                    };
+                }
+
+                // Create oscillator
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                // Set up oscillator
+                oscillator.type = oscillatorType;
+                oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+
+                // ADSR envelope
+                gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + envelope.attack);
+                gainNode.gain.exponentialRampToValueAtTime(0.2, audioContext.currentTime + envelope.attack + envelope.decay);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + envelope.attack + envelope.decay + envelope.release);
+
+                // Connect nodes
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                // Play sound
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + envelope.attack + envelope.decay + envelope.release);
+
+                // Show note indicator
+                showNoteIndicator(noteName);
+
+                // Add visual feedback
+                this.glowIntensity = 1;
+                this.vy = -15; // Jump effect
+                this.vx = (Math.random() - 0.5) * 10;
+
+                // Update stats
+                stats.notes++;
+                updateStats();
+            }
+        }
+
+        // Initialize with one ball
+        balls.push(new Ball());
+
+        // Show note indicator
+        function showNoteIndicator(noteName) {
+            const indicator = document.createElement('div');
+            indicator.className = 'note-indicator';
+            indicator.textContent = `♪ ${noteName}`;
+            document.body.appendChild(indicator);
+            
+            setTimeout(() => {
+                indicator.remove();
+            }, 1000);
+        }
+
+        // Game loop
+        function gameLoop() {
+            // Clear canvas with gradient background
+            const bgGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            bgGradient.addColorStop(0, '#87CEEB');
+            bgGradient.addColorStop(0.5, '#E0F6FF');
+            bgGradient.addColorStop(1, '#FFF9E6');
+            ctx.fillStyle = bgGradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw ground
+            ctx.fillStyle = 'rgba(139, 69, 19, 0.3)';
+            ctx.fillRect(0, canvas.height - 10, canvas.width, 10);
+
+            // Update and draw balls
+            balls.forEach(ball => {
+                ball.update();
+                ball.draw();
+            });
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Handle clicks
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            let ballClicked = false;
+            balls.forEach(ball => {
+                if (ball.isClicked(x, y)) {
+                    ball.playSound();
+                    ballClicked = true;
+                }
+            });
+
+            if (ballClicked) {
+                stats.clicks++;
+                
+                // Update combo
+                const currentTime = Date.now();
+                if (currentTime - stats.lastClickTime < 1000) {
+                    stats.combo++;
+                } else {
+                    stats.combo = 1;
+                }
+                stats.lastClickTime = currentTime;
+                
+                updateStats();
+            }
+        });
+
+        // Handle touch/drag events
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+
+            balls.forEach(ball => {
+                if (ball.isClicked(x, y)) {
+                    isDragging = true;
+                    draggedBall = ball;
+                    ball.playSound();
+                    
+                    // Update stats
+                    stats.clicks++;
+                    const currentTime = Date.now();
+                    if (currentTime - stats.lastClickTime < 1000) {
+                        stats.combo++;
+                    } else {
+                        stats.combo = 1;
+                    }
+                    stats.lastClickTime = currentTime;
+                    updateStats();
+                }
+            });
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (!isDragging || !draggedBall) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+            
+            // Update ball position
+            draggedBall.x = x;
+            draggedBall.y = y;
+            
+            // Reset velocity
+            draggedBall.vx = 0;
+            draggedBall.vy = 0;
+        });
+
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            if (!isDragging || !draggedBall) return;
+            
+            // Give the ball some velocity based on movement
+            draggedBall.vx = (Math.random() - 0.5) * 10;
+            draggedBall.vy = -10;
+            
+            isDragging = false;
+            draggedBall = null;
+        });
+
+        // Handle mouse drag events for desktop
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            balls.forEach(ball => {
+                if (ball.isClicked(x, y)) {
+                    isDragging = true;
+                    draggedBall = ball;
+                    ball.playSound();
+                    
+                    // Update stats
+                    stats.clicks++;
+                    const currentTime = Date.now();
+                    if (currentTime - stats.lastClickTime < 1000) {
+                        stats.combo++;
+                    } else {
+                        stats.combo = 1;
+                    }
+                    stats.lastClickTime = currentTime;
+                    updateStats();
+                }
+            });
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDragging || !draggedBall) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // Update ball position
+            draggedBall.x = x;
+            draggedBall.y = y;
+            
+            // Reset velocity
+            draggedBall.vx = 0;
+            draggedBall.vy = 0;
+        });
+
+        canvas.addEventListener('mouseup', (e) => {
+            if (!isDragging || !draggedBall) return;
+            
+            // Give the ball some velocity based on movement
+            draggedBall.vx = (Math.random() - 0.5) * 10;
+            draggedBall.vy = -10;
+            
+            isDragging = false;
+            draggedBall = null;
+        });
+
+        // Update stats display
+        function updateStats() {
+            document.getElementById('clickCount').textContent = stats.clicks;
+            document.getElementById('ballCount').textContent = balls.length;
+            document.getElementById('noteCount').textContent = stats.notes;
+            document.getElementById('comboCount').textContent = stats.combo;
+        }
+
+        // Control functions
+        function resetBalls() {
+            balls = [new Ball()];
+            stats = { clicks: 0, notes: 0, combo: 0, lastClickTime: 0 };
+            updateStats();
+        }
+
+        function addBall() {
+            if (balls.length < 10) {
+                balls.push(new Ball());
+                updateStats();
+            }
+        }
+
+        function toggleGravity() {
+            gravityEnabled = !gravityEnabled;
+            document.getElementById('gravityText').textContent = `Gravitasi: ${gravityEnabled ? 'ON' : 'OFF'}`;
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('soundText').textContent = `Suara: ${soundEnabled ? 'ON' : 'OFF'}`;
+        }
+
+        function setSoundMode(mode) {
+            soundMode = mode;
+            
+            // Update button states
+            document.querySelectorAll('.sound-mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            if (mode === 'piano') {
+                document.querySelectorAll('.sound-mode-btn')[0].classList.add('active');
+            } else if (mode === 'drum') {
+                document.querySelectorAll('.sound-mode-btn')[1].classList.add('active');
+            } else if (mode === 'flute') {
+                document.querySelectorAll('.sound-mode-btn')[2].classList.add('active');
+            }
+        }
+
+        function socialClick(platform) {
+            // Visual feedback
+            event.target.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                event.target.style.transform = '';
+            }, 200);
+            
+            // In a real app, this would open the social media
+            console.log(`Clicked ${platform} link`);
+        }
+
+        // Start game
+        gameLoop();
+        updateStats();
+    </script>
+</body>
+</html>
