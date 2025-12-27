@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HydroTrack - Pelacak Asupan Air Harian</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-blue: #3498db;
+            --light-blue: #e3f2fd;
+            --dark-blue: #2980b9;
+            --water-blue: #00bcd4;
+            --white: #ffffff;
+            --gray: #ecf0f1;
+            --text-dark: #2c3e50;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--text-dark);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .wave-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,165.3C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') repeat-x;
+            animation: wave 10s linear infinite;
+        }
+
+        .wave:nth-child(2) {
+            bottom: 10px;
+            opacity: 0.5;
+            animation: wave 15s linear infinite reverse;
+        }
+
+        .wave:nth-child(3) {
+            bottom: 20px;
+            opacity: 0.3;
+            animation: wave 20s linear infinite;
+        }
+
+        @keyframes wave {
+            0% { background-position-x: 0; }
+            100% { background-position-x: 1440px; }
+        }
+
+        /* Header */
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-blue);
+        }
+
+        .logo i {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.6s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-blue), var(--water-blue));
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary-blue), var(--water-blue));
+            color: white;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        /* Progress Section */
+        .progress-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-title {
+            font-size: 1.5rem;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .progress-bar-container {
+            background: var(--gray);
+            border-radius: 50px;
+            height: 30px;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-blue), var(--water-blue));
+            border-radius: 50px;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 1rem;
+            color: white;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* Water Glasses */
+        .glasses-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 2rem 0;
+            justify-content: center;
+        }
+
+        .glass-item {
+            width: 60px;
+            height: 80px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .glass-item:hover {
+            transform: scale(1.1);
+        }
+
+        .glass {
+            width: 100%;
+            height: 100%;
+            border: 3px solid var(--primary-blue);
+            border-radius: 0 0 20px 20px;
+            position: relative;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .glass.filled {
+            background: linear-gradient(to top, var(--water-blue) 0%, var(--water-blue) 80%, transparent 80%);
+            animation: fillGlass 0.5s ease;
+        }
+
+        @keyframes fillGlass {
+            from {
+                background: linear-gradient(to top, var(--water-blue) 0%, transparent 0%);
+            }
+            to {
+                background: linear-gradient(to top, var(--water-blue) 0%, var(--water-blue) 80%, transparent 80%);
+            }
+        }
+
+        .glass-ripple {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: ripple 2s infinite;
+        }
+
+        @keyframes ripple {
+            0%, 100% { transform: translateX(-50%) scaleX(1); }
+            50% { transform: translateX(-50%) scaleX(0.8); }
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-blue), var(--water-blue));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary-blue);
+            border: 2px solid var(--primary-blue);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Chart Section */
+        .chart-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 1rem;
+        }
+
+        .chart-bars {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 250px;
+            border-left: 2px solid #ddd;
+            border-bottom: 2px solid #ddd;
+            padding: 1rem;
+        }
+
+        .chart-bar {
+            width: 40px;
+            background: linear-gradient(to top, var(--primary-blue), var(--water-blue));
+            border-radius: 5px 5px 0 0;
+            position: relative;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            animation: growBar 1s ease-out;
+        }
+
+        @keyframes growBar {
+            from {
+                height: 0;
+            }
+        }
+
+        .chart-bar:hover {
+            opacity: 0.8;
+            transform: scaleY(1.05);
+        }
+
+        .chart-bar-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            color: #7f8c8d;
+        }
+
+        .chart-bar-value {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-weight: bold;
+            color: var(--primary-blue);
+        }
+
+        /* History Section */
+        .history-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            animation: fadeInUp 1.2s ease-out;
+        }
+
+        .history-list {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 1rem 0;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            background: var(--light-blue);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .history-item:hover {
+            background: #bbdefb;
+            transform: translateX(5px);
+        }
+
+        .history-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-blue);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .history-time {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .history-amount {
+            color: var(--primary-blue);
+            font-weight: bold;
+        }
+
+        /* Settings Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            color: var(--text-dark);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #7f8c8d;
+            transition: color 0.3s ease;
+        }
+
+        .close-btn:hover {
+            color: var(--text-dark);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: #ddd;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: var(--primary-blue);
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(30px);
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: -400px;
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: right 0.3s ease;
+            z-index: 1001;
+            max-width: 350px;
+        }
+
+        .notification.show {
+            right: 20px;
+        }
+
+        .notification-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary-blue);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: bold;
+            color: var(--text-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .notification-message {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 2rem 0;
+            margin-top: 4rem;
+            box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .footer-section h3 {
+            color: var(--primary-blue);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .social-link {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-blue);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .social-link:hover {
+            background: var(--dark-blue);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            margin-top: 2rem;
+            border-top: 1px solid #ddd;
+            color: #7f8c8d;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-content {
+                padding: 0 1rem;
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .chart-bars {
+                padding: 0.5rem;
+            }
+
+            .chart-bar {
+                width: 30px;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .social-links {
+                justify-content: center;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Pulse Animation for Water Drop */
+        .water-drop {
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="wave-bg">
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-tint water-drop"></i>
+                <span>HydroTrack</span>
+            </div>
+            <button class="btn btn-secondary" onclick="openSettings()">
+                <i class="fas fa-cog"></i>
+                Pengaturan
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-glass-water"></i>
+                </div>
+                <div class="stat-value" id="todayIntake">0</div>
+                <div class="stat-label">Gelas Hari Ini</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-bullseye"></i>
+                </div>
+                <div class="stat-value" id="dailyTarget">8</div>
+                <div class="stat-label">Target Harian</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-percentage"></i>
+                </div>
+                <div class="stat-value" id="progressPercent">0%</div>
+                <div class="stat-label">Progres Hari Ini</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-fire"></i>
+                </div>
+                <div class="stat-value" id="streakDays">0</div>
+                <div class="stat-label">Hari Beruntun</div>
+            </div>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="progress-section">
+            <div class="progress-header">
+                <h2 class="progress-title">
+                    <i class="fas fa-chart-line"></i>
+                    Progres Hidrasi Hari Ini
+                </h2>
+                <span id="currentTime"></span>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar">
+                    <span id="progressText">0 / 8 gelas</span>
+                </div>
+            </div>
+            
+            <!-- Visual Glasses -->
+            <div class="glasses-container" id="glassesContainer">
+                <!-- Glasses will be generated by JavaScript -->
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="addWater()">
+                    <i class="fas fa-plus"></i>
+                    Tambah Gelas
+                </button>
+                <button class="btn btn-secondary" onclick="addCustomWater()">
+                    <i class="fas fa-edit"></i>
+                    Jumlah Kustom
+                </button>
+                <button class="btn btn-secondary" onclick="resetToday()">
+                    <i class="fas fa-redo"></i>
+                    Reset Hari Ini
+                </button>
+            </div>
+        </div>
+
+        <!-- Chart Section -->
+        <div class="chart-section">
+            <h2 class="progress-title">
+                <i class="fas fa-chart-bar"></i>
+                Statistik 7 Hari Terakhir
+            </h2>
+            <div class="chart-container">
+                <div class="chart-bars" id="weekChart">
+                    <!-- Chart bars will be generated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- History Section -->
+        <div class="history-section">
+            <h2 class="progress-title">
+                <i class="fas fa-history"></i>
+                Riwayat Minum Hari Ini
+            </h2>
+            <div class="history-list" id="historyList">
+                <!-- History items will be generated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Pengaturan</h2>
+                <button class="close-btn" onclick="closeSettings()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Target Harian (gelas)</label>
+                <input type="number" class="form-input" id="targetInput" min="1" max="20" value="8">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Ukuran Gelas (ml)</label>
+                <input type="number" class="form-input" id="glassSizeInput" min="100" max="500" value="250" step="50">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Pengingat Otomatis</label>
+                <div class="toggle-switch" id="reminderToggle" onclick="toggleReminder()">
+                    <div class="toggle-slider"></div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Jam Mulai Kerja</label>
+                <input type="time" class="form-input" id="workStartInput" value="09:00">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Jam Selesai Kerja</label>
+                <input type="time" class="form-input" id="workEndInput" value="17:00">
+            </div>
+            <button class="btn btn-primary" onclick="saveSettings()" style="width: 100%;">
+                <i class="fas fa-save"></i>
+                Simpan Pengaturan
+            </button>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <div class="notification-icon">
+            <i class="fas fa-bell"></i>
+        </div>
+        <div class="notification-content">
+            <div class="notification-title">Waktu Minum Air!</div>
+            <div class="notification-message" id="notificationMessage">Jangan lupa untuk minum air</div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3><i class="fas fa-tint"></i> HydroTrack</h3>
+                <p>Aplikasi pelacak asupan air harian untuk menjaga tubuh tetap terhidrasi dengan baik.</p>
+                <div class="social-links">
+                    <a class="social-link" onclick="handleSocialClick('whatsapp')">
+                        <i class="fab fa-whatsapp"></i>
+                    </a>
+                    <a class="social-link" onclick="handleSocialClick('facebook')">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a class="social-link" onclick="handleSocialClick('twitter')">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a class="social-link" onclick="handleSocialClick('instagram')">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a class="social-link" onclick="handleSocialClick('telegram')">
+                        <i class="fab fa-telegram"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h3><i class="fas fa-link"></i> Link Cepat</h3>
+                <p><a href="#" onclick="scrollToSection('progress')" style="color: #7f8c8d; text-decoration: none;">Progres Hari Ini</a></p>
+                <p><a href="#" onclick="scrollToSection('chart')" style="color: #7f8c8d; text-decoration: none;">Statistik</a></p>
+                <p><a href="#" onclick="scrollToSection('history')" style="color: #7f8c8d; text-decoration: none;">Riwayat</a></p>
+                <p><a href="#" onclick="openSettings()" style="color: #7f8c8d; text-decoration: none;">Pengaturan</a></p>
+            </div>
+            <div class="footer-section">
+                <h3><i class="fas fa-envelope"></i> Hubungi Kami</h3>
+                <p style="color: #7f8c8d;">Email: info@hydrotrack.com</p>
+                <p style="color: #7f8c8d;">Telepon: +62 812-3456-7890</p>
+                <p style="color: #7f8c8d;">Alamat: Jakarta, Indonesia</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 HydroTrack. Dibuat dengan <i class="fas fa-heart" style="color: #e74c3c;"></i> untuk kesehatan Anda.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Helper Function
+        async function fetchGptOss(userMessage) {
+            const proxy = "https://cors-anywhere.herokuapp.com/";
+            const url = "https://chat.gradient.network/api/generate";
+            const messages = [
+                { role: "system", content: "Gunakan Bahasa Indonesia." },
+                { role: "user", content: userMessage }
+            ];
+            try {
+                const response = await fetch(proxy + url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Origin': 'https://chat.gradient.network',
+                        'Referer': 'https://chat.gradient.network/'
+                    },
+                    body: JSON.stringify({
+                        model: "GPT OSS 120B",
+                        clusterMode: "nvidia",
+                        messages: messages,
+                        enableThinking: true
+                    })
+                });
+                if (!response.ok) return "Error Jaringan.";
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = "";
+                let final = "";
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split("\n");
+                    buffer = lines.pop();
+                    for (const line of lines) {
+                        const clean = line.trim().replace(/^data: /, '');
+                        if(!clean) continue;
+                        try {
+                            const obj = JSON.parse(clean);
+                            if (obj.type === 'reply' && obj.data?.content) {
+                                final += obj.data.content;
+                            }
+                        } catch(e){}
+                    }
+                }
+                return final;
+            } catch (e) { return "Error: " + e.message; }
+        }
+
+        // Application State
+        const APP_KEY = 'hydrotrack_data';
+        const SETTINGS_KEY = 'hydrotrack_settings';
+        
+        let appData = {
+            today: new Date().toISOString().split('T')[0],
+            intake: 0,
+            target: 8,
+            glassSize: 250,
+            history: [],
+            weekData: {},
+            streak: 0
+        };
+
+        let settings = {
+            reminders: true,
+            workStart: '09:00',
+            workEnd: '17:00',
+            lastReminder: null
+        };
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            checkAndResetDaily();
+            updateUI();
+            setupReminders();
+            updateClock();
+            setInterval(updateClock, 1000);
+            requestNotificationPermission();
+        });
+
+        // Load Data from LocalStorage
+        function loadData() {
+            const savedData = localStorage.getItem(APP_KEY);
+            const savedSettings = localStorage.getItem(SETTINGS_KEY);
+            
+            if (savedData) {
+                const parsed = JSON.parse(savedData);
+                if (parsed.today === appData.today) {
+                    appData = { ...appData, ...parsed };
+                } else {
+                    // Save yesterday's data to week history
+                    if (parsed.today && parsed.intake > 0) {
+                        appData.weekData[parsed.today] = parsed.intake;
+                    }
+                }
+            }
+            
+            if (savedSettings) {
+                settings = { ...settings, ...JSON.parse(savedSettings) };
+            }
+        }
+
+        // Save Data to LocalStorage
+        function saveData() {
+            localStorage.setItem(APP_KEY, JSON.stringify(appData));
+            localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+        }
+
+        // Check and Reset Daily Data
+        function checkAndResetDaily() {
+            const today = new Date().toISOString().split('T')[0];
+            if (appData.today !== today) {
+                // Save yesterday's data
+                if (appData.intake >= appData.target) {
+                    appData.streak++;
+                } else {
+                    appData.streak = 0;
+                }
+                
+                appData.weekData[appData.today] = appData.intake;
+                
+                // Reset for new day
+                appData.today = today;
+                appData.intake = 0;
+                appData.history = [];
+                
+                // Keep only last 7 days
+                const days = Object.keys(appData.weekData);
+                if (days.length > 7) {
+                    days.slice(0, -7).forEach(day => delete appData.weekData[day]);
+                }
+                
+                saveData();
+            }
+        }
+
+        // Update UI
+        function updateUI() {
+            // Update stats
+            document.getElementById('todayIntake').textContent = appData.intake;
+            document.getElementById('dailyTarget').textContent = appData.target;
+            const percent = Math.round((appData.intake / appData.target) * 100);
+            document.getElementById('progressPercent').textContent = percent + '%';
+            document.getElementById('streakDays').textContent = appData.streak;
+            
+            // Update progress bar
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            const progressWidth = Math.min((appData.intake / appData.target) * 100, 100);
+            progressBar.style.width = progressWidth + '%';
+            progressText.textContent = `${appData.intake} / ${appData.target} gelas`;
+            
+            // Update glasses visual
+            updateGlassesVisual();
+            
+            // Update chart
+            updateWeekChart();
+            
+            // Update history
+            updateHistory();
+        }
+
+        // Update Glasses Visual
+        function updateGlassesVisual() {
+            const container = document.getElementById('glassesContainer');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < appData.target; i++) {
+                const glassItem = document.createElement('div');
+                glassItem.className = 'glass-item';
+                glassItem.onclick = () => toggleGlass(i);
+                
+                const glass = document.createElement('div');
+                glass.className = 'glass';
+                if (i < appData.intake) {
+                    glass.classList.add('filled');
+                }
+                
+                const ripple = document.createElement('div');
+                ripple.className = 'glass-ripple';
+                
+                glass.appendChild(ripple);
+                glassItem.appendChild(glass);
+                container.appendChild(glassItem);
+            }
+        }
+
+        // Toggle Glass
+        function toggleGlass(index) {
+            if (index < appData.intake) {
+                // Remove glass
+                appData.intake = index;
+                appData.history.pop();
+            } else {
+                // Add glass
+                appData.intake = index + 1;
+                addHistoryEntry(1);
+            }
+            saveData();
+            updateUI();
+            showNotification('Gelas ' + (index + 1), 'Asupan air berhasil diperbarui!');
+        }
+
+        // Add Water
+        function addWater() {
+            appData.intake++;
+            addHistoryEntry(1);
+            saveData();
+            updateUI();
+            showNotification('Gelas Ditambahkan!', `Anda telah minum ${appData.intake} gelas hari ini.`);
+            
+            // Animate the last glass
+            setTimeout(() => {
+                const glasses = document.querySelectorAll('.glass-item');
+                if (glasses[appData.intake - 1]) {
+                    glasses[appData.intake - 1].style.animation = 'pulse 0.5s ease';
+                }
+            }, 100);
+        }
+
+        // Add Custom Water
+        function addCustomWater() {
+            const amount = prompt('Masukkan jumlah gelas:', '1');
+            if (amount && !isNaN(amount) && amount > 0) {
+                const glasses = parseInt(amount);
+                appData.intake += glasses;
+                addHistoryEntry(glasses);
+                saveData();
+                updateUI();
+                showNotification(`${glasses} Gelas Ditambahkan!`, `Total: ${appData.intake} gelas hari ini.`);
+            }
+        }
+
+        // Reset Today
+        function resetToday() {
+            if (confirm('Apakah Anda yakin ingin mereset data hari ini?')) {
+                appData.intake = 0;
+                appData.history = [];
+                saveData();
+                updateUI();
+                showNotification('Data Direset', 'Data asupan air hari ini telah direset.');
+            }
+        }
+
+        // Add History Entry
+        function addHistoryEntry(glasses) {
+            const entry = {
+                time: new Date().toLocaleTimeString('id-ID'),
+                amount: glasses,
+                timestamp: Date.now()
+            };
+            appData.history.push(entry);
+        }
+
+        // Update History List
+        function updateHistory() {
+            const historyList = document.getElementById('historyList');
+            historyList.innerHTML = '';
+            
+            if (appData.history.length === 0) {
+                historyList.innerHTML = '<p style="text-align: center; color: #7f8c8d;">Belum ada riwayat minum hari ini</p>';
+                return;
+            }
+            
+            appData.history.slice().reverse().forEach(entry => {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                item.innerHTML = `
+                    <div class="history-icon">
+                        <i class="fas fa-glass-water"></i>
+                    </div>
+                    <div class="history-time">${entry.time}</div>
+                    <div class="history-amount">+${entry.amount} gelas</div>
+                `;
+                historyList.appendChild(item);
+            });
+        }
+
+        // Update Week Chart
+        function updateWeekChart() {
+            const chartContainer = document.getElementById('weekChart');
+            chartContainer.innerHTML = '';
+            
+            const days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+            const today = new Date();
+            const weekData = [];
+            
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                const dateStr = date.toISOString().split('T')[0];
+                const dayIndex = date.getDay();
+                
+                weekData.push({
+                    day: days[dayIndex],
+                    value: appData.weekData[dateStr] || 0,
+                    date: dateStr
+                });
+            }
+            
+            const maxValue = Math.max(...weekData.map(d => d.value), appData.target);
+            
+            weekData.forEach((data, index) => {
+                const bar = document.createElement('div');
+                bar.className = 'chart-bar';
+                const height = (data.value / maxValue) * 100;
+                bar.style.height = height + '%';
+                
+                const label = document.createElement('div');
+                label.className = 'chart-bar-label';
+                label.textContent = data.day;
+                
+                const value = document.createElement('div');
+                value.className = 'chart-bar-value';
+                value.textContent = data.value;
+                
+                bar.appendChild(label);
+                bar.appendChild(value);
+                chartContainer.appendChild(bar);
+                
+                // Animate bars
+                setTimeout(() => {
+                    bar.style.animation = `growBar 0.5s ease-out ${index * 0.1}s`;
+                }, 100);
+            });
+        }
+
+        // Settings Functions
+        function openSettings() {
+            document.getElementById('settingsModal').classList.add('active');
+            document.getElementById('targetInput').value = appData.target;
+            document.getElementById('glassSizeInput').value = appData.glassSize;
+            document.getElementById('workStartInput').value = settings.workStart;
+            document.getElementById('workEndInput').value = settings.workEnd;
+            
+            const toggle = document.getElementById('reminderToggle');
+            if (settings.reminders) {
+                toggle.classList.add('active');
+            } else {
+                toggle.classList.remove('active');
+            }
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').classList.remove('active');
+        }
+
+        function toggleReminder() {
+            const toggle = document.getElementById('reminderToggle');
+            toggle.classList.toggle('active');
+            settings.reminders = toggle.classList.contains('active');
+            saveData();
+            
+            if (settings.reminders) {
+                setupReminders();
+                showNotification('Pengingat Diaktifkan', 'Anda akan menerima pengingat setiap 2 jam.');
+            } else {
+                showNotification('Pengingat Dinonaktifkan', 'Pengingat otomatis telah dimatikan.');
+            }
+        }
+
+        function saveSettings() {
+            appData.target = parseInt(document.getElementById('targetInput').value);
+            appData.glassSize = parseInt(document.getElementById('glassSizeInput').value);
+            settings.workStart = document.getElementById('workStartInput').value;
+            settings.workEnd = document.getElementById('workEndInput').value;
+            
+            saveData();
+            updateUI();
+            closeSettings();
+            showNotification('Pengaturan Disimpan', 'Pengaturan berhasil diperbarui.');
+        }
+
+        // Reminder Functions
+        function setupReminders() {
+            if (!settings.reminders) return;
+            
+            const now = new Date();
+            const workStart = new Date();
+            const workEnd = new Date();
+            
+            const [startHour, startMin] = settings.workStart.split(':');
+            const [endHour, endMin] = settings.workEnd.split(':');
+            
+            workStart.setHours(parseInt(startHour), parseInt(startMin), 0, 0);
+            workEnd.setHours(parseInt(endHour), parseInt(endMin), 0, 0);
+            
+            if (now < workStart || now > workEnd) return;
+            
+            // Check if we need to show reminder now
+            const lastReminder = settings.lastReminder ? new Date(settings.lastReminder) : null;
+            const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
+            
+            if (!lastReminder || lastReminder < twoHoursAgo) {
+                showReminderNotification();
+                settings.lastReminder = now.toISOString();
+                saveData();
+            }
+            
+            // Schedule next reminder
+            setTimeout(() => {
+                setupReminders();
+            }, 2 * 60 * 60 * 1000); // 2 hours
+        }
+
+        function requestNotificationPermission() {
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+        }
+
+        function showReminderNotification() {
+            const message = `Waktu minum air! Anda telah minum ${appData.intake}/${appData.target} gelas hari ini.`;
+            
+            // Show in-app notification
+            showNotification('⏰ Pengingat Hidrasi', message);
+            
+            // Show browser notification if permitted
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('⏰ Pengingat Hidrasi - HydroTrack', {
+                    body: message,
+                    icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">💧</text></svg>',
+                    badge: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">💧</text></svg>'
+                });
+            }
+        }
+
+        // Notification Functions
+        function showNotification(title, message) {
+            const notification = document.getElementById('notification');
+            const notificationMessage = document.getElementById('notificationMessage');
+            
+            notification.querySelector('.notification-title').textContent = title;
+            notificationMessage.textContent = message;
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
+        }
+
+        // Clock Update
+        function updateClock() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('id-ID', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('currentTime').textContent = timeString;
+        }
+
+        // Social Media Handlers
+        function handleSocialClick(platform) {
+            const messages = {
+                whatsapp: 'Terima kasih telah mengklik WhatsApp!',
+                facebook: 'Terima kasih telah mengklik Facebook!',
+                twitter: 'Terima kasih telah mengklik Twitter!',
+                instagram: 'Terima kasih telah mengklik Instagram!',
+                telegram: 'Terima kasih telah mengklik Telegram!'
+            };
+            
+            showNotification('Media Sosial', messages[platform] || 'Terima kasih!');
+        }
+
+        // Scroll to Section
+        function scrollToSection(section) {
+            const sections = {
+                progress: document.querySelector('.progress-section'),
+                chart: document.querySelector('.chart-section'),
+                history: document.querySelector('.history-section')
+            };
+            
+            if (sections[section]) {
+                sections[section].scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('settingsModal');
+            if (event.target === modal) {
+                closeSettings();
+            }
+        }
+    </script>
+</body>
+</html>
