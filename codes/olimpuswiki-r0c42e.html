@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OlimpusWiki - Dewa-Dewa Olimpus & Mitologi Yunani Klasik</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-gold: #FFD700;
+            --secondary-blue: #4169E1;
+            --marble-white: #F5F5DC;
+            --temple-brown: #8B4513;
+            --sky-blue: #87CEEB;
+            --purple-royal: #7851A9;
+            --red-divine: #DC143C;
+            --green-olive: #808000;
+            --bg-light: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --bg-dark: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            --card-light: rgba(255,255,255,0.95);
+            --card-dark: rgba(30, 30, 50, 0.85);
+            --text-light: #333;
+            --text-dark: #e0e0e0;
+            --nav-light: rgba(255,255,255,0.95);
+            --nav-dark: rgba(30, 30, 50, 0.9);
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: var(--bg-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            transition: background 0.5s ease;
+        }
+
+        body.dark-mode {
+            background: var(--bg-dark);
+        }
+
+        /* Three.js Background */
+        #threejs-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        /* Dark Mode Toggle */
+        .dark-mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            padding: 10px 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .dark-mode-toggle:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .toggle-icon {
+            font-size: 1.5rem;
+            color: var(--primary-gold);
+            transition: transform 0.3s ease;
+        }
+
+        .dark-mode .toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary-gold), var(--secondary-blue));
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255,255,255,0.1) 10px,
+                rgba(255,255,255,0.1) 20px
+            );
+            animation: slidePattern 20s linear infinite;
+        }
+
+        @keyframes slidePattern {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            color: white;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+            position: relative;
+            z-index: 1;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 3px 3px 6px rgba(0,0,0,0.5), 0 0 20px var(--primary-gold); }
+            to { text-shadow: 3px 3px 6px rgba(0,0,0,0.5), 0 0 30px var(--primary-gold), 0 0 40px var(--primary-gold); }
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--marble-white);
+            margin-top: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Navigation */
+        nav {
+            background: var(--nav-light);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            transition: background 0.5s ease;
+        }
+
+        body.dark-mode nav {
+            background: var(--nav-dark);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            background: linear-gradient(135deg, var(--purple-royal), var(--secondary-blue));
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .nav-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        /* Main Content */
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .section {
+            background: var(--card-light);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            animation: fadeInUp 0.8s ease;
+            transition: background 0.5s ease, color 0.5s ease;
+        }
+
+        body.dark-mode .section {
+            background: var(--card-dark);
+            color: var(--text-dark);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            color: var(--purple-royal);
+            margin-bottom: 1.5rem;
+            text-align: center;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-gold), var(--secondary-blue));
+        }
+
+        /* God Cards Grid */
+        .gods-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .god-card {
+            background: linear-gradient(135deg, var(--marble-white), white);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        body.dark-mode .god-card {
+            background: linear-gradient(135deg, #2a2a3e, #1a1a2e);
+        }
+
+        .god-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent, rgba(255,215,0,0.3));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .god-card:hover::before {
+            opacity: 1;
+        }
+
+        .god-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+
+        .god-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .god-card:hover .god-image {
+            transform: scale(1.1);
+        }
+
+        .god-info {
+            padding: 1.5rem;
+        }
+
+        .god-name {
+            font-size: 1.5rem;
+            color: var(--purple-royal);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .god-domain {
+            color: var(--secondary-blue);
+            font-style: italic;
+            margin-bottom: 1rem;
+        }
+
+        .god-description {
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        body.dark-mode .god-description {
+            color: var(--text-dark);
+        }
+
+        /* Olympus Location */
+        .olympus-section {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(135,206,235,0.3));
+        }
+
+        body.dark-mode .olympus-section {
+            background: linear-gradient(135deg, rgba(30,30,50,0.85), rgba(65,105,225,0.3));
+        }
+
+        .olympus-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .olympus-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .olympus-img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            position: relative;
+            background: white;
+            margin: 5% auto;
+            padding: 2rem;
+            width: 90%;
+            max-width: 800px;
+            border-radius: 20px;
+            animation: slideIn 0.3s ease;
+            transition: background 0.5s ease, color 0.5s ease;
+        }
+
+        body.dark-mode .modal-content {
+            background: #1a1a2e;
+            color: var(--text-dark);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--red-divine);
+            transition: transform 0.3s ease;
+        }
+
+        .close-modal:hover {
+            transform: rotate(90deg);
+        }
+
+        /* Footer */
+        footer {
+            background: linear-gradient(135deg, var(--temple-brown), var(--purple-royal));
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .social-icon {
+            font-size: 2rem;
+            color: var(--primary-gold);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .social-icon:hover {
+            transform: translateY(-5px) scale(1.2);
+            color: white;
+            text-shadow: 0 0 20px var(--primary-gold);
+        }
+
+        /* Floating Elements */
+        .floating-god {
+            position: fixed;
+            font-size: 3rem;
+            animation: float 6s ease-in-out infinite;
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .section-title { font-size: 2rem; }
+            .gods-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="threejs-bg"></canvas>
+    
+    <!-- Dark Mode Toggle -->
+    <div class="dark-mode-toggle" onclick="toggleDarkMode()">
+        <i class="fas fa-moon toggle-icon" id="toggleIcon"></i>
+    </div>
+    
+    <!-- Floating Gods -->
+    <div class="floating-god" style="top: 10%; left: 5%;">⚡</div>
+    <div class="floating-god" style="top: 20%; right: 10%; animation-delay: 2s;">👑</div>
+    <div class="floating-god" style="bottom: 20%; left: 8%; animation-delay: 4s;">🌊</div>
+    <div class="floating-god" style="bottom: 10%; right: 5%; animation-delay: 1s;">🏛️</div>
+
+    <header>
+        <h1><i class="fas fa-crown"></i> OlimpusWiki <i class="fas fa-bolt"></i></h1>
+        <p class="subtitle">Eksplorasi Mitologi Yunani Klasik & Para Penguasa Gunung Olympus</p>
+    </header>
+
+    <nav>
+        <div class="nav-container">
+            <button class="nav-btn" onclick="scrollToSection('gods')"><i class="fas fa-users"></i> Para Dewa</button>
+            <button class="nav-btn" onclick="scrollToSection('statues')"><i class="fas fa-monument"></i> Patung Kuno</button>
+            <button class="nav-btn" onclick="scrollToSection('illustrations')"><i class="fas fa-palette"></i> Ilustrasi</button>
+            <button class="nav-btn" onclick="scrollToSection('zeus-hera')"><i class="fas fa-heart"></i> Zeus & Hera</button>
+            <button class="nav-btn" onclick="scrollToSection('olympus')"><i class="fas fa-mountain"></i> Gunung Olympus</button>
+        </div>
+    </nav>
+
+    <main>
+        <section id="gods" class="section">
+            <h2 class="section-title"><i class="fas fa-users"></i> 12 Dewa Olimpus</h2>
+            <div class="gods-grid" id="godsGrid"></div>
+        </section>
+
+        <section id="statues" class="section">
+            <h2 class="section-title"><i class="fas fa-monument"></i> Patung Dewa-Dewa Yunani Kuno</h2>
+            <div class="olympus-gallery" id="statuesGallery"></div>
+        </section>
+
+        <section id="illustrations" class="section">
+            <h2 class="section-title"><i class="fas fa-palette"></i> Ilustrasi Mitologi Yunani</h2>
+            <div class="olympus-gallery" id="illustrationsGallery"></div>
+        </section>
+
+        <section id="zeus-hera" class="section">
+            <h2 class="section-title"><i class="fas fa-heart"></i> Zeus dan Hera</h2>
+            <div class="olympus-gallery" id="zeusHeraGallery"></div>
+        </section>
+
+        <section id="olympus" class="section olympus-section">
+            <h2 class="section-title"><i class="fas fa-mountain"></i> Gunung Olympus</h2>
+            <p style="text-align: center; color: #333; margin-bottom: 1.5rem;">
+                Gunung Olympus adalah tempat bersemayamnya para dewa-dewa Yunani. Puncak tertingginya, Mytikas, 
+                diyakini sebagai istana para dewa yang tidak dapat dijangkau oleh manusia biasa.
+            </p>
+            <div class="olympus-gallery" id="olympusGallery"></div>
+        </section>
+    </main>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 OlimpusWiki | Dibuat dengan <i class="fas fa-heart" style="color: var(--red-divine);"></i> untuk para pecinta mitologi</p>
+        <div class="social-icons">
+            <i class="fab fa-facebook social-icon"></i>
+            <i class="fab fa-twitter social-icon"></i>
+            <i class="fab fa-instagram social-icon"></i>
+            <i class="fab fa-youtube social-icon"></i>
+        </div>
+    </footer>
+
+    <script>
+        // Dark Mode Toggle
+        function toggleDarkMode() {
+            const body = document.body;
+            const icon = document.getElementById('toggleIcon');
+            
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                localStorage.setItem('darkMode', 'true');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                localStorage.setItem('darkMode', 'false');
+            }
+        }
+        
+        // Check for saved dark mode preference
+        window.addEventListener('DOMContentLoaded', () => {
+            const darkMode = localStorage.getItem('darkMode');
+            const icon = document.getElementById('toggleIcon');
+            
+            if (darkMode === 'true') {
+                document.body.classList.add('dark-mode');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+        });
+        
+        // Three.js Background
+        let scene, camera, renderer, stars = [];
+        
+        function initThreeJS() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('threejs-bg'), alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            
+            // Create stars
+            const geometry = new THREE.SphereGeometry(0.5, 32, 32);
+            for (let i = 0; i < 200; i++) {
+                const material = new THREE.MeshBasicMaterial({ 
+                    color: new THREE.Color().setHSL(Math.random(), 0.5, 0.8),
+                    transparent: true,
+                    opacity: Math.random() * 0.8 + 0.2
+                });
+                const star = new THREE.Mesh(geometry, material);
+                star.position.x = (Math.random() - 0.5) * 100;
+                star.position.y = (Math.random() - 0.5) * 100;
+                star.position.z = (Math.random() - 0.5) * 100;
+                scene.add(star);
+                stars.push(star);
+            }
+            
+            camera.position.z = 50;
+            animate();
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            stars.forEach(star => {
+                star.rotation.x += 0.001;
+                star.rotation.y += 0.002;
+            });
+            renderer.render(scene, camera);
+        }
+        
+        window.addEventListener('resize', () => {
+            if (camera && renderer) {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+        });
+        
+        // Gods Data
+        const godsData = [
+            { name: "Zeus", domain: "Dewa Langit & Petir", icon: "⚡", description: "Raja para dewa, penguasa langit dan petir. Zeus adalah anak termuda dari Kronos dan Rhea." },
+            { name: "Hera", domain: "Dewi Pernikahan", icon: "👑", description: "Ratu para dewi, pelindung pernikahan dan keluarga. Istri Zeus." },
+            { name: "Poseidon", domain: "Dewa Lautan", icon: "🌊", description: "Penguasa lautan, gempa bumi, dan kuda. Bersaudara dengan Zeus dan Hades." },
+            { name: "Demeter", domain: "Dewi Pertanian", icon: "🌾", description: "Dewi panen, kesuburan, dan pertanian. Ibu dari Persephone." },
+            { name: "Ares", domain: "Dewa Perang", icon: "⚔️", description: "Dewa perang yang kejam dan berdarah. Anak Zeus dan Hera." },
+            { name: "Athena", domain: "Dewi Kebijaksanaan", icon: "🦉", description: "Dewi kebijaksanaan, perang strategis, dan seni. Lahir dari kepala Zeus." },
+            { name: "Apollo", domain: "Dewa Matahari & Musik", icon: "☀️", description: "Dewa matahari, musik, puisi, dan ramalan. Kembaran Artemis." },
+            { name: "Artemis", domain: "Dewi Bulan & Berburu", icon: "🌙", description: "Dewi bulan, berburu, dan perawan. Pelindung wanita muda." },
+            { name: "Hephaestus", domain: "Dewa Api & Pandai Besi", icon: "🔨", description: "Dewa api, metalurgi, dan kerajinan. Pembuat senjata para dewa." },
+            { name: "Aphrodite", domain: "Dewi Cinta & Kecantikan", icon: "💕", description: "Dewi cinta, kecantikan, dan hasrat. Lahir dari busa laut." },
+            { name: "Hermes", domain: "Dewa Pesan & Pedagang", icon: "📬", description: "Pembawa para dewa, pelindung pedagang, pencuri, dan pelancong." },
+            { name: "Hestia", domain: "Dewi Perapian", icon: "🔥", description: "Dewi perapian, rumah tangga, dan keluarga. Kakak tertua dari Zeus." }
+        ];
+        
+        // Image URLs
+        const olympusGodsImages = [
+            "https://koropak.co.id/wp-content/uploads/artikel/inilah-dewa-penguasa-olimpus-dari-mitologi-yunani.jpg",
+            "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi9t4lCZcYqPYgdHPT8y2oHvLfqeitmAIRsVCf24DLPbHkS6frUKDVx9I5pa7xRzZ5NzbqXpcxi0AsMQ-vG5sGORI08-4SG41aii253R-weNEQNBf6PMbBjWed1kk_oukOgNM1czmocxA/s640/Dodekatheon+12+Dewa+Olimpus+Mitologi+Yunani.jpg",
+            "https://cdn.grid.id/crop/0x0:0x0/x/photo/2024/08/13/12-dewa-olympus-yang-jadi-dewa-d-20240813082746.jpg",
+            "https://asset.kompas.com/crops/RPbzGpYd52Yr2hu4BmlaIu5oE-s=/21x61:1191x841/375x240/data/photo/2023/02/02/63dbb3f4c80b8.png",
+            "https://lookaside.fbsbx.com/lookaside/crawler/media/?media_id=692285570912625"
+        ];
+        
+        const statuesImages = [
+            "https://upload.wikimedia.org/wikipedia/commons/8/86/Apollo_ny_carlsberg_glyptotek.jpg",
+            "https://cdn.grid.id/crop/0x0:0x0/x/photo/2024/08/13/12-dewa-olympus-yang-jadi-dewa-d-20240813082746.jpg",
+            "https://media.istockphoto.com/id/1389139430/id/foto/gambar-abstrak-dengan-patung-dewa-kuno-neptunus-dengan-trisula-pelindung-kuda-dan-ras-kereta.jpg?s=612x612&w=0&k=20&c=86cDIMx63Kk-6O43aRNBPgxRqs3fmZ3_jSvobpfoRW0=",
+            "https://images.unsplash.com/photo-1742495212152-1849e009c488?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDE3fHx8ZW58MHx8fHx8",
+            "https://image.made-in-china.com/202f0j00yiluWpPJCbgD/Greek-Woman-Statue-Greek-Gods-Aphrodite-Marble-Sculpture.webp"
+        ];
+        
+        const illustrationsImages = [
+            "https://media.istockphoto.com/id/1055504986/id/vektor/ilustrasi-mitologi-yunani-atlas.jpg?s=612x612&w=0&k=20&c=A4AwnbAFzAlbfyqp27S68fHs6EGUaWF1d1oTbRzRuSI=",
+            "https://upload.wikimedia.org/wikipedia/commons/7/70/Jacopo_Zucchi_-_The_Assembly_of_the_Gods.jpg",
+            "https://st3.depositphotos.com/6239256/18511/v/1600/depositphotos_185112212-stock-illustration-greek-god-the-mythological-hero.jpg",
+            "https://cdn.grid.id//crop/4x0:1417x1242/700x0/photo/2023/06/26/gowy-icaro-pradojpg-20230626022552.jpg",
+            "https://media.istockphoto.com/id/1220052224/id/vektor/adegan-yunani-kuno-vas-antik-dengan-siluet-karakter-mitologi-dan-dewa-vector-pola-orang.jpg?s=170667a&w=is&k=20&c=I1dtcLu1BMnmli6BaK_m9fEYDxUGWMey-AyM0nosSRk="
+        ];
+        
+        const zeusHeraImages = [
+            "https://cdn.grid.id//crop/0x0:0x0/360x240/photo/2023/02/15/whatsapp-image-2023-02-15-at-01-20230215012357.jpeg",
+            "https://media.istockphoto.com/id/514839554/photo/zeus-and-hera-at-austria-parliament-building-vienna.jpg?s=170667a&w=is&k=20&c=0iTa-cdvv9BdhcaKIKyS7ICdyEItlMPBpt1feIET3Gw=",
+            "https://cdn.grid.id//crop/0x0:0x0/700x465/photo/2022/11/16/zeus_s_lovers_large_image_76jpe-20221116112727.jpeg",
+            "https://cdn.grid.id//crop/0x0:0x0/700x465/photo/2023/08/19/whatsapp-image-2023-08-19-at-21-20230819093840.jpeg",
+            "https://ptero9.com/wp-content/uploads/2018/10/zeus_semele_und_hera-_flc3a4misch_3-_viertel_17-_jahrhundert_erasmus_quellinus_ii_oder_jan_erasmus_quellinus.jpg?w=287&h=255"
+        ];
+        
+        const olympusImages = [
+            "https://upload.wikimedia.org/wikipedia/commons/e/e8/Olympus_National_Park_30.jpg",
+            "https://i.natgeofe.com/n/90ddbd94-9f33-40d3-a953-afb049818ba9/30924.jpg",
+            "https://i0.wp.com/onebackpackeach.com/wp-content/uploads/2020/01/20181014_153626-scaled.jpg?fit=2560%2C1920&ssl=1",
+            "https://upload.wikimedia.org/wikipedia/commons/d/d1/Mount_Olympus_Utah.jpg",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Mytikas_peak_02.jpg/250px-Mytikas_peak_02.jpg"
+        ];
+        
+        // Initialize content
+        function initializeContent() {
+            // Load gods
+            const godsGrid = document.getElementById('godsGrid');
+            godsData.forEach((god, index) => {
+                const card = document.createElement('div');
+                card.className = 'god-card';
+                card.innerHTML = `
+                    <img src="${olympusGodsImages[index % olympusGodsImages.length]}" alt="${god.name}" class="god-image">
+                    <div class="god-info">
+                        <h3 class="god-name">${god.icon} ${god.name}</h3>
+                        <p class="god-domain">${god.domain}</p>
+                        <p class="god-description">${god.description}</p>
+                    </div>
+                `;
+                card.onclick = () => showGodDetails(god);
+                godsGrid.appendChild(card);
+            });
+            
+            // Load galleries
+            loadGallery('statuesGallery', statuesImages);
+            loadGallery('illustrationsGallery', illustrationsImages);
+            loadGallery('zeusHeraGallery', zeusHeraImages);
+            loadGallery('olympusGallery', olympusImages);
+        }
+        
+        function loadGallery(elementId, images) {
+            const gallery = document.getElementById(elementId);
+            images.forEach(img => {
+                const imgElement = document.createElement('img');
+                imgElement.src = img;
+                imgElement.alt = 'Gallery Image';
+                imgElement.className = 'olympus-img';
+                imgElement.onclick = () => openImageModal(img);
+                gallery.appendChild(imgElement);
+            });
+        }
+        
+        function showGodDetails(god) {
+            const modalBody = document.getElementById('modalBody');
+            modalBody.innerHTML = `
+                <h2 style="color: var(--purple-royal); margin-bottom: 1rem;">${god.icon} ${god.name}</h2>
+                <h3 style="color: var(--secondary-blue); margin-bottom: 1rem;">${god.domain}</h3>
+                <p style="line-height: 1.8; color: var(--text-light);">${god.description}</p>
+                <div style="margin-top: 2rem; padding: 1rem; background: var(--marble-white); border-radius: 10px;">
+                    <h4 style="color: var(--temple-brown); margin-bottom: 0.5rem;">Fakta Menarik:</h4>
+                    <ul style="color: var(--text-light); line-height: 1.6;">
+                        <li>${god.name} adalah salah satu dari 12 Dewa Olimpus</li>
+                        <li>Dipuja oleh bangsa Yunani kuno</li>
+                        <li>Memiliki kuil-kuil megah di seluruh Yunani</li>
+                        <li>Ceritanya diabadikan dalam banyak mitos dan legenda</li>
+                    </ul>
+                </div>
+            `;
+            
+            // Update modal content for dark mode
+            if (document.body.classList.contains('dark-mode')) {
+                modalBody.querySelector('p').style.color = 'var(--text-dark)';
+                modalBody.querySelector('div').style.background = '#2a2a3e';
+                modalBody.querySelector('h4').style.color = '#a0a0c0';
+                modalBody.querySelector('ul').style.color = 'var(--text-dark)';
+            }
+            
+            document.getElementById('modal').style.display = 'block';
+        }
+        
+        function openImageModal(imgSrc) {
+            const modalBody = document.getElementById('modalBody');
+            modalBody.innerHTML = `
+                <img src="${imgSrc}" style="width: 100%; border-radius: 10px;">
+            `;
+            document.getElementById('modal').style.display = 'block';
+        }
+        
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+        
+        function scrollToSection(sectionId) {
+            document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Initialize on load
+        window.addEventListener('load', () => {
+            initThreeJS();
+            initializeContent();
+        });
+        
+        // Close modal on outside click
+        window.onclick = function(event) {
+            const modal = document.getElementById('modal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
