@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow Pro | Glassmorphism List App</title>
+    <!-- Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary-blue: #3B82F6;
+            --soft-purple: #8B5CF6;
+            --mint-green: #10B981;
+            --warm-orange: #F59E0B;
+            --neutral-gray: #6B7280;
+            --bg-light: #F9FAFB;
+            --grad-primary: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+            --grad-mint: linear-gradient(135deg, #10B981 0%, #3B82F6 100%);
+            --grad-warm: linear-gradient(135deg, #F59E0B 0%, #EF4444 100%);
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: var(--bg-light);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.15) 0, transparent 50%);
+            min-height: 100vh;
+            color: #1F2937;
+            padding: 20px;
+            font-size: 14px;
+        }
+
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+        .animate-fade-in { animation: fadeIn 0.3s ease-out; }
+        .animate-slide-up { animation: slideUp 0.4s ease-out; }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            background: var(--grad-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        /* Glassmorphism Container */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        /* Input Section */
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid #E5E7EB;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .btn-add {
+            background: var(--grad-primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s;
+        }
+
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Search & Filter bar */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--neutral-gray);
+        }
+
+        .search-box input {
+            padding-left: 38px;
+            width: 100%;
+        }
+
+        /* List Styling */
+        .task-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            background: white;
+            border-radius: 14px;
+            border-left: 5px solid var(--primary-blue);
+            transition: all 0.3s ease;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        .task-item:hover {
+            transform: scale(1.02);
+        }
+
+        .task-item.completed {
+            opacity: 0.6;
+            border-left-color: var(--mint-green);
+        }
+
+        .task-item.completed span {
+            text-decoration: line-through;
+            color: var(--neutral-gray);
+        }
+
+        .task-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .checkbox-custom {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--primary-blue);
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--neutral-gray);
+            padding: 4px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .action-btn:hover {
+            background: rgba(0,0,0,0.05);
+            color: #EF4444;
+        }
+
+        /* Placeholder */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--neutral-gray);
+        }
+
+        .empty-state i {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 480px) {
+            .input-group { flex-direction: column; }
+            .btn-add { width: 100%; justify-content: center; }
+            .toolbar { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container animate-fade-in">
+        <header>
+            <h1>✨ TaskFlow Pro ✨</h1>
+            <p style="color: var(--neutral-gray)">Stay organized, achieve more 🎯</p>
+        </header>
+
+        <section class="glass-card">
+            <div class="input-group">
+                <input type="text" id="taskInput" placeholder="Write your next mission... 📝">
+                <button class="btn-add" id="addTaskBtn">
+                    <i data-lucide="plus-circle"></i> Add Task
+                </button>
+            </div>
+
+            <div class="toolbar">
+                <div class="search-box">
+                    <i data-lucide="search" size="18"></i>
+                    <input type="text" id="searchTask" placeholder="Search tasks...">
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <i data-lucide="filter" style="color: var(--neutral-gray)"></i>
+                    <select id="filterStatus" style="border:none; background:transparent; font-weight: 500; cursor:pointer; outline:none;">
+                        <option value="all">All Missions</option>
+                        <option value="pending">Active</option>
+                        <option value="completed">Done</option>
+                    </select>
+                </div>
+            </div>
+
+            <ul class="task-list" id="taskList">
+                <!-- Task items injected here -->
+            </ul>
+
+            <div id="emptyState" class="empty-state">
+                <i data-lucide="check-square"></i>
+                <p>No tasks found. Start your day with a win! 💡</p>
+            </div>
+        </section>
+
+        <!-- Stats Section -->
+        <div class="glass-card animate-slide-up" style="display: flex; justify-content: space-around; text-align: center;">
+            <div>
+                <p style="font-size: 12px; color: var(--neutral-gray); text-transform: uppercase; letter-spacing: 0.05em;">Total</p>
+                <h3 id="statTotal" style="color: var(--primary-blue)">0</h3>
+            </div>
+            <div>
+                <p style="font-size: 12px; color: var(--neutral-gray); text-transform: uppercase; letter-spacing: 0.05em;">Completed</p>
+                <h3 id="statDone" style="color: var(--mint-green)">0</h3>
+            </div>
+            <div>
+                <p style="font-size: 12px; color: var(--neutral-gray); text-transform: uppercase; letter-spacing: 0.05em;">Efficiency</p>
+                <h3 id="statPercent" style="color: var(--soft-purple)">0%</h3>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data Management
+        let tasks = JSON.parse(localStorage.getItem('taskflow_data')) || [];
+        const PROXY_URL = "https://cors-anywhere.herokuapp.com/"; // Digunakan bila ada external API fetch
+
+        // DOM Elements
+        const taskInput = document.getElementById('taskInput');
+        const addTaskBtn = document.getElementById('addTaskBtn');
+        const taskList = document.getElementById('taskList');
+        const emptyState = document.getElementById('emptyState');
+        const searchInput = document.getElementById('searchTask');
+        const filterStatus = document.getElementById('filterStatus');
+
+        // Stats Elements
+        const statTotal = document.getElementById('statTotal');
+        const statDone = document.getElementById('statDone');
+        const statPercent = document.getElementById('statPercent');
+
+        // Functions
+        function init() {
+            lucide.createIcons();
+            renderTasks();
+        }
+
+        function saveTasks() {
+            localStorage.setItem('taskflow_data', JSON.stringify(tasks));
+            updateStats();
+        }
+
+        function updateStats() {
+            const total = tasks.length;
+            const done = tasks.filter(t => t.completed).length;
+            const percent = total === 0 ? 0 : Math.round((done / total) * 100);
+
+            statTotal.innerText = total;
+            statDone.innerText = done;
+            statPercent.innerText = percent + "%";
+        }
+
+        function renderTasks() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const filterValue = filterStatus.value;
+            
+            taskList.innerHTML = '';
+
+            const filteredTasks = tasks.filter(task => {
+                const matchesSearch = task.text.toLowerCase().includes(searchTerm);
+                const matchesFilter = filterValue === 'all' || 
+                                     (filterValue === 'completed' && task.completed) || 
+                                     (filterValue === 'pending' && !task.completed);
+                return matchesSearch && matchesFilter;
+            });
+
+            if (filteredTasks.length === 0) {
+                emptyState.style.display = 'block';
+            } else {
+                emptyState.style.display = 'none';
+                filteredTasks.forEach((task, index) => {
+                    const li = document.createElement('li');
+                    li.className = `task-item ${task.completed ? 'completed' : ''}`;
+                    li.innerHTML = `
+                        <div class="task-content">
+                            <div class="checkbox-custom" onclick="toggleTask(${task.id})">
+                                ${task.completed ? '<i data-lucide="check" size="14" style="color:#10B981"></i>' : ''}
+                            </div>
+                            <span>${task.text}</span>
+                        </div>
+                        <div class="task-actions">
+                            <button class="action-btn" onclick="deleteTask(${task.id})">
+                                <i data-lucide="trash-2" size="18"></i>
+                            </button>
+                        </div>
+                    `;
+                    taskList.appendChild(li);
+                });
+            }
+            lucide.createIcons();
+            updateStats();
+        }
+
+        function addTask() {
+            const text = taskInput.value.trim();
+            if (text) {
+                const newTask = {
+                    id: Date.now(),
+                    text: text,
+                    completed: false,
+                    createdAt: new Date().toISOString()
+                };
+                tasks.unshift(newTask);
+                taskInput.value = '';
+                saveTasks();
+                renderTasks();
+            }
+        }
+
+        function toggleTask(id) {
+            tasks = tasks.map(t => t.id === id ? {...t, completed: !t.completed} : t);
+            saveTasks();
+            renderTasks();
+        }
+
+        function deleteTask(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            saveTasks();
+            renderTasks();
+        }
+
+        // Event Listeners
+        addTaskBtn.addEventListener('click', addTask);
+        taskInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addTask();
+        });
+        searchInput.addEventListener('input', renderTasks);
+        filterStatus.addEventListener('change', renderTasks);
+
+        // Bootstrapping
+        init();
+
+        // Contoh Fetch dengan Proxy (Placeholder jika ingin integrasi API luar)
+        async function fetchExternalQuotes() {
+            try {
+                // Placeholder logic 
+                // const res = await fetch(PROXY_URL + 'https://api.quotable.io/random');
+            } catch (err) { console.log("Fetch limited by proxy settings"); }
+        }
+    </script>
+</body>
+</html>
