@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volcano Eruption Simulator | Opus AI</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --lava-red: #FF4500;
+            --volcanic-ash: #404040;
+            --magma-orange: #FF6B35;
+            --stone-gray: #696969;
+            --smoke-black: #1A1A1A;
+            --sulfur-yellow: #FFD700;
+            --gradient-lava: linear-gradient(135deg, #FF4500 0%, #FF6B35 50%, #FFD700 100%);
+            --gradient-bg: linear-gradient(180deg, #1A1A1A 0%, #404040 100%);
+        }
+
+        @keyframes eruptionPulse {
+            0% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.05); filter: brightness(1.3); }
+            100% { transform: scale(1); filter: brightness(1); }
+        }
+
+        @keyframes lavaFlow {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 0% 100%; }
+        }
+
+        @keyframes ashFall {
+            0% { transform: translateY(-100vh) translateX(0); opacity: 0; }
+            50% { opacity: 0.8; }
+            100% { transform: translateY(100vh) translateX(20px); opacity: 0; }
+        }
+
+        @keyframes groundShake {
+            0% { transform: translate(0,0); }
+            25% { transform: translate(2px, 2px); }
+            50% { transform: translate(-2px, -2px); }
+            75% { transform: translate(2px, -2px); }
+            100% { transform: translate(0,0); }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        body {
+            background: var(--gradient-bg);
+            color: white;
+            min-height: 100vh;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .shake-active {
+            animation: groundShake 0.1s linear infinite;
+        }
+
+        /* Glassmorphism Container */
+        .main-container {
+            width: 90%;
+            max-width: 1000px;
+            height: 80vh;
+            background: rgba(26, 26, 26, 0.7);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 69, 0, 0.3);
+            border-radius: 2rem; /* rounded-3xl */
+            position: relative;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+            box-shadow: 0 0 50px rgba(255, 69, 0, 0.2);
+            z-index: 10;
+        }
+
+        /* Volcano Simulation Area */
+        .simulation-view {
+            position: relative;
+            background: #000;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            border: 2px solid var(--volcanic-ash);
+        }
+
+        .mountain {
+            position: absolute;
+            bottom: -10%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120%;
+            height: 60%;
+            background: var(--stone-gray);
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            z-index: 2;
+        }
+
+        .crater {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 20px;
+            background: #222;
+            border-radius: 50%;
+            z-index: 3;
+        }
+
+        .lava-glow {
+            position: absolute;
+            top: 38%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 15px;
+            background: var(--lava-red);
+            filter: blur(10px);
+            border-radius: 50%;
+            opacity: 0;
+            transition: 1s;
+        }
+
+        .lava-glow.active {
+            opacity: 1;
+            animation: eruptionPulse 1s infinite;
+        }
+
+        /* Controls Panel */
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 1.5rem;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        h1 {
+            font-size: 32px;
+            background: var(--gradient-lava);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        button {
+            background: var(--gradient-lava);
+            border: none;
+            padding: 15px;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 69, 0, 0.4);
+        }
+
+        button:active { transform: translateY(0); }
+
+        /* Effects */
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .ash {
+            background: var(--volcanic-ash);
+            border-radius: 50%;
+            animation: ashFall linear infinite;
+        }
+
+        .magma-stream {
+            position: absolute;
+            width: 20px;
+            background: var(--gradient-lava);
+            background-size: 100% 200%;
+            z-index: 4;
+            top: 40%;
+            left: calc(50% - 10px);
+            height: 0;
+            transition: height 2s ease-in;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .magma-stream.flowing {
+            height: 60%;
+            animation: lavaFlow 2s linear infinite;
+        }
+
+        .alert-box {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background: var(--lava-red);
+            border-radius: 5px;
+            font-weight: bold;
+            display: none;
+            z-index: 100;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                height: 95vh;
+                overflow-y: auto;
+            }
+            .simulation-view { height: 300px; }
+        }
+    </style>
+</head>
+<body id="body">
+
+    <div id="alert" class="alert-box">⚠️ PERINGATAN! AKTIVITAS VULKANIK MENINGKAT!</div>
+
+    <div class="main-container">
+        <!-- Visual Simulation -->
+        <div class="simulation-view" id="simView">
+            <div class="crater"></div>
+            <div class="lava-glow" id="lavaGlow"></div>
+            <div class="mountain"></div>
+            <div class="magma-stream" id="magmaStream"></div>
+            
+            <!-- Overlay Info -->
+            <div style="position: absolute; top: 10px; left: 10px; z-index: 10;">
+                <i data-lucide="activity"></i> <span id="seismicLabel">Aktivitas: Normal</span>
+            </div>
+        </div>
+
+        <!-- Dashboard UI -->
+        <div class="controls">
+            <h1>VOLCANO 🌋</h1>
+            
+            <div class="stat-card">
+                <i data-lucide="thermometer" style="color: var(--lava-red)"></i>
+                <div>
+                    <div>Suhu Magma</div>
+                    <strong id="tempDisplay">250°C</strong>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <i data-lucide="zap" style="color: var(--sulfur-yellow)"></i>
+                <div>
+                    <div>Tekanan Gas</div>
+                    <strong id="pressureDisplay">1.0 atm</strong>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <i data-lucide="warning" style="color: var(--magma-orange)"></i>
+                <div>
+                    <div>Status</div>
+                    <strong id="statusLabel">LEVEL I (NORMAL)</strong>
+                </div>
+            </div>
+
+            <button id="btnErupt">MEMICU ERUPSI 💥</button>
+            <button id="btnReset" style="background: var(--volcanic-ash)">RESET SISTEM ☁️</button>
+            
+            <p style="font-size: 10px; color: var(--stone-gray); text-align: center; margin-top: auto;">
+                OPUS AI VOLCANIC MONITORING SYSTEM v2.0
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Init Lucide
+        lucide.createIcons();
+
+        // Variables
+        const btnErupt = document.getElementById('btnErupt');
+        const btnReset = document.getElementById('btnReset');
+        const view = document.getElementById('simView');
+        const body = document.getElementById('body');
+        const lavaGlow = document.getElementById('lavaGlow');
+        const magmaStream = document.getElementById('magmaStream');
+        const alertBox = document.getElementById('alert');
+        
+        // Stats
+        const tempDisplay = document.getElementById('tempDisplay');
+        const pressureDisplay = document.getElementById('pressureDisplay');
+        const statusLabel = document.getElementById('statusLabel');
+        const seismicLabel = document.getElementById('seismicLabel');
+
+        let isErupting = false;
+        let ashInterval;
+
+        // Logic
+        function createAsh() {
+            const ash = document.createElement('div');
+            ash.className = 'particle ash';
+            const size = Math.random() * 8 + 2;
+            ash.style.width = `${size}px`;
+            ash.style.height = `${size}px`;
+            ash.style.left = `${Math.random() * 100}%`;
+            ash.style.top = `-20px`;
+            ash.style.animationDuration = `${Math.random() * 3 + 2}s`;
+            view.appendChild(ash);
+            
+            setTimeout(() => ash.remove(), 5000);
+        }
+
+        function triggerEruption() {
+            if (isErupting) return;
+            isErupting = true;
+
+            // Update UI
+            alertBox.style.display = 'block';
+            body.classList.add('shake-active');
+            lavaGlow.classList.add('active');
+            magmaStream.classList.add('flowing');
+            
+            statusLabel.innerText = "LEVEL IV (AWAS)";
+            statusLabel.style.color = "var(--lava-red)";
+            seismicLabel.innerText = "Aktivitas: ERUPSI!";
+
+            // Eruption Data Simulation
+            let temp = 250;
+            let pressure = 1.0;
+            
+            const timer = setInterval(() => {
+                if (temp < 1200) temp += 15;
+                if (pressure < 450) pressure += 8;
+                
+                tempDisplay.innerText = `${temp}°C`;
+                pressureDisplay.innerText = `${pressure.toFixed(1)} atm`;
+
+                if (temp >= 1200) clearInterval(timer);
+            }, 50);
+
+            // Ash cloud effect
+            ashInterval = setInterval(createAsh, 100);
+
+            // Fetch Data Dummy using Proxy (Example Implementation)
+            fetch('https://cors-anywhere.herokuapp.com/https://api.agify.io?name=volcano')
+                .then(res => res.json())
+                .then(data => console.log('Sim Log:', data))
+                .catch(err => console.log('Net Bypass Active'));
+        }
+
+        function reset() {
+            isErupting = false;
+            clearInterval(ashInterval);
+            body.classList.remove('shake-active');
+            lavaGlow.classList.remove('active');
+            magmaStream.classList.remove('flowing');
+            alertBox.style.display = 'none';
+            
+            tempDisplay.innerText = "250°C";
+            pressureDisplay.innerText = "1.0 atm";
+            statusLabel.innerText = "LEVEL I (NORMAL)";
+            statusLabel.style.color = "white";
+            seismicLabel.innerText = "Aktivitas: Normal";
+
+            const ashes = document.querySelectorAll('.ash');
+            ashes.forEach(a => a.remove());
+        }
+
+        btnErupt.addEventListener('click', triggerEruption);
+        btnReset.addEventListener('click', reset);
+
+        // Random seismic spikes
+        setInterval(() => {
+            if (!isErupting) {
+                const spike = (Math.random() * 2).toFixed(1);
+                pressureDisplay.innerText = `${(1.0 + parseFloat(spike)).toFixed(1)} atm`;
+            }
+        }, 3000);
+
+    </script>
+</body>
+</html>
